@@ -1,0 +1,51 @@
+[gd_scene load_steps=2 format=3 uid="uid://dm2rhyxcsb061"]
+
+[ext_resource type="Script" uid="uid://cjd0ajhw22g5" path="res://scripts/MainMenu.gd" id="1_yqorp"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_yqorp")
+
+[node name="MenuContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MenuVBox" type="VBoxContainer" parent="MenuContainer"]
+layout_mode = 2
+size_flags_stretch_ratio = 1.1
+mouse_default_cursor_shape = 2
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="MenuContainer/MenuVBox"]
+clip_contents = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Comenzar"
+language = "es_AR"
+
+[node name="QuitButton" type="Button" parent="MenuContainer/MenuVBox"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Salir"
+language = "es_AR"
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5647059)
+
+[connection signal="pressed" from="MenuContainer/MenuVBox/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="MenuContainer/MenuVBox/QuitButton" to="." method="_on_quit_button_pressed"]

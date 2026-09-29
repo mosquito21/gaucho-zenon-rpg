@@ -1,0 +1,21 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Asistentes de IA (reglas, MCP, borradores)
+.cursor/
+.claude/
+.windsurf/
+.continue/
+.aider/
+.agents/
+.codex/
+agent-transcripts/
+.revision/
+addons/godot_mcp/
+docs/bitacora/*
+!docs/bitacora/GauchoZenon-Bitacora.pdf
+
+# Notas en Markdown: contexto del asistente, bitácora y README
+*.md
+*.mdc

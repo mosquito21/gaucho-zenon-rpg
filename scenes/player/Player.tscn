@@ -1,0 +1,48 @@
+[gd_scene load_steps=4 format=3 uid="uid://bi1qp0kmu78ut"]
+
+[ext_resource type="Script" uid="uid://c4aatou864l5c" path="res://scenes/player/player.gd" id="1_wr5hl"]
+[ext_resource type="PackedScene" uid="uid://rggsqh1t0i1e" path="res://assets/personajes/gaucho_zenon_animado.glb" id="2_gaucho"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4kuee"]
+radius = 0.35
+height = 1.8
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_wr5hl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_4kuee")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.4, 3.8)
+current = true
+fov = 60.0
+
+[node name="RayInteract" type="RayCast3D" parent="CameraPivot/Camera3D"]
+visible = false
+target_position = Vector3(0, -1, -15)
+collide_with_areas = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="InteractLabel" type="Label" parent="UI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -62.5
+offset_right = 62.5
+offset_bottom = 93.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Cuerpo" type="Node3D" parent="."]
+
+[node name="Zenon" parent="Cuerpo" instance=ExtResource("2_gaucho")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, -0.9, 0)
