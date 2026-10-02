@@ -14,11 +14,15 @@ extract_path="res://AmbientCG/Downloads"
 material_file_directory="res://AmbientCG/Materials"
 environment_file_directory="res://AmbientCG/Environments"
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="GauchoZenonRPG"
 run/main_scene="uid://dm2rhyxcsb061"
-config/features=PackedStringArray("4.5", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -33,6 +37,10 @@ MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=2
+
+[editor]
+
+movie_writer/movie_file="F:/Proyectos GODOT/GauchoZenonRPG/gaucho-zenon-rpg/test.avi"
 
 [editor_plugins]
 

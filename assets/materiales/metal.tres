@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[resource]
+resource_name = "Metal"
+vertex_color_use_as_albedo = true
+metallic = 0.35
+metallic_specular = 0.35
+roughness = 0.72

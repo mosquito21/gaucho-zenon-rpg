@@ -46,6 +46,7 @@ func _get(key: StringName):
 			return _max_value
 		&"range":
 			return Vector2(_min_value, _max_value)
+	return null
 
 
 func _set(key: StringName, value):
@@ -59,6 +60,7 @@ func _set(key: StringName, value):
 		&"range":
 			_min_value = value.x
 			_max_value = value.y
+	return false
 
 
 func set_values(low: float, high: float):

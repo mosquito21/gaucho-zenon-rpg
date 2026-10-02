@@ -92,6 +92,7 @@ func _get(key: StringName):
 		return _mode
 	if key == &"textures":
 		return _textures
+	return null
 
 
 func _set(key: StringName, value):
@@ -100,6 +101,7 @@ func _set(key: StringName, value):
 		_mode = value
 	if key == &"textures":
 		_textures = value
+	return false
 
 
 func get_slots_count() -> int:

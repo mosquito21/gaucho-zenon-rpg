@@ -306,6 +306,7 @@ func _get(key: StringName):
 	if key_str.begins_with("shader_params/"):
 		var param_name = key_str.substr(len("shader_params/"))
 		return get_shader_param(param_name)
+	return null
 
 
 func _set(key: StringName, v):
@@ -313,6 +314,7 @@ func _set(key: StringName, v):
 	if key_str.begins_with("shader_params/"):
 		var param_name = key_str.substr(len("shader_params/"))
 		set_shader_param(param_name, v)
+	return false
 
 
 func get_shader_param(param_name: String):

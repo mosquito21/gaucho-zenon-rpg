@@ -1,0 +1,49 @@
+{
+  "_nota": "Fuente: direccion-de-arte.md del proyecto (secciones 1-6). Si cambia la direccion de arte, cambiar aca el bloque de estilo. Los textos van en ingles porque los modelos de imagen responden mejor.",
+
+  "estilo": "Stylized semi-realistic 3D render, like a hand-sculpted clay miniature. Matte materials, subtle fabric folds, soft diffuse lighting, no outlines, simplified but believable forms, realistic slightly compact proportions with full volumes, muted earthy palette (charcoal, leather brown, dark earth, olive and straw) with a single dull red accent used sparingly. Not cartoon, not hyper-realistic: no skin pores, no plastic shine, no polished metal.",
+
+  "fondo_hunyuan": "Single subject, entire body fully inside the frame with some margin, centered. Plain uniform light gray background, soft even lighting, no cast shadow on the ground, no scenery, no text, no watermark, no other objects, no depth of field, no motion blur.",
+
+  "fondo_escena": "Patagonian steppe and snow-capped mountains in a soft blurred background.",
+
+  "poses": {
+    "tpose": "Front view. T-pose: arms straight out horizontally to the sides, palms facing down, hands empty and open, legs straight and slightly apart, feet flat on the ground, facing the camera, body symmetrical. Nothing held in the hands.",
+    "neutral": "Front view, neutral relaxed standing pose, arms along the body, hands empty."
+  },
+
+  "categorias": {
+    "humano": {
+      "pose_default": "tpose",
+      "aspect_ratio": "4:5",
+      "extra": "Human character with a distinctive, individual face (marked features, no caricature) and one or two garments that identify them from afar. Worn, dusty, historically grounded clothing from Patagonia in 1881. Fabrics with soft thick folds; leather worn at belt and boots; opaque dull metal details."
+    },
+    "animal": {
+      "pose_default": "animal",
+      "aspect_ratio": "3:2",
+      "extra": "Animal in a calm neutral standing pose, all four legs visible, clearly separated from each other and from the body (no legs overlapping), head up and in line with the body, tail relaxed. Matte, volumetric fur or plumage, no hyper-real hair. Natural proportions."
+    },
+    "prop": {
+      "pose_default": "ninguna",
+      "aspect_ratio": "1:1",
+      "extra": "Single object seen from a three-quarter front view. Wood, leather, adobe, straw and dull metal, with visible wear and simple shapes."
+    },
+    "flora": {
+      "pose_default": "ninguna",
+      "aspect_ratio": "3:4",
+      "extra": "Single plant or tree with a clear silhouette, foliage in masses (not individual leaves), muted autumn and steppe colors. Patagonian species only."
+    },
+    "edificio": {
+      "pose_default": "ninguna",
+      "aspect_ratio": "3:2",
+      "extra": "Single small building seen from a three-quarter front view, austere, built with wood, adobe and straw, with visible wear and simple shapes."
+    }
+  },
+
+  "poses_extra": {
+    "animal": "Three-quarter front view with the whole animal visible.",
+    "ninguna": ""
+  },
+
+  "evitar": "Avoid: drawn outlines, saturated or neon colors, plastic shine, polished metal, hyper-realistic skin, cartoon proportions, excessive detail, dramatic or cinematic lighting."
+}

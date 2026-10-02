@@ -8,6 +8,9 @@ enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON }
 
 @export var rol: Rol = Rol.PIEDRA
 @export var interact_text := "Presioná E para inspeccionar la piedra"
+## Lo que se lee al apretar E en un lugar que solo informa (por ejemplo la pulpería).
+## Si queda vacío, sigue la frase de la piedra.
+@export_multiline var texto_al_usar := ""
 
 
 func texto_mira(jugador: Node) -> String:
@@ -64,6 +67,8 @@ func al_interactuar(jugador: Node) -> String:
 		Rol.MOJON:
 			return str(jugador.call("marcar_mojon"))
 		_:
+			if texto_al_usar != "":
+				return texto_al_usar
 			return "Es una piedra de la estepa. No guarda ningún recado."
 
 

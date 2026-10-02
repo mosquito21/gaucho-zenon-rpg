@@ -11,6 +11,7 @@
 .agents/
 .codex/
 agent-transcripts/
+.mcp.json
 .revision/
 addons/godot_mcp/
 docs/bitacora/*
@@ -19,3 +20,16 @@ docs/bitacora/*
 # Notas en Markdown: contexto del asistente, bitácora y README
 *.md
 *.mdc
+
+# Fotos de referencia para crear assets (no forman parte del juego)
+referencias/fotos/
+
+# Generador de imagenes de referencia (claves y salidas)
+.env
+API_KEYS.md
+art_source/referencias_generadas/
+.env.example
+
+# Copias automáticas de Blender y grabaciones del Movie Maker de Godot
+*.blend1
+test.avi

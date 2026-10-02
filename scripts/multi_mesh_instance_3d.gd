@@ -1,7 +1,13 @@
 extends MultiMeshInstance3D
 
 ## Coirón sembrado una sola vez alrededor del arranque.
-## Unos pajaritos y un ñandú se mueven como hijos de este nodo.
+## Unos pajaritos, un choique, guanacos y un zorro se mueven como hijos de este nodo.
+## Las matas salen de assets/flora/coiron.glb (tres formas); cada forma va en su propio MultiMesh.
+
+const COIRON_GLB := "res://assets/flora/coiron.glb"
+const CHOIQUE_GLB := "res://assets/animales/choique.glb"
+const GUANACO_GLB := "res://assets/animales/guanaco.glb"
+const ZORRO_GLB := "res://assets/animales/zorro.glb"
 
 @export var terrain_path: NodePath = ^"../HTerrain"
 @export var count := 520
@@ -12,7 +18,10 @@ extends MultiMeshInstance3D
 
 var _pajaros: Array[Node3D] = []
 var _nandu: Node3D
+var _bichos: Array[Node3D] = []
 var _reloj := 0.0
+# Este nodo lleva la primera forma de mata; las otras van en hijos creados al arrancar.
+var _matas: Array[MultiMeshInstance3D] = []
 
 func _ready() -> void:
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -21,11 +30,13 @@ func _ready() -> void:
 	_sembrar()
 	_armar_pajaros()
 	_armar_nandu()
+	_armar_bichos()
 
 func _process(delta: float) -> void:
 	_reloj += delta
 	_mover_pajaros(delta)
 	_mover_nandu(delta)
+	_mover_bichos(delta)
 
 func _terreno() -> Node:
 	return get_node_or_null(terrain_path)
@@ -61,7 +72,7 @@ func _pendiente_ok(x: float, z: float) -> bool:
 	return grados <= max_slope_degrees
 
 func _sembrar() -> void:
-	if multimesh == null:
+	if multimesh == null or _matas.is_empty():
 		return
 	var origen := Vector3.ZERO
 	var jugador := get_parent().get_node_or_null("Player") as Node3D
@@ -86,59 +97,64 @@ func _sembrar() -> void:
 		var base := Basis(Vector3.UP, rng.randf() * TAU)
 		var s := rng.randf_range(min_scale, max_scale)
 		base = base.scaled(Vector3(s, rng.randf_range(0.7, 1.2) * s, s))
-		multimesh.set_instance_transform(puestos, Transform3D(base, pos))
 		var tono := rng.randf()
 		var color := Color(0.72, 0.62, 0.32).lerp(Color(0.48, 0.52, 0.34), tono)
 		color = color.lerp(Color(0.55, 0.42, 0.24), rng.randf() * 0.4)
-		multimesh.set_instance_color(puestos, color)
+		# Las matas se reparten por turno entre las formas.
+		var mata := _matas[puestos % _matas.size()]
+		var indice := floori(float(puestos) / _matas.size())
+		mata.multimesh.set_instance_transform(indice, Transform3D(base, pos))
+		mata.multimesh.set_instance_color(indice, color)
 		puestos += 1
-	multimesh.visible_instance_count = puestos
+	for i in _matas.size():
+		_matas[i].multimesh.visible_instance_count = ceili(float(puestos - i) / _matas.size())
 
 func _armar_multimesh() -> void:
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = _malla_coiron()
-	mm.instance_count = count
-	multimesh = mm
+	var mallas := _mallas_coiron()
+	_matas.clear()
+	if mallas.is_empty():
+		push_warning("Falta %s: no se siembra coirón." % COIRON_GLB)
+		return
+	var material := _material_coiron()
+	var por_forma := ceili(float(count) / mallas.size())
+	for i in mallas.size():
+		var mata: MultiMeshInstance3D = self
+		if i > 0:
+			mata = MultiMeshInstance3D.new()
+			mata.name = "CoironForma%d" % i
+			mata.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			add_child(mata)
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = mallas[i]
+		mm.instance_count = por_forma
+		mata.multimesh = mm
+		mata.material_override = material
+		_matas.append(mata)
 
-func _malla_coiron() -> ArrayMesh:
-	var vertices := PackedVector3Array()
-	var normales := PackedVector3Array()
-	var colores := PackedColorArray()
-	var indices := PackedInt32Array()
-	var abajo := Color(0.42, 0.34, 0.18)
-	var arriba := Color(0.78, 0.68, 0.38)
-	for i in 6:
-		var ang := float(i) * TAU / 6.0
-		var dir := Vector3(cos(ang), 0.0, sin(ang))
-		var lado := Vector3(-dir.z, 0.0, dir.x)
-		var base_i := vertices.size()
-		var punta := dir * 0.34 + Vector3(0.0, 0.42, 0.0)
-		var p0 := dir * 0.05 - lado * 0.07
-		var p1 := dir * 0.05 + lado * 0.07
-		var normal := (punta - p0).cross(p1 - p0).normalized()
-		vertices.append_array([p0, p1, punta])
-		normales.append_array([normal, normal, normal])
-		colores.append_array([abajo, abajo, arriba])
-		indices.append_array([base_i, base_i + 1, base_i + 2])
-	var arrays := []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_NORMAL] = normales
-	arrays[Mesh.ARRAY_COLOR] = colores
-	arrays[Mesh.ARRAY_INDEX] = indices
-	var malla := ArrayMesh.new()
-	malla.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+## Las formas de mata del GLB, ordenadas por nombre.
+func _mallas_coiron() -> Array[Mesh]:
+	var mallas: Array[Mesh] = []
+	var escena := load(COIRON_GLB) as PackedScene
+	if escena != null:
+		var raiz := escena.instantiate()
+		var nodos := raiz.find_children("*", "MeshInstance3D", true, false)
+		nodos.sort_custom(func(a, b): return String(a.name) < String(b.name))
+		for nodo in nodos:
+			mallas.append((nodo as MeshInstance3D).mesh)
+		raiz.free()
+	return mallas
+
+## Material mate que recibe la luz del sol y de la luna. Antes era UNSHADED y brillaba de noche.
+## La malla trae un degradé de luz (oscura abajo, clara en las puntas) y el tono lo pone cada mata.
+func _material_coiron() -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	mat.vertex_color_use_as_albedo = true
 	mat.vertex_color_is_srgb = true
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.roughness = 1.0
-	mat.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	malla.surface_set_material(0, mat)
-	return malla
+	mat.metallic_specular = 0.1
+	return mat
 
 func _material_opaco(color: Color) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -201,31 +217,55 @@ func _mover_pajaros(_delta: float) -> void:
 		if alas != null:
 			alas.rotation.z = sin(t * (8.0 if vuela else 3.0)) * 0.5
 
+## Carga un animal de assets/animales/. Devuelve null si el archivo no está.
+func _modelo_bicho(ruta: String, nombre: String, escala: float) -> Node3D:
+	if not ResourceLoader.exists(ruta):
+		return null
+	var escena := load(ruta) as PackedScene
+	if escena == null:
+		return null
+	var bicho := escena.instantiate() as Node3D
+	bicho.name = nombre
+	bicho.scale = Vector3.ONE * escala
+	add_child(bicho)
+	return bicho
+
+## Guanacos y zorro: cada uno da vueltas a su propio círculo, igual que el choique.
+func _armar_bichos() -> void:
+	# [archivo, nombre, escala, centro x, centro z, radio, vueltas por segundo, fase]
+	var lista := [
+		[GUANACO_GLB, "Guanaco1", 1.0, -70.0, -30.0, 46.0, 0.05, 0.0],
+		[GUANACO_GLB, "Guanaco2", 0.95, -70.0, -30.0, 49.0, 0.05, 0.16],
+		[GUANACO_GLB, "Guanaco3", 1.05, -70.0, -30.0, 43.0, 0.05, 0.3],
+		[GUANACO_GLB, "Chulengo", 0.6, -70.0, -30.0, 47.0, 0.05, 0.08],
+		[ZORRO_GLB, "Zorro", 1.0, 30.0, 60.0, 18.0, 0.09, 0.0],
+	]
+	for d in lista:
+		var bicho := _modelo_bicho(d[0], d[1], d[2])
+		if bicho == null:
+			continue
+		bicho.set_meta("centro", Vector2(d[3], d[4]))
+		bicho.set_meta("radio", d[5])
+		bicho.set_meta("vel", d[6])
+		bicho.set_meta("fase", d[7])
+		_bichos.append(bicho)
+
+func _mover_bichos(_delta: float) -> void:
+	for bicho in _bichos:
+		var centro: Vector2 = bicho.get_meta("centro")
+		var radio_loop: float = bicho.get_meta("radio")
+		var ang: float = _reloj * float(bicho.get_meta("vel")) + float(bicho.get_meta("fase"))
+		var x := centro.x + cos(ang) * radio_loop
+		var z := centro.y + sin(ang) * radio_loop
+		var suelo := _altura_mundo(x, z)
+		var paso := absf(sin(_reloj * 4.0 + float(bicho.get_meta("fase")) * 9.0)) * 0.03
+		bicho.global_position = Vector3(x, suelo.y + paso, z)
+		# La cabeza apunta a +Z, igual que el choique.
+		bicho.rotation.y = -ang
+
 func _armar_nandu() -> void:
-	_nandu = Node3D.new()
-	_nandu.name = "Nandu"
-	add_child(_nandu)
-	var cuerpo_malla := CapsuleMesh.new()
-	cuerpo_malla.radius = 0.28
-	cuerpo_malla.height = 1.15
-	var cuerpo := _malla_color(cuerpo_malla, Color(0.42, 0.34, 0.24))
-	cuerpo.rotation.z = PI * 0.5
-	cuerpo.position = Vector3(0.0, 0.85, 0.0)
-	_nandu.add_child(cuerpo)
-	var cuello_malla := CapsuleMesh.new()
-	cuello_malla.radius = 0.07
-	cuello_malla.height = 0.7
-	var cuello := _malla_color(cuello_malla, Color(0.38, 0.3, 0.22))
-	cuello.position = Vector3(0.0, 1.35, 0.42)
-	cuello.rotation.x = -0.4
-	_nandu.add_child(cuello)
-	var cabeza_malla := SphereMesh.new()
-	cabeza_malla.radius = 0.1
-	cabeza_malla.height = 0.22
-	var cabeza := _malla_color(cabeza_malla, Color(0.36, 0.28, 0.2))
-	cabeza.position = Vector3(0.0, 1.72, 0.62)
-	_nandu.add_child(cabeza)
-	_nandu.scale = Vector3(1.8, 1.8, 1.8)
+	# El choique da la vuelta que antes daba el ñandú de cápsulas.
+	_nandu = _modelo_bicho(CHOIQUE_GLB, "Nandu", 1.0)
 
 func _mover_nandu(_delta: float) -> void:
 	if _nandu == null:
@@ -234,7 +274,8 @@ func _mover_nandu(_delta: float) -> void:
 	var x := cos(ang) * 32.0
 	var z := sin(ang) * 32.0
 	var suelo := _altura_mundo(x, z)
-	var paso := sin(_reloj * 3.2) * 0.06
+	# Apoya las patas en el suelo: el vaivén va solo para arriba.
+	var paso := absf(sin(_reloj * 3.2)) * 0.03
 	_nandu.global_position = Vector3(x, suelo.y + paso, z)
 	# El cuello apunta a +Z. Con giro en Y, +Z queda en (sin(yaw), 0, cos(yaw)).
 	_nandu.rotation.y = -ang

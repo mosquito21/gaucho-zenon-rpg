@@ -461,7 +461,8 @@ func _get(key: StringName):
 	
 	elif key == &"cast_shadow":
 		return _cast_shadow_setting
-	
+
+	return null
 
 func _set(key: StringName, value):
 	if key == &"data_directory":
@@ -522,11 +523,12 @@ func _set(key: StringName, value):
 		set_physics_material(value)
 
 	elif key == &"render_layers":
-		return set_render_layer_mask(value)
+		set_render_layer_mask(value)
 
 	elif key == &"cast_shadow":
 		set_cast_shadow(value)
 
+	return false
 
 func get_texture_set() -> HTerrainTextureSet:
 	return _texture_set
