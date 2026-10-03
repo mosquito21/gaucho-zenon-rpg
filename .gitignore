@@ -33,3 +33,8 @@ art_source/referencias_generadas/
 # Copias automáticas de Blender y grabaciones del Movie Maker de Godot
 *.blend1
 test.avi
+
+# Descargas crudas de Mixamo: la carpeta tiene .gdignore y Godot ya no la importa.
+# Los .import y las texturas _0.png que dejaba al lado de cada FBX no sirven para nada.
+assets/personajes/animaciones/*.import
+assets/personajes/animaciones/*_0.png

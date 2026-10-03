@@ -1,0 +1,71 @@
+{
+  "_ayuda": "Una receta por personaje. Las rutas son relativas a assets/personajes/. 'tpose' es el personaje con esqueleto que devuelve Mixamo; 'clips' son las animaciones (nombre corto: archivo); 'prenda' es la prenda larga de assets/personajes/prendas/ que se le pega al esqueleto (o null). 'recortes' (opcional) arma un clip nuevo con un tramo de otro: desde y hasta son cuadros; con ida_y_vuelta el tramo se reproduce y se desanda, para que empalme al repetirse.",
+  "personajes": {
+    "don_ceferino": {
+      "tpose": "animaciones/T-Pose_DON_CEFERINO.fbx",
+      "clips": {"idle": "animaciones/Standing_Idle_DON_CEFERINO.fbx", "talking": "animaciones/Talking_DON_CEFERINO.fbx"},
+      "prenda": "delantal_ceferino"
+    },
+    "dona_rosario": {
+      "tpose": "animaciones/T-Pose_DONA_ROSARIO.fbx",
+      "clips": {"idle": "animaciones/Idle_DONA_ROSARIO.fbx", "talking": "animaciones/Talking_DONA_ROSARIO.fbx"},
+      "prenda": "pollera_rosario"
+    },
+    "don_rufino": {
+      "tpose": "animaciones/T-Pose_DON_RUFINO.fbx",
+      "clips": {"idle": "animaciones/Breathing Idle_DON_RUFINO.fbx", "talking": "animaciones/Talking_DON_RUFINO.fbx"},
+      "prenda": null
+    },
+    "nicasio": {
+      "tpose": "animaciones/T-Pose_NICASIO.fbx",
+      "clips": {"idle": "animaciones/Idle_NICASIO.fbx", "looking_around": "animaciones/Looking Around_NICASIO.fbx"},
+      "prenda": "chiripa_nicasio"
+    },
+    "painefil": {
+      "tpose": "animaciones/T-Pose_PAINEFIL.fbx",
+      "clips": {"idle": "animaciones/Breathing Idle_PAINEFIL.fbx", "talking": "animaciones/Talking_PAINEFIL.fbx"},
+      "prenda": "chiripa_painefil"
+    },
+    "millaray": {
+      "tpose": "animaciones/T-Pose_MILLARAY.fbx",
+      "clips": {"idle": "animaciones/Idle_MILLARAY.fbx", "talking": "animaciones/Talking_MILLARAY.fbx"},
+      "prenda": "kupam_millaray"
+    },
+    "poblador_1": {
+      "tpose": "animaciones/T-Pose_Poblador_1.fbx",
+      "clips": {"idle": "animaciones/Neutral Idle_Poblador_1.fbx", "sitting_idle": "animaciones/Sitting Idle_Poblador_1.fbx"},
+      "prenda": "kupam_poblador_1"
+    },
+    "poblador_2": {
+      "tpose": "animaciones/T-Pose_Poblador_2.fbx",
+      "clips": {"idle": "animaciones/Idle_Poblador_2.fbx", "working": "animaciones/Trabajando_Poblador_2.fbx"},
+      "prenda": "kupam_poblador_2"
+    },
+    "poblador_3": {
+      "tpose": "animaciones/T-Pose_Poblador_3.fbx",
+      "clips": {"idle": "animaciones/Neutral Idle_Poblador_3.fbx", "looking_around": "animaciones/Looking Around_Poblador_3.fbx"},
+      "prenda": "chiripa_poblador_3"
+    },
+    "soldado_1": {
+      "tpose": "animaciones/T-Pose_Soldado_1.fbx",
+      "clips": {"idle": "animaciones/Neutral Idle_Soldado_1.fbx", "sitting_idle": "animaciones/Sitting Idle_Soldado_1.fbx"},
+      "prenda": null
+    },
+    "soldado_2": {
+      "tpose": "animaciones/T-Pose_Soldado_2.fbx",
+      "clips": {"idle": "animaciones/Standing_Idle_Soldado 2.fbx", "salute": "animaciones/Salute_Soldado_2.fbx"},
+      "prenda": null
+    },
+    "soldado_3": {
+      "tpose": "animaciones/T-Pose_Soldado_3.fbx",
+      "clips": {"warrior_idle": "animaciones/Warrior Idle_Soldado_3.fbx"},
+      "recortes": {"idle": {"de": "warrior_idle", "desde": 1, "hasta": 106, "ida_y_vuelta": true}},
+      "prenda": null
+    },
+    "lucero": {
+      "tpose": "animaciones/lucero-T.fbx",
+      "clips": {"idle": "animaciones/lucero_Idle.fbx"},
+      "prenda": null
+    }
+  }
+}

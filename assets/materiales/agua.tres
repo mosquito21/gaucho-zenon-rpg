@@ -1,0 +1,97 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://b88un0kimttpc"]
+
+[sub_resource type="Shader" id="Shader_52y8x"]
+code = "shader_type spatial;
+	render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
+	
+	// Agua del rio Limay y del lago: el color cambia con la hondura (usa la profundidad de la pantalla)
+	// y las ondas corren en la direccion del agua, que viene en el color de cada vertice (rojo y verde).
+	uniform vec3 color_hondo : source_color = vec3(0.17, 0.30, 0.32);
+	uniform vec3 color_bajo : source_color = vec3(0.44, 0.55, 0.51);
+	uniform float hondura_color = 2.2;
+	uniform float alfa_orilla = 0.35;
+	uniform float alfa_hondo = 0.93;
+	uniform sampler2D ondas_a : hint_normal, filter_linear_mipmap, repeat_enable;
+	uniform sampler2D ondas_b : hint_normal, filter_linear_mipmap, repeat_enable;
+	uniform float escala = 0.08;
+	uniform float velocidad = 0.6;
+	uniform float fuerza = 0.4;
+	uniform float rugosidad : hint_range(0.0, 1.0) = 0.18;
+	uniform float especular : hint_range(0.0, 1.0) = 0.3;
+	uniform sampler2D profundidad : hint_depth_texture, filter_linear_mipmap;
+	
+	varying vec3 pos_mundo;
+	varying vec2 flujo;
+	
+	void vertex() {
+		pos_mundo = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		flujo = COLOR.rg * 2.0 - 1.0;
+	}
+	
+	vec3 ondas(vec2 uv, vec2 f, float t) {
+		float f0 = fract(t);
+		float f1 = fract(t + 0.5);
+		float w = abs(1.0 - 2.0 * f0);
+		vec3 a = texture(ondas_a, uv - f * f0 * 0.6).rgb;
+		vec3 b = texture(ondas_a, uv - f * f1 * 0.6 + vec2(0.31, 0.17)).rgb;
+		return mix(a, b, w);
+	}
+	
+	void fragment() {
+		vec2 uv = pos_mundo.xz * escala;
+		float t = TIME * velocidad * 0.25;
+		vec3 n1 = ondas(uv, flujo, t);
+		vec3 n2 = texture(ondas_b, uv * 0.37 + vec2(TIME * 0.004, -TIME * 0.003)).rgb;
+		NORMAL_MAP = normalize(n1 * 0.65 + n2 * 0.35);
+		NORMAL_MAP_DEPTH = fuerza;
+		float d = texture(profundidad, SCREEN_UV).r;
+		vec4 v = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, d, 1.0);
+		float suelo = -v.z / v.w;
+		float hondo = clamp((suelo + VERTEX.z) / hondura_color, 0.0, 1.0);
+		ALBEDO = mix(color_bajo, color_hondo, hondo);
+		ALPHA = mix(alfa_orilla, alfa_hondo, hondo);
+		// mirada de costado: el agua refleja mas y deja ver menos el fondo
+		float costado = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
+		ALPHA = mix(ALPHA, 1.0, costado * 0.7);
+		ROUGHNESS = rugosidad;
+		SPECULAR = especular;
+	}
+	"
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_vvdln"]
+seed = 7
+frequency = 0.035
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_82b5y"]
+noise = SubResource("FastNoiseLite_vvdln")
+seamless = true
+as_normal_map = true
+bump_strength = 3.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_va6v2"]
+seed = 11
+frequency = 0.012
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_nxshp"]
+noise = SubResource("FastNoiseLite_va6v2")
+seamless = true
+as_normal_map = true
+bump_strength = 3.0
+
+[resource]
+render_priority = 0
+shader = SubResource("Shader_52y8x")
+shader_parameter/color_hondo = Color(0.1, 0.21, 0.22, 1)
+shader_parameter/color_bajo = Color(0.3, 0.4, 0.37, 1)
+shader_parameter/hondura_color = 2.2
+shader_parameter/alfa_orilla = 0.35
+shader_parameter/alfa_hondo = 0.95
+shader_parameter/ondas_a = SubResource("NoiseTexture2D_82b5y")
+shader_parameter/ondas_b = SubResource("NoiseTexture2D_nxshp")
+shader_parameter/escala = 0.08
+shader_parameter/velocidad = 0.6
+shader_parameter/fuerza = 0.4
+shader_parameter/rugosidad = 0.55
+shader_parameter/especular = 0.12

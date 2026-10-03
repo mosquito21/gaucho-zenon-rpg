@@ -1,13 +1,24 @@
 extends MultiMeshInstance3D
 
 ## Coirón sembrado una sola vez alrededor del arranque.
-## Unos pajaritos, un choique, guanacos y un zorro se mueven como hijos de este nodo.
+## Unos pajaritos, un choique, guanacos, un zorro, cóndores y los animales de la estancia
+## y la pulpería se mueven como hijos de este nodo.
 ## Las matas salen de assets/flora/coiron.glb (tres formas); cada forma va en su propio MultiMesh.
 
 const COIRON_GLB := "res://assets/flora/coiron.glb"
 const CHOIQUE_GLB := "res://assets/animales/choique.glb"
 const GUANACO_GLB := "res://assets/animales/guanaco.glb"
 const ZORRO_GLB := "res://assets/animales/zorro.glb"
+const CONDOR_GLB := "res://assets/animales/condor.glb"
+const VACA_GLB := "res://assets/animales/vaca.glb"
+const OVEJA_GLB := "res://assets/animales/oveja.glb"
+const OVEJA_HEMBRA_GLB := "res://assets/animales/oveja_hembra.glb"
+const GALLINA_GLB := "res://assets/animales/gallina.glb"
+const GALLINA_COLORADA_GLB := "res://assets/animales/gallina_colorada.glb"
+const GALLINA_BATARAZA_GLB := "res://assets/animales/gallina_bataraza.glb"
+const GALLO_GLB := "res://assets/animales/gallo.glb"
+const POLLITO_GLB := "res://assets/animales/pollito.glb"
+const POLLITO_PARDO_GLB := "res://assets/animales/pollito_pardo.glb"
 
 @export var terrain_path: NodePath = ^"../HTerrain"
 @export var count := 520
@@ -230,15 +241,45 @@ func _modelo_bicho(ruta: String, nombre: String, escala: float) -> Node3D:
 	add_child(bicho)
 	return bicho
 
-## Guanacos y zorro: cada uno da vueltas a su propio círculo, igual que el choique.
+## Guanacos, zorro, cóndores y los animales de la estancia y la pulpería:
+## cada uno da vueltas a su propio círculo, igual que el choique.
 func _armar_bichos() -> void:
-	# [archivo, nombre, escala, centro x, centro z, radio, vueltas por segundo, fase]
+	# [archivo, nombre, escala, centro x, centro z, radio, vueltas por segundo, fase, altura de vuelo]
+	# La altura de vuelo es opcional: si está, el bicho planea a esa altura sobre el suelo.
 	var lista := [
 		[GUANACO_GLB, "Guanaco1", 1.0, -70.0, -30.0, 46.0, 0.05, 0.0],
 		[GUANACO_GLB, "Guanaco2", 0.95, -70.0, -30.0, 49.0, 0.05, 0.16],
 		[GUANACO_GLB, "Guanaco3", 1.05, -70.0, -30.0, 43.0, 0.05, 0.3],
 		[GUANACO_GLB, "Chulengo", 0.6, -70.0, -30.0, 47.0, 0.05, 0.08],
 		[ZORRO_GLB, "Zorro", 1.0, 30.0, 60.0, 18.0, 0.09, 0.0],
+		# Cóndores planeando alto: dos sobre el arranque y uno sobre la toldería.
+		[CONDOR_GLB, "Condor1", 1.0, -40.0, 60.0, 95.0, 0.12, 0.0, 55.0],
+		[CONDOR_GLB, "Condor2", 0.95, -40.0, 60.0, 80.0, 0.14, 2.6, 70.0],
+		[CONDOR_GLB, "Condor3", 1.0, -430.0, 60.0, 70.0, 0.13, 1.0, 60.0],
+		# Vacas y ovejas de la estancia de Don Rufino, pastando despacio.
+		[VACA_GLB, "Vaca1", 1.0, -136.0, -254.0, 10.0, 0.025, 0.0],
+		[VACA_GLB, "Vaca2", 0.95, -136.0, -254.0, 12.0, 0.025, 1.3],
+		[VACA_GLB, "Vaca3", 1.05, -136.0, -254.0, 8.0, 0.025, 2.4],
+		[VACA_GLB, "Vaca4", 0.9, -136.0, -254.0, 11.0, 0.025, 3.6],
+		[VACA_GLB, "Vaca5", 1.0, -136.0, -254.0, 9.5, 0.025, 5.0],
+		[OVEJA_GLB, "Carnero", 1.0, -162.7, -221.2, 6.0, 0.04, 0.0],
+		[OVEJA_HEMBRA_GLB, "Oveja1", 0.95, -162.7, -221.2, 5.5, 0.04, 0.5],
+		[OVEJA_HEMBRA_GLB, "Oveja2", 1.0, -162.7, -221.2, 6.5, 0.04, 0.9],
+		[OVEJA_HEMBRA_GLB, "Oveja3", 0.9, -162.7, -221.2, 5.0, 0.04, 1.4],
+		[OVEJA_HEMBRA_GLB, "Oveja4", 1.0, -162.7, -221.2, 7.0, 0.04, 1.9],
+		[OVEJA_HEMBRA_GLB, "Oveja5", 0.95, -162.7, -221.2, 6.0, 0.04, 2.5],
+		[OVEJA_HEMBRA_GLB, "Oveja6", 0.85, -162.7, -221.2, 5.8, 0.04, 3.1],
+		# Gallinas, gallo y pollitos frente a la estancia y al costado de la pulpería.
+		[GALLO_GLB, "GalloEstancia", 1.0, -157.5, -252.5, 3.0, 0.22, 0.0],
+		[GALLINA_GLB, "GallinaEstancia1", 1.0, -157.5, -252.5, 2.4, 0.25, 1.2],
+		[GALLINA_COLORADA_GLB, "GallinaEstancia2", 0.95, -157.5, -252.5, 3.4, 0.2, 2.5],
+		[GALLINA_BATARAZA_GLB, "GallinaEstancia3", 1.05, -157.5, -252.5, 1.8, 0.3, 4.0],
+		[POLLITO_GLB, "Pollito1", 1.0, -157.5, -252.5, 2.2, 0.25, 1.35],
+		[POLLITO_PARDO_GLB, "Pollito2", 1.0, -157.5, -252.5, 2.1, 0.25, 1.5],
+		[POLLITO_GLB, "Pollito3", 0.9, -157.5, -252.5, 2.3, 0.25, 1.62],
+		[GALLINA_GLB, "GallinaPulperia1", 1.0, 195.0, 165.0, 2.5, 0.22, 0.4],
+		[GALLINA_COLORADA_GLB, "GallinaPulperia2", 0.9, 195.0, 165.0, 3.2, 0.18, 3.0],
+		[POLLITO_PARDO_GLB, "Pollito4", 1.0, 195.0, 165.0, 2.4, 0.22, 0.55],
 	]
 	for d in lista:
 		var bicho := _modelo_bicho(d[0], d[1], d[2])
@@ -248,6 +289,7 @@ func _armar_bichos() -> void:
 		bicho.set_meta("radio", d[5])
 		bicho.set_meta("vel", d[6])
 		bicho.set_meta("fase", d[7])
+		bicho.set_meta("alto", d[8] if d.size() > 8 else 0.0)
 		_bichos.append(bicho)
 
 func _mover_bichos(_delta: float) -> void:
@@ -258,6 +300,13 @@ func _mover_bichos(_delta: float) -> void:
 		var x := centro.x + cos(ang) * radio_loop
 		var z := centro.y + sin(ang) * radio_loop
 		var suelo := _altura_mundo(x, z)
+		var alto: float = bicho.get_meta("alto")
+		if alto > 0.0:
+			# Planea: sube y baja despacio y se inclina hacia adentro de la vuelta.
+			var ola := sin(_reloj * 0.25 + float(bicho.get_meta("fase")) * 3.0) * 4.0
+			bicho.global_position = Vector3(x, suelo.y + alto + ola, z)
+			bicho.rotation = Vector3(0.0, -ang, -0.22)
+			continue
 		var paso := absf(sin(_reloj * 4.0 + float(bicho.get_meta("fase")) * 9.0)) * 0.03
 		bicho.global_position = Vector3(x, suelo.y + paso, z)
 		# La cabeza apunta a +Z, igual que el choique.

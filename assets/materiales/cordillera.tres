@@ -1,0 +1,61 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bqh1s5nsf76b8"]
+
+[sub_resource type="Shader" id="Shader_auoy4"]
+code = "shader_type spatial;
+	render_mode fog_disabled, cull_disabled, diffuse_burley, specular_disabled;
+	
+	// Montanias lejanas (la cordillera nevada y los cerros de bosque). Estan a mas de 2,5 km,
+	// donde la niebla del ambiente las borraria; por eso no usan esa niebla y se arreglan solas:
+	// - el cuerpo de la montania se aclara con la distancia (los cerros de adelante quedan mas oscuros que la
+	//   cordillera de atras) y lo iluminan el sol o la luna, asi de noche se oscurece con todo lo demas;
+	// - el pie se funde con la niebla del horizonte, que en este juego tiene un color fijo (no cambia con la hora).
+	uniform vec3 color_bruma : source_color = vec3(0.76, 0.8, 0.78);
+	uniform float luz_bruma : hint_range(0.0, 1.0) = 0.25;
+	uniform float brillo_pie = 1.0;
+	uniform float bruma_cerca : hint_range(0.0, 1.0) = 0.3;
+	uniform float bruma_lejos : hint_range(0.0, 1.0) = 0.55;
+	uniform float distancia_cerca = 2600.0;
+	uniform float distancia_lejos = 3900.0;
+	uniform float alto_horizonte = -15.0;
+	uniform float alto_claro = 90.0;
+	
+	varying float bruma;
+	varying float pie;
+	
+	void vertex() {
+		float lejos = smoothstep(distancia_cerca, distancia_lejos, length(VERTEX.xz));
+		bruma = mix(bruma_cerca, bruma_lejos, lejos);
+		pie = 1.0 - smoothstep(alto_horizonte, alto_claro, VERTEX.y);
+	}
+	
+	void fragment() {
+		if (!FRONT_FACING) {
+			NORMAL = -NORMAL;
+		}
+		// los colores de la malla estan en sRGB: se pasan a lineal
+		ALBEDO = mix(pow(COLOR.rgb, vec3(2.2)), color_bruma, bruma) * (1.0 - pie);
+		EMISSION = color_bruma * pie * brillo_pie;
+		ROUGHNESS = 1.0;
+	}
+	
+	void light() {
+		// la roca recibe luz segun hacia donde mira la ladera; la bruma, pareja,
+		// pero solo si la luz viene de arriba del horizonte
+		float ladera = clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
+		float sobre = smoothstep(-0.05, 0.15, (INV_VIEW_MATRIX * vec4(LIGHT, 0.0)).y);
+		DIFFUSE_LIGHT += mix(ladera, luz_bruma * sobre, bruma) * ATTENUATION * LIGHT_COLOR / PI;
+	}
+	"
+
+[resource]
+render_priority = 0
+shader = SubResource("Shader_auoy4")
+shader_parameter/color_bruma = Color(0.76, 0.8, 0.78, 1)
+shader_parameter/luz_bruma = 0.25
+shader_parameter/brillo_pie = 1.0
+shader_parameter/bruma_cerca = 0.04
+shader_parameter/bruma_lejos = 0.12
+shader_parameter/distancia_cerca = 2600.0
+shader_parameter/distancia_lejos = 3900.0
+shader_parameter/alto_horizonte = -14.0
+shader_parameter/alto_claro = 40.0

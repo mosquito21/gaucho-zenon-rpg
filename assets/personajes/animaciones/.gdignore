@@ -1,0 +1,2 @@
+# Godot ignora esta carpeta: son las descargas crudas de Mixamo, que solo lee Blender (tools/npc).
+# Los personajes que usa el juego son los assets/personajes/npc/*_animado.glb y gaucho_zenon_animado.glb.

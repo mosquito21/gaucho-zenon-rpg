@@ -12,7 +12,8 @@ var materiales_cielo: Array[StandardMaterial3D] = []
 
 @export var cantidad_estrellas: int = 1400
 @export var cantidad_via_lactea: int = 2200
-@export var distancia_estrellas: float = 420.0
+# Más lejos que la cordillera (llega hasta 3850 m), así las montañas tapan las estrellas bajas.
+@export var distancia_estrellas: float = 3900.0
 @export var intensidad_estrellas: float = 1.0
 
 func _ready():
@@ -46,8 +47,11 @@ func _crear_campo(cantidad: int, es_via_lactea: bool) -> MultiMeshInstance3D:
 	material.no_depth_test = false
 	materiales_cielo.append(material)
 	
+	# Cada estrella es un cuadrado de 1 m visto a 420 m; si están más lejos, el cuadrado crece en la misma
+	# proporción para que se vean del mismo tamaño. (El "tamano" de cada una no cambia nada: en modo
+	# billboard Godot descarta la escala de cada instancia.)
 	var quad := QuadMesh.new()
-	quad.size = Vector2(1, 1)
+	quad.size = Vector2.ONE * (distancia_estrellas / 420.0)
 	
 	var malla := MultiMesh.new()
 	malla.transform_format = MultiMesh.TRANSFORM_3D

@@ -1,34 +1,35 @@
-[gd_scene load_steps=4 format=3 uid="uid://bi1qp0kmu78ut"]
+[gd_scene format=3 uid="uid://bi1qp0kmu78ut"]
 
 [ext_resource type="Script" uid="uid://c4aatou864l5c" path="res://scenes/player/player.gd" id="1_wr5hl"]
 [ext_resource type="PackedScene" uid="uid://rggsqh1t0i1e" path="res://assets/personajes/gaucho_zenon_animado.glb" id="2_gaucho"]
+[ext_resource type="PackedScene" uid="uid://b4petybc0wok" path="res://assets/props/facon.glb" id="3_4kuee"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4kuee"]
 radius = 0.35
 height = 1.8
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" unique_id=2123542920]
 script = ExtResource("1_wr5hl")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1844883562]
 shape = SubResource("CapsuleShape3D_4kuee")
 
-[node name="CameraPivot" type="Node3D" parent="."]
+[node name="CameraPivot" type="Node3D" parent="." unique_id=28770157]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
-[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=314678404]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.4, 3.8)
 current = true
 fov = 60.0
 
-[node name="RayInteract" type="RayCast3D" parent="CameraPivot/Camera3D"]
+[node name="RayInteract" type="RayCast3D" parent="CameraPivot/Camera3D" unique_id=1250197960]
 visible = false
 target_position = Vector3(0, -1, -15)
 collide_with_areas = true
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=65139255]
 
-[node name="InteractLabel" type="Label" parent="UI"]
+[node name="InteractLabel" type="Label" parent="UI" unique_id=364371855]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -42,7 +43,17 @@ theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Cuerpo" type="Node3D" parent="."]
+[node name="Cuerpo" type="Node3D" parent="." unique_id=1388558991]
 
-[node name="Zenon" parent="Cuerpo" instance=ExtResource("2_gaucho")]
+[node name="Zenon" parent="Cuerpo" unique_id=545168180 instance=ExtResource("2_gaucho")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, -0.9, 0)
+
+[node name="FaconEnElCinto" type="BoneAttachment3D" parent="Cuerpo" unique_id=1507298160]
+transform = Transform3D(-0.01, 0, 0, 0, 0.01, 0, 0, 0, -0.01, 0.0018241374, 0.06944114, 0.0013411392)
+bone_name = "mixamorig_Hips"
+bone_idx = 0
+use_external_skeleton = true
+external_skeleton = NodePath("../Zenon/Zenon/Skeleton3D")
+
+[node name="Facon" type="Node3D" parent="Cuerpo/FaconEnElCinto" unique_id=1289845199 instance=ExtResource("3_4kuee")]
+transform = Transform3D(96.59258, -1.131334e-06, -25.881905, -25.881905, -4.222196e-06, -96.59258, 0, 100, -4.371139e-06, -9, 7, -14)

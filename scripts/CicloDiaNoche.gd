@@ -134,8 +134,13 @@ func crear_luna() -> void:
 	
 	var shader := Shader.new()
 	shader.code = "shader_type spatial;
-render_mode unshaded, cull_disabled, depth_draw_never, depth_test_disabled;
+render_mode unshaded, cull_disabled;
 uniform float fase = 0.5;
+void vertex() {
+	// La luna va al fondo de todo, como el cielo: la tapan las paredes, el terreno y la cordillera.
+	POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+	POSITION.z = POSITION.w * 1e-8;
+}
 void fragment() {
 	vec3 dir_vista = normalize(VERTEX);
 	vec3 arriba = normalize((VIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
