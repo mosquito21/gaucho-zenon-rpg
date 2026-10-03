@@ -1,5 +1,5 @@
 {
-  "_ayuda": "Una receta por personaje. Las rutas son relativas a assets/personajes/. 'tpose' es el personaje con esqueleto que devuelve Mixamo; 'clips' son las animaciones (nombre corto: archivo); 'prenda' es la prenda larga de assets/personajes/prendas/ que se le pega al esqueleto (o null). 'recortes' (opcional) arma un clip nuevo con un tramo de otro: desde y hasta son cuadros; con ida_y_vuelta el tramo se reproduce y se desanda, para que empalme al repetirse.",
+  "_ayuda": "Una receta por personaje. Las rutas son relativas a assets/personajes/. 'tpose' es el personaje con esqueleto que devuelve Mixamo; 'clips' son las animaciones (nombre corto: archivo); 'prenda' es la prenda larga de assets/personajes/prendas/ que se le pega al esqueleto (o null). 'recortes' (opcional) arma un clip nuevo con un tramo de otro: desde y hasta son cuadros; con ida_y_vuelta el tramo se reproduce y se desanda, para que empalme al repetirse. 'prestado' (opcional) es el nombre de otro personaje del que se toman el esqueleto y los clips mientras este no tenga los suyos de Mixamo: en ese caso 'tpose' y 'clips' son los archivos del otro. 'separar_brazos', 'falda' y 'ocultar_cuerpo_entre' estan explicados en LEEME.md.",
   "personajes": {
     "don_ceferino": {
       "tpose": "animaciones/T-Pose_DON_CEFERINO.fbx",
@@ -9,7 +9,8 @@
     "dona_rosario": {
       "tpose": "animaciones/T-Pose_DONA_ROSARIO.fbx",
       "clips": {"idle": "animaciones/Idle_DONA_ROSARIO.fbx", "talking": "animaciones/Talking_DONA_ROSARIO.fbx"},
-      "prenda": "pollera_rosario"
+      "prenda": "pollera_rosario",
+      "separar_brazos": 7
     },
     "don_rufino": {
       "tpose": "animaciones/T-Pose_DON_RUFINO.fbx",
@@ -34,7 +35,9 @@
     "poblador_1": {
       "tpose": "animaciones/T-Pose_Poblador_1.fbx",
       "clips": {"idle": "animaciones/Neutral Idle_Poblador_1.fbx", "sitting_idle": "animaciones/Sitting Idle_Poblador_1.fbx"},
-      "prenda": "kupam_poblador_1"
+      "prenda": "kupam_poblador_1",
+      "falda": true,
+      "ocultar_cuerpo_entre": [0.47, 0.775]
     },
     "poblador_2": {
       "tpose": "animaciones/T-Pose_Poblador_2.fbx",
@@ -65,6 +68,30 @@
     "lucero": {
       "tpose": "animaciones/lucero-T.fbx",
       "clips": {"idle": "animaciones/lucero_Idle.fbx"},
+      "prenda": null
+    },
+    "villegas": {
+      "prestado": "lucero",
+      "tpose": "animaciones/lucero-T.fbx",
+      "clips": {"idle": "animaciones/lucero_Idle.fbx"},
+      "prenda": null
+    },
+    "gaucho_1": {
+      "prestado": "millaray",
+      "tpose": "animaciones/T-Pose_MILLARAY.fbx",
+      "clips": {"idle": "animaciones/Idle_MILLARAY.fbx", "talking": "animaciones/Talking_MILLARAY.fbx"},
+      "prenda": null
+    },
+    "gaucho_2": {
+      "prestado": "soldado_1",
+      "tpose": "animaciones/T-Pose_Soldado_1.fbx",
+      "clips": {"idle": "animaciones/Neutral Idle_Soldado_1.fbx", "sitting_idle": "animaciones/Sitting Idle_Soldado_1.fbx"},
+      "prenda": null
+    },
+    "gaucho_3": {
+      "prestado": "nicasio",
+      "tpose": "animaciones/T-Pose_NICASIO.fbx",
+      "clips": {"idle": "animaciones/Idle_NICASIO.fbx", "looking_around": "animaciones/Looking Around_NICASIO.fbx"},
       "prenda": null
     }
   }

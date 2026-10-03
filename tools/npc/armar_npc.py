@@ -58,38 +58,107 @@ informe('huesos', len(armadura.data.bones), 'vertices', len(cuerpo.data.vertices
 with bpy.data.libraries.load(f"{BASE}/npc/{NOMBRE}.blend", link=False) as (src, dst):
     dst.objects = list(src.objects)
 quieto = [o for o in dst.objects if o is not None and o.type == 'MESH'][0]
-if len(quieto.data.vertices) != len(cuerpo.data.vertices):
-    abortar('distinta cantidad de vertices que el modelo quieto')
-peor = 0.0
-suma = 0.0
-for va, vb in zip(cuerpo.data.vertices, quieto.data.vertices):
-    d = ((cuerpo.matrix_world @ va.co) - (quieto.matrix_world @ vb.co)).length
-    suma += d
-    peor = max(peor, d)
-media = suma / len(cuerpo.data.vertices)
-informe('control contra el modelo quieto: media_mm', round(media * 1000, 3), 'max_mm', round(peor * 1000, 3))
-if media > TOLERANCIA:
-    abortar('la malla de Mixamo no coincide con el modelo quieto')
+PRESTADO = receta.get('prestado')            # nombre del personaje que presta el esqueleto y los clips, o nada
+if PRESTADO:
+    # ------------------------------------------------------------ 2b. esqueleto prestado
+    # El personaje todavia no paso por Mixamo. Toma el esqueleto y los clips de otro de cuerpo parecido (el T-Pose
+    # y los clips de la receta son los de ese otro): el esqueleto se agranda o achica hasta que los brazos queden
+    # a la altura de los suyos, y cada punto de su cuerpo copia los pesos del punto mas cercano del cuerpo prestado.
+    # Sirve para estar parado, hablar o sentarse. Cuando tenga su propio esqueleto de Mixamo, se saca 'prestado'
+    # de la receta y se rehace con --pisar.
+    escena.collection.objects.link(quieto)
 
-# ---------------------------------------------------------------- 3. material: el del modelo quieto, con su JPG
-# (el que se ve hoy en el juego; Mixamo devuelve la textura en PNG, que pesa cinco veces mas)
-material = quieto.data.materials[0]
-jpg = f"{BASE}/npc/{NOMBRE}_{NOMBRE}_color.jpg"
-if os.path.exists(jpg):
-    imagen = bpy.data.images.load(jpg)
-    imagen.pack()
-    for n in material.node_tree.nodes:
-        if n.type == 'TEX_IMAGE':
-            n.image = imagen
-    informe('textura', os.path.basename(jpg), round(os.path.getsize(jpg) / 1e6, 2), 'MB')
+    def altura_brazos(obj):
+        puntos = [obj.matrix_world @ v.co for v in obj.data.vertices]
+        medio = max(abs(p.x) for p in puntos)
+        zs = sorted(p.z for p in puntos if 0.5 * medio < abs(p.x) < 0.8 * medio)
+        return zs[len(zs) // 2], medio
+
+    z_suyo, medio_suyo = altura_brazos(quieto)
+    z_otro, medio_otro = altura_brazos(cuerpo)
+    escala = z_suyo / z_otro
+    armadura.scale = armadura.scale * escala
+    bpy.context.view_layer.update()
+    informe('esqueleto prestado de', PRESTADO, '| escala', round(escala, 3), '| brazos a', round(z_suyo, 3),
+            'm | envergadura suya', round(2 * medio_suyo, 3), 'y del prestado', round(2 * medio_otro * escala, 3))
+    dt = quieto.modifiers.new('Pesos', 'DATA_TRANSFER')
+    dt.object = cuerpo
+    dt.use_vert_data = True
+    dt.data_types_verts = {'VGROUP_WEIGHTS'}
+    dt.vert_mapping = 'POLYINTERP_NEAREST'
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.view_layer.objects.active = quieto
+    quieto.select_set(True)
+    bpy.ops.object.datalayout_transfer(modifier='Pesos')
+    bpy.ops.object.modifier_apply(modifier='Pesos')
+    # Los dedos pasan a moverse con la mano (las manos de dos personajes nunca coinciden dedo por dedo) y cada
+    # punto se queda con sus cuatro huesos de mas peso, que es lo que usa Godot.
+    manos = {}
+    for lado in ('Left', 'Right'):
+        nombre_mano = [g.name for g in armadura.data.bones if g.name.split(':')[-1] == lado + 'Hand'][0]
+        manos[lado] = quieto.vertex_groups.get(nombre_mano) or quieto.vertex_groups.new(name=nombre_mano)
+    por_indice = {g.index: g for g in quieto.vertex_groups}
+    for v in quieto.data.vertices:
+        pesos = {}
+        for g in v.groups:
+            corto = por_indice[g.group].name.split(':')[-1]
+            destino = g.group
+            if 'Hand' in corto and corto not in ('LeftHand', 'RightHand'):
+                destino = manos['Left' if corto.startswith('Left') else 'Right'].index
+            pesos[destino] = pesos.get(destino, 0.0) + g.weight
+        mayores = sorted(pesos.items(), key=lambda par: -par[1])[:4]
+        total = sum(w for _, w in mayores)
+        for gi in [g.group for g in v.groups]:
+            por_indice[gi].remove([v.index])
+        for gi, w in mayores:
+            if total > 1e-6:
+                por_indice[gi].add([v.index], w / total, 'REPLACE')
+    usados = {g.group for v in quieto.data.vertices for g in v.groups if g.weight > 1e-4}
+    for g in [g for g in quieto.vertex_groups if g.index not in usados]:
+        quieto.vertex_groups.remove(g)
+    mundo = quieto.matrix_world.copy()
+    quieto.parent = armadura
+    quieto.matrix_world = mundo
+    quieto.modifiers.new('Armature', 'ARMATURE').object = armadura
+    datos_prestados = cuerpo.data
+    bpy.data.objects.remove(cuerpo)
+    bpy.data.meshes.remove(datos_prestados)
+    cuerpo = quieto
+    cuerpo.name = 'CuerpoMalla'
+    informe('cuerpo', len(cuerpo.data.vertices), 'vertices | huesos que lo mueven', len(cuerpo.vertex_groups))
 else:
-    informe('textura: no hay JPG extraido, queda la del modelo quieto')
-cuerpo.data.materials.clear()
-cuerpo.data.materials.append(material)
-datos_quieto = quieto.data
-bpy.data.objects.remove(quieto)
-bpy.data.meshes.remove(datos_quieto)
-material.name = NOMBRE
+    if len(quieto.data.vertices) != len(cuerpo.data.vertices):
+        abortar('distinta cantidad de vertices que el modelo quieto')
+    peor = 0.0
+    suma = 0.0
+    for va, vb in zip(cuerpo.data.vertices, quieto.data.vertices):
+        d = ((cuerpo.matrix_world @ va.co) - (quieto.matrix_world @ vb.co)).length
+        suma += d
+        peor = max(peor, d)
+    media = suma / len(cuerpo.data.vertices)
+    informe('control contra el modelo quieto: media_mm', round(media * 1000, 3), 'max_mm', round(peor * 1000, 3))
+    if media > TOLERANCIA:
+        abortar('la malla de Mixamo no coincide con el modelo quieto')
+
+    # ------------------------------------------------------------ 3. material: el del modelo quieto, con su JPG
+    # (el que se ve hoy en el juego; Mixamo devuelve la textura en PNG, que pesa cinco veces mas)
+    material = quieto.data.materials[0]
+    jpg = f"{BASE}/npc/{NOMBRE}_{NOMBRE}_color.jpg"
+    if os.path.exists(jpg):
+        imagen = bpy.data.images.load(jpg)
+        imagen.pack()
+        for n in material.node_tree.nodes:
+            if n.type == 'TEX_IMAGE':
+                n.image = imagen
+        informe('textura', os.path.basename(jpg), round(os.path.getsize(jpg) / 1e6, 2), 'MB')
+    else:
+        informe('textura: no hay JPG extraido, queda la del modelo quieto')
+    cuerpo.data.materials.clear()
+    cuerpo.data.materials.append(material)
+    datos_quieto = quieto.data
+    bpy.data.objects.remove(quieto)
+    bpy.data.meshes.remove(datos_quieto)
+    material.name = NOMBRE
 
 
 # ---------------------------------------------------------------- 4. clips
@@ -161,6 +230,40 @@ for nombre_nuevo, r in receta.get('recortes', {}).items():
             kp.interpolation = 'LINEAR'
         fc.update()
     acciones.append(nueva)
+# Separar los brazos del cuerpo unos grados en todos los clips (opcional, "separar_brazos" en la receta). Sirve
+# cuando el personaje lleva una prenda ancha en la cadera y la mano, al colgar, se le mete adentro.
+grados = float(receta.get('separar_brazos', 0))
+if grados:
+    from mathutils import Matrix, Quaternion, Vector
+    mundo_arm = armadura.matrix_world.to_3x3().normalized()
+    for lado in ('Left', 'Right'):
+        brazo = [pb for pb in armadura.pose.bones if pb.name.split(':')[-1] == lado + 'Arm'][0]
+        ruta = 'pose.bones["%s"].rotation_quaternion' % brazo.name
+        for accion in acciones:
+            curvas = [accion.fcurves.find(ruta, index=i) for i in range(4)]
+            if any(c is None for c in curvas):
+                continue
+            # el giro se calcula una vez, con el brazo como esta a mitad del clip, y se aplica igual a todos los cuadros
+            armadura.animation_data.action = accion
+            escena.frame_set(int(sum(accion.frame_range) / 2))
+            hueso = (mundo_arm @ brazo.matrix.to_3x3()).normalized()
+            mejor = None
+            for signo in (1, -1):
+                giro = Matrix.Rotation(math.radians(grados * signo), 3, 'Y')
+                punta = giro @ hueso @ Vector((0.0, 1.0, 0.0))    # hacia donde queda apuntando el brazo
+                if mejor is None or abs(punta.x) > mejor[0]:
+                    mejor = (abs(punta.x), (hueso.inverted() @ giro @ hueso).to_quaternion())
+            delta = mejor[1]
+            for k in range(len(curvas[0].keyframe_points)):
+                q = Quaternion([c.keyframe_points[k].co[1] for c in curvas]) @ delta
+                for i, c in enumerate(curvas):
+                    c.keyframe_points[k].co[1] = q[i]
+                    c.keyframe_points[k].handle_left[1] = q[i]
+                    c.keyframe_points[k].handle_right[1] = q[i]
+            for c in curvas:
+                c.update()
+    armadura.animation_data.action = None
+    informe('brazos separados del cuerpo', grados, 'grados en', len(acciones), 'clips')
 for accion in acciones:
     f0, f1, salto, deriva, zmin, zmax, bajo = medir(accion)
     informe('clip', accion.name, 'cuadros', f1 - f0 + 1, 'segundos', round((f1 - f0) / 30.0, 2),
@@ -224,11 +327,40 @@ if receta.get('prenda'):
         else:
             pecho.add([v.index], 1.0, 'REPLACE')
             sueltos += 1
+    if receta.get('falda'):
+        # Pollera o kupam de alguien que se sienta ("falda": true en la receta): la mitad de atras cuelga de la cadera
+        # y no sigue a las piernas. Si no, al sentarse las pantorrillas se llevan el ruedo de atras hacia adelante
+        # y el borde se quiebra. Adelante sigue igual (muslos y pantorrillas); a los costados se mezclan.
+        nombre_cadera = [b.name for b in armadura.data.bones if b.name.endswith('Hips')][0]
+        cadera_g = prenda.vertex_groups.get(nombre_cadera) or prenda.vertex_groups.new(name=nombre_cadera)
+        ys = [(prenda.matrix_world @ v.co).y for v in prenda.data.vertices]
+        medio_y, ancho_y = (min(ys) + max(ys)) / 2.0, (max(ys) - min(ys)) / 2.0
+        por_indice = {g.index: g for g in prenda.vertex_groups}
+        for v, y in zip(prenda.data.vertices, ys):
+            t = min(1.0, max(0.0, ((y - medio_y) / ancho_y + 0.15) / 0.7))     # 0 adelante, 1 bien atras
+            atras = t * t * (3.0 - 2.0 * t)
+            if atras <= 0.0:
+                continue
+            for gi, peso in [(g.group, g.weight) for g in v.groups]:
+                por_indice[gi].add([v.index], peso * (1.0 - atras), 'REPLACE')
+            cadera_g.add([v.index], atras, 'ADD')
+        informe('falda: la mitad de atras de la prenda cuelga de la cadera')
     usados = {g.group for v in prenda.data.vertices for g in v.groups if g.weight > 1e-4}
     for g in [g for g in prenda.vertex_groups if g.index not in usados]:
         prenda.vertex_groups.remove(g)
     mod = prenda.modifiers.new('Armature', 'ARMATURE')
     mod.object = armadura
+    tapado = receta.get('ocultar_cuerpo_entre')
+    if tapado:
+        # El cuerpo que queda siempre debajo de la prenda (entre esas dos alturas, en metros, con el personaje en T)
+        # se saca: asi, al sentarse, la cadera y los muslos no asoman a traves de la tela.
+        bm = bmesh.new()
+        bm.from_mesh(cuerpo.data)
+        sobran = [f for f in bm.faces if all(tapado[0] < (cuerpo.matrix_world @ v.co).z < tapado[1] for v in f.verts)]
+        bmesh.ops.delete(bm, geom=sobran, context='FACES')
+        bm.to_mesh(cuerpo.data)
+        bm.free()
+        informe('cuerpo tapado por la prenda: se sacaron', len(sobran), 'caras entre', tapado[0], 'y', tapado[1], 'm')
     informe('prenda', prenda.name, 'vertices', len(prenda.data.vertices), 'huesos que la mueven',
             sorted(g.name.split(':')[-1] for g in prenda.vertex_groups), '| puntos sin peso pasados al pecho', sueltos)
 

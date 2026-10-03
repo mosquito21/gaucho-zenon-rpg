@@ -66,12 +66,16 @@
 [ext_resource type="Script" uid="uid://cimk8iff5booe" path="res://scripts/npc_animado.gd" id="50_jamvv"]
 [ext_resource type="PackedScene" uid="uid://utdxmpnj62p8" path="res://assets/props/trabuco.glb" id="52_m4l42"]
 [ext_resource type="PackedScene" uid="uid://daht0dt1v3ohp" path="res://assets/flora/sauce_b.glb" id="53_ovuqc"]
+[ext_resource type="PackedScene" uid="uid://bww7qonr755t3" path="res://assets/personajes/npc/gaucho_1_animado.glb" id="54_4i8j7"]
 [ext_resource type="PackedScene" uid="uid://dy6iagmstls6y" path="res://assets/flora/sauce_a.glb" id="54_7lmes"]
 [ext_resource type="PackedScene" uid="uid://b2qot5yrt28db" path="res://assets/animales/aguila_mora.glb" id="54_11qg2"]
+[ext_resource type="PackedScene" uid="uid://ejy45at78fow" path="res://assets/personajes/npc/gaucho_3_animado.glb" id="55_0telq"]
 [ext_resource type="PackedScene" uid="uid://dnxdrx636hcaw" path="res://assets/personajes/npc/don_rufino_animado.glb" id="55_6tpjy"]
 [ext_resource type="PackedScene" uid="uid://c67mkm23yre55" path="res://assets/flora/matorral_a.glb" id="55_pj78u"]
+[ext_resource type="PackedScene" uid="uid://brk2gmvbyfndy" path="res://assets/animales/perro.glb" id="56_kqgeq"]
 [ext_resource type="PackedScene" uid="uid://5y3iy5mcijyy" path="res://assets/flora/matorral_b.glb" id="56_m0nh4"]
 [ext_resource type="PackedScene" uid="uid://kahbu48k2fgr" path="res://assets/flora/jarilla.glb" id="57_o1gg4"]
+[ext_resource type="PackedScene" uid="uid://b3h7w5w78s2k0" path="res://assets/props/lenia.glb" id="57_yyqwr"]
 [ext_resource type="PackedScene" uid="uid://cf1uga8sdxjfj" path="res://assets/flora/juncos.glb" id="58_21lio"]
 [ext_resource type="PackedScene" uid="uid://dbjoqkim2qds8" path="res://assets/edificios/toldo_lonko.glb" id="59_4t18r"]
 [ext_resource type="PackedScene" uid="uid://baon4u3cyoemo" path="res://assets/flora/pasto_orilla.glb" id="59_q0w1w"]
@@ -81,7 +85,9 @@
 [ext_resource type="PackedScene" uid="uid://d0mmsf4lvfspn" path="res://assets/flora/roca_b.glb" id="61_wlxyt"]
 [ext_resource type="PackedScene" uid="uid://bhc8hwl1p4src" path="res://assets/flora/roca_c.glb" id="62_pxjxx"]
 [ext_resource type="PackedScene" uid="uid://dj03wqyd5crbd" path="res://assets/personajes/npc/poblador_1_animado.glb" id="63_aq3xx"]
+[ext_resource type="PackedScene" uid="uid://bp775ocu5et3y" path="res://assets/personajes/npc/gaucho_2_animado.glb" id="63_ul1rc"]
 [ext_resource type="Texture2D" uid="uid://phphshmhe3mc" path="res://assets/terreno/camino_huellas.png" id="64_7lmes"]
+[ext_resource type="PackedScene" uid="uid://cxx2y5rcbc45u" path="res://assets/props/tendal.glb" id="65_jjmy0"]
 [ext_resource type="PackedScene" uid="uid://dqi7mnxikgiwh" path="res://assets/personajes/npc/poblador_2_animado.glb" id="65_jy8fo"]
 [ext_resource type="PackedScene" uid="uid://dsf8htnnc8vd6" path="res://assets/edificios/toldo_a.glb" id="66_m06a3"]
 [ext_resource type="PackedScene" uid="uid://l7dyf8gpkm5b" path="res://assets/personajes/npc/poblador_3_animado.glb" id="66_n1y5e"]
@@ -96,10 +102,38 @@
 [ext_resource type="PackedScene" uid="uid://bexlohnvr7air" path="res://assets/props/tronco_asiento.glb" id="74_w0et0"]
 [ext_resource type="PackedScene" uid="uid://b8b2m85u468h0" path="res://assets/props/mate.glb" id="75_5xeb2"]
 [ext_resource type="PackedScene" uid="uid://5msj1j7mgtnt" path="res://assets/animales/caballo_bayo.glb" id="75_nrjd4"]
+[ext_resource type="PackedScene" uid="uid://dp2ninyh7dnbk" path="res://assets/edificios/carpa_comando.glb" id="75_pukry"]
 [ext_resource type="PackedScene" uid="uid://cduitsrwupkw5" path="res://assets/props/boleadoras.glb" id="76_3m48t"]
+[ext_resource type="PackedScene" uid="uid://beu222mm31sm0" path="res://assets/props/mastil_bandera.glb" id="76_aek4c"]
+[ext_resource type="PackedScene" uid="uid://bfsqfu6vqjav0" path="res://assets/edificios/carpa_tropa.glb" id="77_dan5s"]
+[ext_resource type="PackedScene" uid="uid://ct5opcngghthp" path="res://assets/edificios/carpa_tropa_b.glb" id="78_qky1p"]
+[ext_resource type="PackedScene" uid="uid://b5y1bhrwi3q0u" path="res://assets/props/pabellon_fusiles.glb" id="81_6vdro"]
+[ext_resource type="PackedScene" uid="uid://mi6hnu4nv6dh" path="res://assets/props/mochila.glb" id="82_ivnb6"]
+[ext_resource type="PackedScene" uid="uid://cn46874jieugu" path="res://assets/props/cantimplora.glb" id="83_nruyh"]
+[ext_resource type="PackedScene" uid="uid://vv3veeifuef7" path="res://assets/props/fusil_remington.glb" id="84_fdmrl"]
+[ext_resource type="PackedScene" uid="uid://ci70n2khjtx3p" path="res://assets/props/cajas_apiladas.glb" id="85_5fh8j"]
+[ext_resource type="PackedScene" uid="uid://du4jcwep2d0ln" path="res://assets/props/cajon_largo.glb" id="86_5sqb2"]
+[ext_resource type="PackedScene" uid="uid://djc5qvwl1q0qk" path="res://assets/props/bulto_lona.glb" id="87_7tfmv"]
+[ext_resource type="PackedScene" uid="uid://b2aarvff8p6gu" path="res://assets/props/saco_abierto.glb" id="88_ug211"]
+[ext_resource type="PackedScene" uid="uid://bg03cuqhldy0u" path="res://assets/props/bolsas.glb" id="89_jxgiq"]
+[ext_resource type="PackedScene" uid="uid://dpl3uirapt16r" path="res://assets/props/fardo.glb" id="90_4i8j7"]
+[ext_resource type="PackedScene" uid="uid://q34idwbk1yda" path="res://assets/props/tercio.glb" id="91_0telq"]
+[ext_resource type="PackedScene" uid="uid://5tt01n3m74bg" path="res://assets/edificios/fortin_nuevo.glb" id="92_kqgeq"]
+[ext_resource type="PackedScene" uid="uid://c0atl5iuvhp44" path="res://assets/props/armero.glb" id="93_ul1rc"]
 [ext_resource type="PackedScene" uid="uid://bo2h0wwnqhms8" path="res://assets/personajes/npc/nicasio_animado.glb" id="95_mh7dw"]
+[ext_resource type="PackedScene" uid="uid://dvj10vioh8q44" path="res://assets/personajes/npc/villegas_animado.glb" id="96_yyqwr"]
 [ext_resource type="ArrayMesh" uid="uid://rvcffyce1wmx" path="res://assets/terreno/agua_rio_limay.res" id="106_jamvv"]
 [ext_resource type="ArrayMesh" uid="uid://omx4sbwl63kg" path="res://assets/terreno/agua_lago_nahuel_huapi.res" id="107_aq3xx"]
+[ext_resource type="PackedScene" uid="uid://4qixec4xown6" path="res://assets/flora/lenga_c.glb" id="112_5fh8j"]
+[ext_resource type="PackedScene" uid="uid://xkxjsgj43myo" path="res://assets/flora/lenga_d.glb" id="113_5sqb2"]
+[ext_resource type="PackedScene" uid="uid://bcahemmhlbppa" path="res://assets/flora/nire_c.glb" id="114_7tfmv"]
+[ext_resource type="PackedScene" uid="uid://c1pjuu8xdn5ne" path="res://assets/flora/nire_d.glb" id="115_ug211"]
+[ext_resource type="PackedScene" uid="uid://crq55mklo1p4p" path="res://assets/flora/matorral_barda_a.glb" id="116_jxgiq"]
+[ext_resource type="PackedScene" uid="uid://2tid5ntut4m6" path="res://assets/flora/matorral_barda_b.glb" id="117_4i8j7"]
+[ext_resource type="PackedScene" uid="uid://dih12s1fx2aqg" path="res://assets/flora/barda_a.glb" id="118_0telq"]
+[ext_resource type="PackedScene" uid="uid://btk7pi4hjyixr" path="res://assets/flora/barda_b.glb" id="119_kqgeq"]
+[ext_resource type="PackedScene" uid="uid://py42858orwii" path="res://assets/props/cruz_camino.glb" id="130_37rif"]
+[ext_resource type="PackedScene" uid="uid://crytnb4u43rl3" path="res://assets/props/osamenta.glb" id="131_2vron"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_7c4bj"]
 sky_top_color = Color(0.4862745, 0.7372549, 1, 1)
@@ -179,9 +213,8 @@ billboard_mode = 1
 radius = 0.32
 height = 1.74
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_11qg2"]
-radius = 0.3
-height = 1.72
+[sub_resource type="BoxShape3D" id="BoxShape3D_c7ra1"]
+size = Vector3(0.75, 0.95, 1.25)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_jwtnp"]
 radius = 0.3
@@ -217,6 +250,13 @@ height = 1.68
 radius = 0.32
 height = 1.58
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_uybca"]
+radius = 0.3
+height = 1.72
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_37rif"]
+size = Vector3(0.32, 0.7, 0.95)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_bn2ao"]
 size = Vector3(20, 4, 9)
 
@@ -233,6 +273,9 @@ size = Vector3(0.7, 1.6, 2.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_85xta"]
 size = Vector3(0.7, 1.6, 2.2)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_2vron"]
+size = Vector3(0.75, 0.95, 1.25)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_35eww"]
 size = Vector3(10, 4, 7)
 
@@ -244,9 +287,8 @@ height = 1.74
 radius = 0.3
 height = 1.6
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_w0et0"]
-radius = 0.3
-height = 1.5
+[sub_resource type="BoxShape3D" id="BoxShape3D_1mtml"]
+size = Vector3(0.7, 1.05, 0.85)
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3m48t"]
 radius = 0.3
@@ -265,12 +307,14 @@ size = Vector3(0.7, 1.6, 2.2)
 [sub_resource type="BoxShape3D" id="BoxShape3D_outiv"]
 size = Vector3(0.7, 1.6, 2.2)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_yyqwr"]
+size = Vector3(4.6, 3, 4.4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jjmy0"]
+size = Vector3(3.2, 3.4, 1.2)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_6fpx2"]
 size = Vector3(0.7, 1.6, 2.1)
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_uybca"]
-radius = 0.3
-height = 1.72
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_m4l42"]
 size = Vector3(0.7, 1.6, 2.2)
@@ -381,6 +425,7 @@ omni_range = 12.0
 [node name="HumoFogon" type="GPUParticles3D" parent="Lugares/PostaDelCoiron" unique_id=1025490941]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.9, 1.2)
 material_override = SubResource("StandardMaterial3D_5w2bu")
+cast_shadow = 0
 amount = 18
 lifetime = 2.8
 process_material = SubResource("ParticleProcessMaterial_1bdwf")
@@ -442,6 +487,7 @@ shape = SubResource("BoxShape3D_lffjk")
 [node name="Humo" type="GPUParticles3D" parent="Lugares/HitoDelHumo" unique_id=382938335]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.3, 0)
 material_override = SubResource("StandardMaterial3D_5w2bu")
+cast_shadow = 0
 amount = 40
 lifetime = 4.5
 process_material = SubResource("ParticleProcessMaterial_1bdwf")
@@ -522,6 +568,7 @@ omni_range = 12.0
 [node name="HumoFogon" type="GPUParticles3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin" unique_id=1793114085]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.39835325, -1.6)
 material_override = SubResource("StandardMaterial3D_2pad8")
+cast_shadow = 0
 amount = 12
 lifetime = 2.8
 process_material = SubResource("ParticleProcessMaterial_1bdwf")
@@ -550,8 +597,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 [node name="Choque" type="StaticBody3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado1" unique_id=890631872]
 
 [node name="Forma" type="CollisionShape3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado1/Choque" unique_id=289779318]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.86, 0)
-shape = SubResource("CapsuleShape3D_11qg2")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0.3)
+shape = SubResource("BoxShape3D_c7ra1")
 
 [node name="Soldado2" type="Node3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin" unique_id=23980281]
 transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -5.600006, -0.17097434, 5)
@@ -567,7 +614,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
 shape = SubResource("CapsuleShape3D_jwtnp")
 
 [node name="Soldado3" type="Node3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin" unique_id=1951406472]
-transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, 3.600006, -0.2048661, 2.399994)
+transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, 3, -0.18980388, 1.699997)
 script = ExtResource("50_jamvv")
 clips = Array[String](["idle", "idle", "idle", "warrior_idle"])
 
@@ -736,7 +783,7 @@ transform = Transform3D(0.9848077, 0, -0.17364818, 0, 1, 0, 0.17364818, 0, 0.984
 script = ExtResource("50_jamvv")
 clips = Array[String](["idle", "talking"])
 
-[node name="Modelo" type="Node3D" parent="Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario" unique_id=775080300 instance=ExtResource("50_aq3xx")]
+[node name="Modelo" parent="Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario" unique_id=775080300 instance=ExtResource("50_aq3xx")]
 
 [node name="Choque" type="StaticBody3D" parent="Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario" unique_id=89064594]
 
@@ -761,6 +808,46 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, 1.07, 11)
 
 [node name="Carreta" parent="Lugares/PulperiaDonCeferino" unique_id=291686739 instance=ExtResource("44_2gc35")]
 transform = Transform3D(-0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, -0.76604444, -4.5000076, -0.24703132, 12)
+
+[node name="Gaucho1" type="Node3D" parent="Lugares/PulperiaDonCeferino" unique_id=595812559]
+transform = Transform3D(0.20791167, 0, 0.9781476, 0, 1, 0, -0.9781476, 0, 0.20791167, 5.3096924, -0.043215644, 7.7573853)
+script = ExtResource("50_jamvv")
+clips = Array[String](["idle", "talking", "talking"])
+
+[node name="Modelo" parent="Lugares/PulperiaDonCeferino/Gaucho1" unique_id=70125233 instance=ExtResource("54_4i8j7")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/PulperiaDonCeferino/Gaucho1" unique_id=54379130]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/PulperiaDonCeferino/Gaucho1/Choque" unique_id=219807347]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="Gaucho3" type="Node3D" parent="Lugares/PulperiaDonCeferino" unique_id=1775308800]
+transform = Transform3D(-0.2079117, 0, -0.9781475, 0, 1, 0, 0.9781475, 0, -0.2079117, 7.1776047, -0.050823603, 8.158554)
+script = ExtResource("50_jamvv")
+clips = Array[String](["idle", "idle", "looking_around"])
+
+[node name="Modelo" parent="Lugares/PulperiaDonCeferino/Gaucho3" unique_id=1381840649 instance=ExtResource("55_0telq")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/PulperiaDonCeferino/Gaucho3" unique_id=1122118768]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/PulperiaDonCeferino/Gaucho3/Choque" unique_id=1114192278]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="Perro" type="Node3D" parent="Lugares/PulperiaDonCeferino" unique_id=1829880439]
+transform = Transform3D(0.9396926, 0, -0.3420201, 0, 1, 0, 0.3420201, 0, 0.9396926, 6.210594, -0.05050955, 5.905792)
+
+[node name="Modelo" parent="Lugares/PulperiaDonCeferino/Perro" unique_id=513959139 instance=ExtResource("56_kqgeq")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/PulperiaDonCeferino/Perro" unique_id=1155683806]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/PulperiaDonCeferino/Perro/Choque" unique_id=1305644494]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0.05)
+shape = SubResource("BoxShape3D_37rif")
+
+[node name="Lenia" parent="Lugares/PulperiaDonCeferino" unique_id=1271454335 instance=ExtResource("57_yyqwr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1, -0.02307872, -6)
 
 [node name="EstanciaDonRufino" type="Node3D" parent="Lugares" unique_id=2036318537]
 transform = Transform3D(0.551937, 0, 0.83388585, 0, 1, 0, -0.83388585, 0, 0.551937, -170, -0.3215686, -250)
@@ -850,6 +937,25 @@ shape = SubResource("BoxShape3D_85xta")
 [node name="AguilaMora" parent="Lugares/EstanciaDonRufino" unique_id=1273284805 instance=ExtResource("54_11qg2")]
 transform = Transform3D(-0.81915206, 0, -0.5735764, 0, 1, 0, 0.5735764, 0, -0.81915206, 39, 1.8070452, -10)
 
+[node name="Gaucho2" type="Node3D" parent="Lugares/EstanciaDonRufino" unique_id=580843908]
+transform = Transform3D(0.26723847, 0, 0.96363044, 0, 1, 0, -0.96363044, 0, 0.26723847, 1.0199738, 0.25219548, 10.237671)
+script = ExtResource("50_jamvv")
+clips = Array[String](["sitting_idle"])
+
+[node name="Modelo" parent="Lugares/EstanciaDonRufino/Gaucho2" unique_id=832498907 instance=ExtResource("63_ul1rc")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/EstanciaDonRufino/Gaucho2" unique_id=395174212]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/EstanciaDonRufino/Gaucho2/Choque" unique_id=1134327248]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0.3)
+shape = SubResource("BoxShape3D_2vron")
+
+[node name="Lenia" parent="Lugares/EstanciaDonRufino" unique_id=1353140243 instance=ExtResource("57_yyqwr")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3, 0.18407686, -4.600006)
+
+[node name="Tendal" parent="Lugares/EstanciaDonRufino" unique_id=36902440 instance=ExtResource("65_jjmy0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0000076, -0.031095624, -9.5)
+
 [node name="TolderiaPainefil" type="Node3D" parent="Lugares" unique_id=1854058248]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -430, -0.031372547, 60)
 
@@ -923,13 +1029,13 @@ transform = Transform3D(-0.7071068, 0, -0.7071067, 0, 1, 0, 0.7071067, 0, -0.707
 script = ExtResource("50_jamvv")
 clips = Array[String](["sitting_idle"])
 
-[node name="Modelo" type="Node3D" parent="Lugares/TolderiaPainefil/Anciana" unique_id=566214503 instance=ExtResource("63_aq3xx")]
+[node name="Modelo" parent="Lugares/TolderiaPainefil/Anciana" unique_id=566214503 instance=ExtResource("63_aq3xx")]
 
 [node name="Choque" type="StaticBody3D" parent="Lugares/TolderiaPainefil/Anciana" unique_id=678818731]
 
 [node name="Forma" type="CollisionShape3D" parent="Lugares/TolderiaPainefil/Anciana/Choque" unique_id=1303927029]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.75, 0)
-shape = SubResource("CapsuleShape3D_w0et0")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.52, 0.1)
+shape = SubResource("BoxShape3D_1mtml")
 
 [node name="Asiento" type="Node3D" parent="Lugares/TolderiaPainefil/Anciana" unique_id=433075759 instance=ExtResource("74_w0et0")]
 transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, -0.08, 0.02)
@@ -1030,6 +1136,513 @@ transform = Transform3D(0.9659258, 0, 0.25881904, 0, 1, 0, -0.25881904, 0, 0.965
 [node name="EstacasCaballos" parent="Lugares/TolderiaPainefil" unique_id=586991958 instance=ExtResource("73_jy8fo")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.000004, 0.18823545, 18)
 
+[node name="CampamentoDeLaTropa" type="Node3D" parent="Lugares" unique_id=6949308]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1030, 0.010898075, 320)
+
+[node name="Cartel" type="Label3D" parent="Lugares/CampamentoDeLaTropa" unique_id=1077452624]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 8.2, 0)
+pixel_size = 0.015
+billboard = 1
+modulate = Color(0.96, 0.9, 0.72, 1)
+outline_modulate = Color(0.05, 0.03, 0.02, 1)
+text = "CAMPAMENTO DE LA TROPA"
+font_size = 72
+outline_size = 16
+
+[node name="Cuerpo" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa" unique_id=490730306]
+
+[node name="Interactuar" type="Area3D" parent="Lugares/CampamentoDeLaTropa/Cuerpo" unique_id=1857533968]
+script = ExtResource("3_7g83o")
+interact_text = "Presioná E para mirar el campamento"
+texto_al_usar = "El campamento de la tropa, a orillas del Nahuel Huapi. La carpa grande es la del coronel."
+
+[node name="Zona" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Cuerpo/Interactuar" unique_id=1376394334]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -21, 1.5, 0)
+shape = SubResource("BoxShape3D_yyqwr")
+
+[node name="CarpaDeComando" parent="Lugares/CampamentoDeLaTropa/Cuerpo" unique_id=1616224829 instance=ExtResource("75_pukry")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -24, -0.18253894, 0)
+
+[node name="Mastil" parent="Lugares/CampamentoDeLaTropa" unique_id=1302885581 instance=ExtResource("76_aek4c")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -18.599976, -0.19329731, -6.399994)
+
+[node name="Carpas" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=1721193971]
+
+[node name="Carpa01" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=1629335295 instance=ExtResource("77_dan5s")]
+transform = Transform3D(0.9999748, 0, -0.007100727, 0, 1, 0, 0.007100727, 0, 0.9999748, -13.893799, -0.09757544, -7.531952)
+
+[node name="Carpa02" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=2034984466 instance=ExtResource("78_qky1p")]
+transform = Transform3D(-0.9994308, 0, -0.033735875, 0, 1, 0, 0.033735875, 0, -0.9994308, -13.5703125, -0.06442692, 6.916992)
+
+[node name="Carpa03" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=553102643 instance=ExtResource("77_dan5s")]
+transform = Transform3D(0.9998469, 0, 0.017498024, 0, 1, 0, -0.017498024, 0, 0.9998469, -8.267944, -0.12675881, -7.131775)
+
+[node name="Carpa04" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=2090214758 instance=ExtResource("77_dan5s")]
+transform = Transform3D(-0.99857837, 0, 0.053302914, 0, 1, 0, -0.053302914, 0, -0.99857837, -8.702393, -0.025407434, 6.9705505)
+
+[node name="Carpa05" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=674978620 instance=ExtResource("78_qky1p")]
+transform = Transform3D(0.9961079, 0, -0.08814219, 0, 1, 0, 0.08814219, 0, 0.9961079, -3.3883057, -0.034039624, -7.427643)
+
+[node name="Carpa06" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=646169710 instance=ExtResource("77_dan5s")]
+transform = Transform3D(-0.9999994, 0, 0.0010751801, 0, 1, 0, -0.0010751801, 0, -0.9999994, -2.9034424, 0.19593984, 7.231537)
+
+[node name="Carpa07" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=1112505358 instance=ExtResource("77_dan5s")]
+transform = Transform3D(0.9958244, 0, -0.09128963, 0, 1, 0, 0.09128963, 0, 0.9958244, 2.8596191, -0.24627939, -7.537506)
+
+[node name="Carpa08" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=1956236652 instance=ExtResource("78_qky1p")]
+transform = Transform3D(-0.99765074, 0, 0.068505146, 0, 1, 0, -0.068505146, 0, -0.99765074, 2.1947021, 0.20952249, 7.7075195)
+
+[node name="Carpa09" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=1865412877 instance=ExtResource("77_dan5s")]
+transform = Transform3D(0.999895, 0, -0.014493639, 0, 1, 0, 0.014493639, 0, 0.999895, 8.036743, 0.000959903, -7.15802)
+
+[node name="Carpa10" parent="Lugares/CampamentoDeLaTropa/Carpas" unique_id=1291915452 instance=ExtResource("77_dan5s")]
+transform = Transform3D(-0.996143, 0, -0.087744825, 0, 1, 0, 0.087744825, 0, -0.996143, 8.003235, 0.062381133, 7.78125)
+
+[node name="Fogones" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=292308647]
+
+[node name="Fogon1" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=316213470 instance=ExtResource("16_2pad8")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, -5.5, -0.07106648, 0)
+
+[node name="LuzFogon1" type="OmniLight3D" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1049010095]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0.82893354, 0)
+light_color = Color(1, 0.55, 0.2, 1)
+light_energy = 2.0
+omni_range = 12.0
+
+[node name="HumoFogon1" type="GPUParticles3D" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1735209557]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 0.3289335, 0)
+material_override = SubResource("StandardMaterial3D_2pad8")
+cast_shadow = 0
+amount = 12
+lifetime = 2.8
+process_material = SubResource("ParticleProcessMaterial_1bdwf")
+draw_pass_1 = SubResource("QuadMesh_1w2qq")
+
+[node name="Olla" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=938494515 instance=ExtResource("17_e4yt5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, -0.021066476, 0)
+
+[node name="Fogon2" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1735890940 instance=ExtResource("16_2pad8")]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 5, -0.053011745, 0.6000061)
+
+[node name="LuzFogon2" type="OmniLight3D" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1635122279]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.84698826, 0.6000061)
+light_color = Color(1, 0.55, 0.2, 1)
+light_energy = 2.0
+omni_range = 12.0
+
+[node name="HumoFogon2" type="GPUParticles3D" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1444777371]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.34698826, 0.6000061)
+material_override = SubResource("StandardMaterial3D_2pad8")
+cast_shadow = 0
+amount = 12
+lifetime = 2.8
+process_material = SubResource("ParticleProcessMaterial_1bdwf")
+draw_pass_1 = SubResource("QuadMesh_1w2qq")
+
+[node name="Pava" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=443263739 instance=ExtResource("73_85xta")]
+transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, 5.449951, -0.046561945, 0.8999939)
+
+[node name="Mate" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1450103834 instance=ExtResource("75_5xeb2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.800049, -0.04000579, 1.3500061)
+
+[node name="Tronco1" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1509197982 instance=ExtResource("74_w0et0")]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, -5.300049, -0.012219567, 1.5)
+
+[node name="Tronco2" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=39627858 instance=ExtResource("74_w0et0")]
+transform = Transform3D(0.17364822, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, 0.17364822, -7, -0.08327267, -0.3999939)
+
+[node name="Tronco3" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=638132622 instance=ExtResource("74_w0et0")]
+transform = Transform3D(0.81915206, 0, -0.57357645, 0, 1, 0, 0.57357645, 0, 0.81915206, -4.199951, 0.021023646, -1.2000122)
+
+[node name="CajonAsiento1" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1397552680 instance=ExtResource("20_aqlsr")]
+transform = Transform3D(0.9659258, 0, 0.25881904, 0, 1, 0, -0.25881904, 0, 0.9659258, 5.5999756, -0.028751522, 2)
+
+[node name="CajonAsiento2" parent="Lugares/CampamentoDeLaTropa/Fogones" unique_id=1891957864 instance=ExtResource("20_aqlsr")]
+transform = Transform3D(0.64278764, 0, -0.76604444, 0, 1, 0, 0.76604444, 0, 0.64278764, 3.5, -0.08355947, -0.2999878)
+
+[node name="Armas" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=403772568]
+
+[node name="Pabellon1" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=283056618 instance=ExtResource("81_6vdro")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, -0.15036792, -3)
+
+[node name="Pabellon2" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=232227013 instance=ExtResource("81_6vdro")]
+transform = Transform3D(0.64278764, 0, 0.76604444, 0, 1, 0, -0.76604444, 0, 0.64278764, -0.19995117, 0.048170675, 2.899994)
+
+[node name="Pabellon3" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=462924612 instance=ExtResource("81_6vdro")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, 6.4000244, -0.05323619, -2.7999878)
+
+[node name="Pabellon4" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1215353885 instance=ExtResource("81_6vdro")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -16.599976, -0.09718378, 2.600006)
+
+[node name="Mochila1" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1914447500 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.8660254, 0, 0.50000006, 0, 1, 0, -0.50000006, 0, -0.8660254, -10.199951, -0.17849495, -3.600006)
+
+[node name="Mochila2" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1667313399 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, -11.699951, -0.14716424, -3.7999878)
+
+[node name="Mochila3" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1631510910 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -0.9000244, 0.050564382, 3.600006)
+
+[node name="Mochila4" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=2139305535 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(0.76604444, 0, -0.6427876, 0, 1, 0, 0.6427876, 0, 0.76604444, 0.5999756, 0.06059061, 3.399994)
+
+[node name="Mochila5" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=605824490 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.9848077, 0, 0.1736483, 0, 1, 0, -0.1736483, 0, -0.9848077, 7.0999756, -0.04213664, -3.5)
+
+[node name="Mochila6" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1109602100 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, -6.4000244, -0.01613299, 2)
+
+[node name="Mochila7" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=635500779 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.50000006, 0, -0.8660254, 0, 1, 0, 0.8660254, 0, -0.50000006, -3.5999756, 0.055927403, -1.6000061)
+
+[node name="Mochila8" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=413250350 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 4, -0.004927875, 2.2999878)
+
+[node name="Cantimplora1" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=801586382 instance=ExtResource("83_nruyh")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.900024, -0.17037544, -4)
+
+[node name="Cantimplora2" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=558799775 instance=ExtResource("83_nruyh")]
+transform = Transform3D(-0.64278764, 0, 0.76604444, 0, 1, 0, -0.76604444, 0, -0.64278764, -6, -0.037964724, 1.2999878)
+
+[node name="Cantimplora3" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=967868041 instance=ExtResource("83_nruyh")]
+transform = Transform3D(0.34202015, 0, -0.9396926, 0, 1, 0, 0.9396926, 0, 0.34202015, 4.5999756, 0.0027963826, 2.899994)
+
+[node name="Cantimplora4" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=1356529838 instance=ExtResource("83_nruyh")]
+transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, 7.799988, -0.02823288, -3.100006)
+
+[node name="FusilSuelto" parent="Lugares/CampamentoDeLaTropa/Armas" unique_id=902017594 instance=ExtResource("84_fdmrl")]
+transform = Transform3D(0.90630776, 0, 0.42261827, 0, 1, 0, -0.42261827, 0, 0.90630776, -4.9000244, 0.014029398, 2.100006)
+
+[node name="Proveeduria" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=1035411417]
+
+[node name="CajasApiladas" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1705689155 instance=ExtResource("85_5fh8j")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 18, -0.08932932, 6)
+
+[node name="CajonLargo1" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1406053537 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(0.9961947, 0, 0.08715574, 0, 1, 0, -0.08715574, 0, 0.9961947, 20.400024, 0.18800408, 2.399994)
+
+[node name="CajonLargo2" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1515827727 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(0.9986295, 0, 0.05233596, 0, 1, 0, -0.05233596, 0, 0.9986295, 20.5, 0.17743655, 2.899994)
+
+[node name="CajonLargo3" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=704430577 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, 20.450012, 0.5025027, 2.649994)
+
+[node name="CajonLargo4" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1166544243 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(-0.08715577, 0, 0.9961947, 0, 1, 0, -0.9961947, 0, -0.08715577, 21.900024, 0.12427644, 3.399994)
+
+[node name="BultoLona1" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1851529905 instance=ExtResource("87_7tfmv")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 16.400024, 0.17294295, 1.6000061)
+
+[node name="BultoLona2" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1775608502 instance=ExtResource("87_7tfmv")]
+transform = Transform3D(0.9659258, 0, -0.25881904, 0, 1, 0, 0.25881904, 0, 0.9659258, 20, -0.06815323, 8.700012)
+
+[node name="Sacos" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1489470244 instance=ExtResource("18_lawxi")]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, 15.400024, -0.11089633, 5)
+
+[node name="SacoAbierto" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=919832651 instance=ExtResource("88_ug211")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.700012, -0.30067524, 7.700012)
+
+[node name="Bolsas" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1694174058 instance=ExtResource("89_jxgiq")]
+transform = Transform3D(-0.34202012, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, -0.34202012, 15.5, -0.22805753, 7.299988)
+
+[node name="Fardo1" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=126199465 instance=ExtResource("90_4i8j7")]
+transform = Transform3D(0.9848077, 0, 0.17364818, 0, 1, 0, -0.17364818, 0, 0.9848077, 22.799988, 0.1735719, 6.299988)
+
+[node name="Fardo2" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=998486465 instance=ExtResource("90_4i8j7")]
+transform = Transform3D(0.087155804, 0, 0.9961947, 0, 1, 0, -0.9961947, 0, 0.087155804, 23, 0.18047394, 7.200012)
+
+[node name="Fardo3" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=351235110 instance=ExtResource("90_4i8j7")]
+transform = Transform3D(0.68943995, 0, 0.5785088, 0, 0.9, 0, -0.5785088, 0, 0.68943995, 22.849976, 0.72898465, 6.700012)
+
+[node name="Tercio1" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=754208155 instance=ExtResource("91_0telq")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 21.599976, 0.15380466, 9)
+
+[node name="Tercio2" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=2140230153 instance=ExtResource("91_0telq")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, 21.099976, 0.071763635, 9.600006)
+
+[node name="Tercio3" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=944075016 instance=ExtResource("91_0telq")]
+transform = Transform3D(0.9396926, 0, -0.34202012, 0, 1, 0, 0.34202012, 0, 0.9396926, 22.299988, 0.16694586, 9.700012)
+
+[node name="Barril1" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=729397202 instance=ExtResource("16_jgbtq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.200012, -0.2384296, 10.299988)
+
+[node name="Barril2" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1822898491 instance=ExtResource("16_jgbtq")]
+transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, 17.299988, -0.1979143, 10.600006)
+
+[node name="Barril3" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=1573286255 instance=ExtResource("16_jgbtq")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 17.799988, -0.18372148, 11.299988)
+
+[node name="Carreta" parent="Lugares/CampamentoDeLaTropa/Proveeduria" unique_id=168629108 instance=ExtResource("44_2gc35")]
+transform = Transform3D(-0.9063078, 0, -0.42261827, 0, 1, 0, 0.42261827, 0, -0.9063078, 26.5, 0.111651175, 12.5)
+
+[node name="Caballada" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=685836863]
+
+[node name="Estacas" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=133709177 instance=ExtResource("73_jy8fo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0.012631514, -11)
+
+[node name="Caballo1" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=32316507]
+transform = Transform3D(-0.9832549, 0, 0.18223558, 0, 1, 0, -0.18223558, 0, -0.9832549, 22.799988, -0.07152439, -9.049988)
+
+[node name="Modelo" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo1" unique_id=1850917462 instance=ExtResource("31_l64wy")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo1" unique_id=375768814]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo1/Choque" unique_id=82211905]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_pabtx")
+
+[node name="Caballo2" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=1233416167]
+transform = Transform3D(-0.99813473, 0, 0.06104858, 0, 1, 0, -0.06104858, 0, -0.99813473, 25.200012, -0.037721176, -9.299988)
+
+[node name="Modelo" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo2" unique_id=355956055 instance=ExtResource("33_nrjd4")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo2" unique_id=1920863082]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo2/Choque" unique_id=1568944119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_4aoer")
+
+[node name="Caballo3" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=1706353658]
+transform = Transform3D(-0.9981348, 0, -0.06104852, 0, 1, 0, 0.06104852, 0, -0.9981348, 27.700012, -0.09708182, -9.049988)
+
+[node name="Modelo" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo3" unique_id=763352187 instance=ExtResource("32_vbt2g")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo3" unique_id=983639148]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo3/Choque" unique_id=802670819]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_outiv")
+
+[node name="Caballo4" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=1609090711]
+transform = Transform3D(-0.9832549, 0, -0.18223552, 0, 1, 0, 0.18223552, 0, -0.9832549, 30, -0.18344708, -9.299988)
+
+[node name="Modelo" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo4" unique_id=107785126 instance=ExtResource("31_l64wy")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo4" unique_id=1484837420]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Caballada/Caballo4/Choque" unique_id=1786262048]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_pabtx")
+
+[node name="Montura1" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=2126547884 instance=ExtResource("35_5w2bu")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 20.400024, 0.47428122, -10.399994)
+
+[node name="Montura2" parent="Lugares/CampamentoDeLaTropa/Caballada" unique_id=1398509012 instance=ExtResource("35_5w2bu")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, 19.799988, 0.47835478, -9.600006)
+
+[node name="Gente" type="Node3D" parent="Lugares/CampamentoDeLaTropa" unique_id=1619766923]
+
+[node name="CoronelVillegas" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=1534805331]
+transform = Transform3D(-0.1736482, 0, -0.9848077, 0, 1, 0, 0.9848077, 0, -0.1736482, -32, -0.3621036, -11)
+script = ExtResource("50_jamvv")
+
+[node name="Modelo" parent="Lugares/CampamentoDeLaTropa/Gente/CoronelVillegas" unique_id=200742434 instance=ExtResource("96_yyqwr")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Gente/CoronelVillegas" unique_id=1022792355]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Gente/CoronelVillegas/Choque" unique_id=1242698545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="Centinela" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=22039644]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -19.199951, -0.11565385, 2.899994)
+script = ExtResource("50_jamvv")
+clips = Array[String](["idle", "idle", "salute"])
+
+[node name="Modelo" parent="Lugares/CampamentoDeLaTropa/Gente/Centinela" unique_id=414059135 instance=ExtResource("36_m06a3")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Gente/Centinela" unique_id=1954895267]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Gente/Centinela/Choque" unique_id=1527484914]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="SoldadoDelFogon" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=561318127]
+transform = Transform3D(-0.61566144, 0, 0.7880108, 0, 1, 0, -0.7880108, 0, -0.61566144, -6.9000244, -0.002254758, 1.2000122)
+script = ExtResource("50_jamvv")
+clips = Array[String](["sitting_idle"])
+
+[node name="Modelo" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon" unique_id=1042716679 instance=ExtResource("35_4t18r")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon" unique_id=375496816]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon/Choque" unique_id=629010355]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0.3)
+shape = SubResource("BoxShape3D_2vron")
+
+[node name="SoldadoDeLaCarga" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=294457909]
+transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, 19.200012, 0.16603887, 4.299988)
+script = ExtResource("50_jamvv")
+clips = Array[String](["idle", "idle", "idle", "warrior_idle"])
+
+[node name="Modelo" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga" unique_id=747451885 instance=ExtResource("37_5xjvn")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga" unique_id=1322078182]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga/Choque" unique_id=977128916]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="Perro" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=673775590]
+transform = Transform3D(-0.34202006, 0, -0.9396927, 0, 1, 0, 0.9396927, 0, -0.34202006, 6.5999756, -0.04525238, -0.7000122)
+
+[node name="Modelo" parent="Lugares/CampamentoDeLaTropa/Gente/Perro" unique_id=1534471574 instance=ExtResource("56_kqgeq")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/CampamentoDeLaTropa/Gente/Perro" unique_id=1750775213]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/CampamentoDeLaTropa/Gente/Perro/Choque" unique_id=1955684096]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0.05)
+shape = SubResource("BoxShape3D_37rif")
+
+[node name="Lenia" parent="Lugares/CampamentoDeLaTropa" unique_id=229331748 instance=ExtResource("57_yyqwr")]
+transform = Transform3D(-0.08715577, 0, 0.9961947, 0, 1, 0, -0.9961947, 0, -0.08715577, 13.5, -0.24206927, -5.799988)
+
+[node name="Tendal" parent="Lugares/CampamentoDeLaTropa" unique_id=569814933 instance=ExtResource("65_jjmy0")]
+transform = Transform3D(0.9975641, 0, 0.06975646, 0, 1, 0, -0.06975646, 0, 0.9975641, -8.699951, -0.13018401, -13.399994)
+
+[node name="FortinNuevo" type="Node3D" parent="Lugares" unique_id=1149085598]
+transform = Transform3D(-0.604599, 0, -0.79653, 0, 1, 0, 0.79653, 0, -0.604599, -905, 0.3411767, 415)
+
+[node name="Cartel" type="Label3D" parent="Lugares/FortinNuevo" unique_id=1692526016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.6, 0)
+pixel_size = 0.015
+billboard = 1
+modulate = Color(0.96, 0.9, 0.72, 1)
+outline_modulate = Color(0.05, 0.03, 0.02, 1)
+text = "FORTÍN NUEVO"
+font_size = 72
+outline_size = 16
+
+[node name="Cuerpo" type="StaticBody3D" parent="Lugares/FortinNuevo" unique_id=2117869854]
+
+[node name="Interactuar" type="Area3D" parent="Lugares/FortinNuevo/Cuerpo" unique_id=1896939263]
+script = ExtResource("3_7g83o")
+interact_text = "Presioná E para mirar el fortín nuevo"
+texto_al_usar = "Un fortín nuevo de la línea: palo a pique, un rancho de barro y el mangrullo."
+
+[node name="Zona" type="CollisionShape3D" parent="Lugares/FortinNuevo/Cuerpo/Interactuar" unique_id=96189878]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 7.3)
+shape = SubResource("BoxShape3D_jjmy0")
+
+[node name="Modelo" parent="Lugares/FortinNuevo/Cuerpo" unique_id=1264078017 instance=ExtResource("92_kqgeq")]
+
+[node name="Fogon" parent="Lugares/FortinNuevo" unique_id=2096470935 instance=ExtResource("16_2pad8")]
+transform = Transform3D(0.9659258, 0, 0.25881904, 0, 1, 0, -0.25881904, 0, 0.9659258, 2.3999634, 0.10086176, 0.59994507)
+
+[node name="Olla" parent="Lugares/FortinNuevo" unique_id=2086341775 instance=ExtResource("17_e4yt5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3999634, 0.15086177, 0.59994507)
+
+[node name="LuzFogon" type="OmniLight3D" parent="Lugares/FortinNuevo" unique_id=1307597310]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3999634, 1.0008619, 0.59994507)
+light_color = Color(1, 0.55, 0.2, 1)
+light_energy = 2.0
+omni_range = 12.0
+
+[node name="HumoFogon" type="GPUParticles3D" parent="Lugares/FortinNuevo" unique_id=1259117619]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3999634, 0.50086176, 0.59994507)
+material_override = SubResource("StandardMaterial3D_2pad8")
+cast_shadow = 0
+amount = 12
+lifetime = 2.8
+process_material = SubResource("ParticleProcessMaterial_1bdwf")
+draw_pass_1 = SubResource("QuadMesh_1w2qq")
+
+[node name="Tronco1" parent="Lugares/FortinNuevo" unique_id=695651158 instance=ExtResource("74_w0et0")]
+transform = Transform3D(0.17364822, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, 0.17364822, 3.9000244, 0.0974437, 0.8999634)
+
+[node name="Tronco2" parent="Lugares/FortinNuevo" unique_id=8934495 instance=ExtResource("74_w0et0")]
+transform = Transform3D(0.9961947, 0, 0.08715574, 0, 1, 0, -0.08715574, 0, 0.9961947, 2.1999512, 0.10061374, 2.0999146)
+
+[node name="Armero" parent="Lugares/FortinNuevo" unique_id=1147869848 instance=ExtResource("93_ul1rc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8499756, 0.15013295, -4.3499756)
+
+[node name="Pabellon" parent="Lugares/FortinNuevo" unique_id=351370241 instance=ExtResource("81_6vdro")]
+transform = Transform3D(0.76604444, 0, 0.6427876, 0, 1, 0, -0.6427876, 0, 0.76604444, 0.4000244, -0.05077985, 2.6999512)
+
+[node name="CajonLargo1" parent="Lugares/FortinNuevo" unique_id=1114979909 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, -2.9500122, 0.050669968, -1.750061)
+
+[node name="CajonLargo2" parent="Lugares/FortinNuevo" unique_id=2070616675 instance=ExtResource("86_5sqb2")]
+transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.1736482, -3.0999756, 0.027810156, -1.2000427)
+
+[node name="Sacos" parent="Lugares/FortinNuevo" unique_id=639068528 instance=ExtResource("18_lawxi")]
+transform = Transform3D(-0.9848077, 0, 0.1736483, 0, 1, 0, -0.1736483, 0, -0.9848077, 0.099975586, 0.014823914, -1.750061)
+
+[node name="Barril1" parent="Lugares/FortinNuevo" unique_id=499318874 instance=ExtResource("16_jgbtq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0499878, 0.0580343, -1.8500366)
+
+[node name="Barril2" parent="Lugares/FortinNuevo" unique_id=1803897107 instance=ExtResource("16_jgbtq")]
+transform = Transform3D(0.64278764, 0, 0.76604444, 0, 1, 0, -0.76604444, 0, 0.64278764, 2.75, 0.1738038, -2.750061)
+
+[node name="Mochila1" parent="Lugares/FortinNuevo" unique_id=1654581138 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(-0.50000006, 0, 0.8660254, 0, 1, 0, -0.8660254, 0, -0.50000006, 3.2999878, 0.15222716, 1.8999634)
+
+[node name="Mochila2" parent="Lugares/FortinNuevo" unique_id=754263315 instance=ExtResource("82_ivnb6")]
+transform = Transform3D(0.49999997, 0, -0.86602545, 0, 1, 0, 0.86602545, 0, 0.49999997, 1.5, 0.05632043, 1.6999512)
+
+[node name="Cantimplora" parent="Lugares/FortinNuevo" unique_id=2146740397 instance=ExtResource("83_nruyh")]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 3, 0.18046433, 2.2999878)
+
+[node name="BultoLona" parent="Lugares/FortinNuevo" unique_id=928958736 instance=ExtResource("87_7tfmv")]
+transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, 4.4000244, 0.115734935, -1.6000061)
+
+[node name="Tercio" parent="Lugares/FortinNuevo" unique_id=1723519647 instance=ExtResource("91_0telq")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 3.5, 0.19705111, -2.9000244)
+
+[node name="Palenque" parent="Lugares/FortinNuevo" unique_id=1025992653 instance=ExtResource("17_ngql4")]
+transform = Transform3D(0.9659258, 0, 0.25881904, 0, 1, 0, -0.25881904, 0, 0.9659258, 6, 0.14947149, 10.599976)
+
+[node name="CaballoAlazan" type="Node3D" parent="Lugares/FortinNuevo" unique_id=2017285379]
+transform = Transform3D(-0.9659258, 0, -0.25881907, 0, 1, 0, 0.25881907, 0, -0.9659258, 6.199951, 0.1147013, 12.199951)
+
+[node name="Modelo" type="Node3D" parent="Lugares/FortinNuevo/CaballoAlazan" unique_id=2070230030 instance=ExtResource("33_nrjd4")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/FortinNuevo/CaballoAlazan" unique_id=1396618401]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/FortinNuevo/CaballoAlazan/Choque" unique_id=344046280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_nrjd4")
+
+[node name="Corral" parent="Lugares/FortinNuevo" unique_id=498041698 instance=ExtResource("16_128ka")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.799988, -0.03816083, 2.499939)
+
+[node name="CaballoMoro" type="Node3D" parent="Lugares/FortinNuevo" unique_id=1623599897]
+transform = Transform3D(0.49999997, 0, 0.86602545, 0, 1, 0, -0.86602545, 0, 0.49999997, -14.5, 0.015657187, 1.7999268)
+
+[node name="Modelo" type="Node3D" parent="Lugares/FortinNuevo/CaballoMoro" unique_id=967616375 instance=ExtResource("32_vbt2g")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/FortinNuevo/CaballoMoro" unique_id=129908400]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/FortinNuevo/CaballoMoro/Choque" unique_id=1771884596]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_outiv")
+
+[node name="CaballoBayo" type="Node3D" parent="Lugares/FortinNuevo" unique_id=60106041]
+transform = Transform3D(-0.34202006, 0, -0.9396927, 0, 1, 0, 0.9396927, 0, -0.34202006, -12.599976, -0.11508542, 3.5999756)
+
+[node name="Modelo" type="Node3D" parent="Lugares/FortinNuevo/CaballoBayo" unique_id=1659730527 instance=ExtResource("75_nrjd4")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/FortinNuevo/CaballoBayo" unique_id=1166546939]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/FortinNuevo/CaballoBayo/Choque" unique_id=1410238958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
+shape = SubResource("BoxShape3D_uybca")
+
+[node name="Soldado" type="Node3D" parent="Lugares/FortinNuevo" unique_id=760602948]
+transform = Transform3D(0.30901697, 0, 0.95105654, 0, 1, 0, -0.95105654, 0, 0.30901697, 1.2000732, 0.05475402, 0.19992065)
+script = ExtResource("50_jamvv")
+
+[node name="Modelo" parent="Lugares/FortinNuevo/Soldado" unique_id=220032060 instance=ExtResource("35_4t18r")]
+
+[node name="Choque" type="StaticBody3D" parent="Lugares/FortinNuevo/Soldado" unique_id=1916943195]
+
+[node name="Forma" type="CollisionShape3D" parent="Lugares/FortinNuevo/Soldado/Choque" unique_id=1615228945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_uybca")
+
+[node name="Lenia" parent="Lugares/FortinNuevo" unique_id=876611183 instance=ExtResource("57_yyqwr")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -3.4000244, 0.041708916, 9.399963)
+
 [node name="Vegetacion" type="Node3D" parent="." unique_id=1016019637]
 
 [node name="ArbolesDelHito" type="Node3D" parent="Vegetacion" unique_id=1780250115]
@@ -1061,6 +1674,18 @@ transform = Transform3D(-0.5500001, 0, 0.95262796, 0, 1.1, 0, -0.95262796, 0, -0
 [node name="CalafateA_8" parent="Vegetacion/ArbolesDelHito" unique_id=1257038662 instance=ExtResource("40_im3ha")]
 transform = Transform3D(-0.57850873, 0, -0.6894401, 0, 0.9, 0, 0.6894401, 0, -0.57850873, 115, -0.17938726, -442)
 
+[node name="LengaC_9" parent="Vegetacion/ArbolesDelHito" unique_id=348754837 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(0.8043466, 0, 0.67492694, 0, 1.05, 0, -0.67492694, 0, 0.8043466, 111.9, -0.22951104, -433.5)
+
+[node name="LengaD_10" parent="Vegetacion/ArbolesDelHito" unique_id=628922982 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(-0.9396926, 0, -0.3420202, 0, 1, 0, 0.3420202, 0, -0.9396926, 115, -0.06431468, -427.6)
+
+[node name="LengaC_11" parent="Vegetacion/ArbolesDelHito" unique_id=956180694 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-0.57850885, 0, 0.68943995, 0, 0.9, 0, -0.68943995, 0, -0.57850885, 108.6, -0.3901905, -439)
+
+[node name="NireC_12" parent="Vegetacion/ArbolesDelHito" unique_id=1466588144 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(0.25881907, 0, 0.9659258, 0, 1, 0, -0.9659258, 0, 0.25881907, 118, -0.21647057, -434.5)
+
 [node name="ArbolesDelFortin" type="Node3D" parent="Vegetacion" unique_id=660322069]
 
 [node name="ManzanoA_0" parent="Vegetacion/ArbolesDelFortin" unique_id=1914738818 instance=ExtResource("42_pd53d")]
@@ -1089,6 +1714,15 @@ transform = Transform3D(-1.0832886, 0, -0.19101305, 0, 1.1, 0, 0.19101305, 0, -1
 
 [node name="CalafateB_8" parent="Vegetacion/ArbolesDelFortin" unique_id=323424746 instance=ExtResource("41_6fpx2")]
 transform = Transform3D(0.4499999, 0, -0.7794229, 0, 0.9, 0, 0.7794229, 0, 0.4499999, 226, -0.074975416, 175)
+
+[node name="NireC_9" parent="Vegetacion/ArbolesDelFortin" unique_id=54432177 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(0.49999988, 0, -0.8660255, 0, 1, 0, 0.8660255, 0, 0.49999988, 279.5, -0.27725488, 166)
+
+[node name="LengaD_10" parent="Vegetacion/ArbolesDelFortin" unique_id=2080827981 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, 282, -0.212549, 159)
+
+[node name="LengaC_11" parent="Vegetacion/ArbolesDelFortin" unique_id=1226574553 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-0.32491902, 0, -0.892708, 0, 0.95, 0, 0.892708, 0, -0.32491902, 285, 0.022745332, 172)
 
 [node name="Calafates" type="Node3D" parent="Vegetacion" unique_id=583267938]
 
@@ -1507,6 +2141,256 @@ transform = Transform3D(0.42558014, 0, -0.7774791, 0, 0.8863364, 0, 0.7774791, 0
 
 [node name="Jarilla_20" parent="Vegetacion/RiberaEstancia" unique_id=1102227379 instance=ExtResource("57_o1gg4")]
 transform = Transform3D(0.53989464, 0, -0.7389713, 0, 0.9151857, 0, 0.7389713, 0, 0.53989464, -266.28607, -3.0376835, -415.32092)
+
+[node name="BosqueDelLago" type="Node3D" parent="Vegetacion" unique_id=320117960]
+
+[node name="LengaC1" parent="Vegetacion/BosqueDelLago" unique_id=1708665545 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-1.1306646, 0, 0.2445689, 0, 1.156813, 0, -0.2445689, 0, -1.1306646, -1099.3423, -1.9004619, 255.48685)
+
+[node name="LengaC2" parent="Vegetacion/BosqueDelLago" unique_id=195361015 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-0.12420171, 0, -1.0965022, 0, 1.103514, 0, 1.0965022, 0, -0.12420171, -1063.3633, -0.7801248, 268.4267)
+
+[node name="LengaD1" parent="Vegetacion/BosqueDelLago" unique_id=641088959 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(0.7680138, 0, 0.6495725, 0, 1.0058775, 0, -0.6495725, 0, 0.7680138, -1073.471, -0.9947004, 271.9495)
+
+[node name="NireC1" parent="Vegetacion/BosqueDelLago" unique_id=125944812 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(-0.49678868, 0, 0.88317025, 0, 1.0133058, 0, -0.88317025, 0, -0.49678868, -1066.9575, -0.8160151, 276.2524)
+
+[node name="LengaC3" parent="Vegetacion/BosqueDelLago" unique_id=389217334 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(0.8424124, 0, 0.3552585, 0, 0.91425776, 0, -0.3552585, 0, 0.8424124, -1075.2892, -1.1717864, 252.98158)
+
+[node name="LengaA1" parent="Vegetacion/BosqueDelLago" unique_id=1082102541 instance=ExtResource("36_cgwb4")]
+transform = Transform3D(-1.0658239, 0, -0.25046027, 0, 1.0948566, 0, 0.25046027, 0, -1.0658239, -1081.8865, -1.3421799, 255.11697)
+
+[node name="LengaD2" parent="Vegetacion/BosqueDelLago" unique_id=2090614376 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(0.8469821, 0, -0.78296036, 0, 1.1534321, 0, 0.78296036, 0, 0.8469821, -1104.0142, -1.8773854, 274.36707)
+
+[node name="NireD1" parent="Vegetacion/BosqueDelLago" unique_id=1390058024 instance=ExtResource("115_ug211")]
+transform = Transform3D(1.1391056, 0, -0.27453235, 0, 1.1717207, 0, 0.27453235, 0, 1.1391056, -1088.1926, -1.5033389, 259.40836)
+
+[node name="NireC2" parent="Vegetacion/BosqueDelLago" unique_id=222672957 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(0.9445543, 0, -0.17851272, 0, 0.96127504, 0, 0.17851272, 0, 0.9445543, -1112.2722, -2.2813165, 259.72266)
+
+[node name="LengaB1" parent="Vegetacion/BosqueDelLago" unique_id=1620065438 instance=ExtResource("37_tx6do")]
+transform = Transform3D(0.9997297, 0, -0.18167867, 0, 1.0161036, 0, 0.18167867, 0, 0.9997297, -1068.2097, -0.7116813, 286.31906)
+
+[node name="NireD2" parent="Vegetacion/BosqueDelLago" unique_id=1979659277 instance=ExtResource("115_ug211")]
+transform = Transform3D(0.8546434, 0, -0.27391073, 0, 0.89746445, 0, 0.27391073, 0, 0.8546434, -1091.0378, -1.7073063, 246.64285)
+
+[node name="CalafateA1" parent="Vegetacion/BosqueDelLago" unique_id=840681215 instance=ExtResource("40_im3ha")]
+transform = Transform3D(0.6395586, 0, 0.5685402, 0, 0.8557296, 0, -0.5685402, 0, 0.6395586, -1101.5792, -1.8670398, 267.10236)
+
+[node name="CalafateB1" parent="Vegetacion/BosqueDelLago" unique_id=231931445 instance=ExtResource("41_6fpx2")]
+transform = Transform3D(1.0900604, 0, 0.15832497, 0, 1.1014982, 0, -0.15832497, 0, 1.0900604, -1104.103, -1.9624846, 265.61157)
+
+[node name="MatorralBardaA1" parent="Vegetacion/BosqueDelLago" unique_id=1665531559 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(1.002255, 0, 0.2541366, 0, 1.0339731, 0, -0.2541366, 0, 1.002255, -1082.9899, -1.2048845, 274.04276)
+
+[node name="LengaC4" parent="Vegetacion/BosqueDelLago" unique_id=774009849 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(0.9895873, 0, 0.5665374, 0, 1.1402841, 0, -0.5665374, 0, 0.9895873, -1108.4637, -0.93490165, 381.43677)
+
+[node name="LengaD3" parent="Vegetacion/BosqueDelLago" unique_id=1713247414 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(1.0362918, 0, -0.34854805, 0, 1.0933373, 0, 0.34854805, 0, 1.0362918, -1090.5751, -0.45155728, 377.76602)
+
+[node name="LengaC5" parent="Vegetacion/BosqueDelLago" unique_id=700475242 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(0.87782186, 0, -0.27008575, 0, 0.9184321, 0, 0.27008575, 0, 0.87782186, -1100.0388, -0.40705994, 406.83902)
+
+[node name="NireC3" parent="Vegetacion/BosqueDelLago" unique_id=1582392929 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(0.80062765, 0, 0.67410076, 0, 1.0466214, 0, -0.67410076, 0, 0.80062765, -1063.3774, 0.07196478, 404.054)
+
+[node name="LengaD4" parent="Vegetacion/BosqueDelLago" unique_id=1643196710 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(-0.26912397, 0, 1.0879525, 0, 1.1207445, 0, -1.0879525, 0, -0.26912397, -1082.5958, -0.161179, 383.46753)
+
+[node name="LengaC6" parent="Vegetacion/BosqueDelLago" unique_id=191694583 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-0.9986467, 0, 0.5249302, 0, 1.1282052, 0, -0.5249302, 0, -0.9986467, -1087.5901, -0.40944567, 371.43613)
+
+[node name="NireA1" parent="Vegetacion/BosqueDelLago" unique_id=1148896561 instance=ExtResource("38_jot8m")]
+transform = Transform3D(0.87877345, 0, -0.2469397, 0, 0.9128099, 0, 0.2469397, 0, 0.87877345, -1112.0679, -0.87653476, 398.13248)
+
+[node name="LengaB2" parent="Vegetacion/BosqueDelLago" unique_id=748467134 instance=ExtResource("37_tx6do")]
+transform = Transform3D(-0.5958834, 0, 0.64521414, 0, 0.8782815, 0, -0.64521414, 0, -0.5958834, -1094.8735, -0.28410652, 406.60925)
+
+[node name="NireC4" parent="Vegetacion/BosqueDelLago" unique_id=100598624 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(-0.35674942, 0, 0.85217834, 0, 0.92383873, 0, -0.85217834, 0, -0.35674942, -1095.7504, -0.3830166, 397.8442)
+
+[node name="LengaD5" parent="Vegetacion/BosqueDelLago" unique_id=384768591 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(-0.110847294, 0, -0.8597395, 0, 0.86685586, 0, 0.8597395, 0, -0.110847294, -1061.004, 0.19110559, 388.67014)
+
+[node name="NireB1" parent="Vegetacion/BosqueDelLago" unique_id=1354573384 instance=ExtResource("39_302v5")]
+transform = Transform3D(-0.84397095, 0, -0.27587774, 0, 0.8879164, 0, 0.27587774, 0, -0.84397095, -1085.1974, 0.10163082, 425.14694)
+
+[node name="NireD3" parent="Vegetacion/BosqueDelLago" unique_id=1929665712 instance=ExtResource("115_ug211")]
+transform = Transform3D(1.0673051, 0, -0.29755816, 0, 1.1080077, 0, 0.29755816, 0, 1.0673051, -1093.6064, -0.43642613, 388.26926)
+
+[node name="CalafateA2" parent="Vegetacion/BosqueDelLago" unique_id=719404544 instance=ExtResource("40_im3ha")]
+transform = Transform3D(-0.86984223, 0, 0.41053942, 0, 0.9618566, 0, -0.41053942, 0, -0.86984223, -1070.7557, -0.029913409, 371.87924)
+
+[node name="CalafateB2" parent="Vegetacion/BosqueDelLago" unique_id=1412858406 instance=ExtResource("41_6fpx2")]
+transform = Transform3D(0.7177817, 0, -0.9253745, 0, 1.1711228, 0, 0.9253745, 0, 0.7177817, -1078.8787, -0.03192582, 396.50122)
+
+[node name="CalafateA3" parent="Vegetacion/BosqueDelLago" unique_id=2074842784 instance=ExtResource("40_im3ha")]
+transform = Transform3D(-0.3203567, 0, 0.8383404, 0, 0.8974648, 0, -0.8383404, 0, -0.3203567, -1050.5923, 0.31679246, 391.06082)
+
+[node name="MatorralBardaB1" parent="Vegetacion/BosqueDelLago" unique_id=189285189 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.91552913, 0, -0.09672541, 0, 0.9206245, 0, 0.09672541, 0, -0.91552913, -1112.3956, -1.0036737, 386.79904)
+
+[node name="LengaD6" parent="Vegetacion/BosqueDelLago" unique_id=1384974994 instance=ExtResource("113_5sqb2")]
+transform = Transform3D(-0.468068, 0, 0.8081791, 0, 0.9339385, 0, -0.8081791, 0, -0.468068, -963.7526, 0.44827774, 470.54834)
+
+[node name="NireC5" parent="Vegetacion/BosqueDelLago" unique_id=1652023296 instance=ExtResource("114_7tfmv")]
+transform = Transform3D(0.99261385, 0, 0.4204699, 0, 1.0779969, 0, -0.4204699, 0, 0.99261385, -950.4092, 0.25762773, 463.10825)
+
+[node name="LengaC7" parent="Vegetacion/BosqueDelLago" unique_id=533517729 instance=ExtResource("112_5fh8j")]
+transform = Transform3D(-0.17110516, 0, 1.034922, 0, 1.0489712, 0, -1.034922, 0, -0.17110516, -955.5008, 0.32140812, 469.978)
+
+[node name="NireD4" parent="Vegetacion/BosqueDelLago" unique_id=1339742559 instance=ExtResource("115_ug211")]
+transform = Transform3D(0.9296401, 0, 0.17180483, 0, 0.9453823, 0, -0.17180483, 0, 0.9296401, -958.72156, 0.37987605, 464.61334)
+
+[node name="LengaA2" parent="Vegetacion/BosqueDelLago" unique_id=90992417 instance=ExtResource("36_cgwb4")]
+transform = Transform3D(0.2987545, 0, 1.0397391, 0, 1.0818095, 0, -1.0397391, 0, 0.2987545, -953.4864, 0.4190005, 442.38095)
+
+[node name="CalafateB3" parent="Vegetacion/BosqueDelLago" unique_id=1389743913 instance=ExtResource("41_6fpx2")]
+transform = Transform3D(-0.054341506, 0, -0.94307375, 0, 0.9446381, 0, 0.94307375, 0, -0.054341506, -937.513, 0.5840907, 469.63297)
+
+[node name="MatorralDeLaBarda" type="Node3D" parent="Vegetacion" unique_id=944681775]
+
+[node name="BardaA1" parent="Vegetacion/MatorralDeLaBarda" unique_id=595838431 instance=ExtResource("118_0telq")]
+transform = Transform3D(0.9396926, 0, 0.34202012, 0, 1, 0, -0.34202012, 0, 0.9396926, -962, -0.52627444, 262)
+
+[node name="BardaB1" parent="Vegetacion/MatorralDeLaBarda" unique_id=838678680 instance=ExtResource("119_kqgeq")]
+transform = Transform3D(0.90106726, 0, -0.6309341, 0, 1.1, 0, 0.6309341, 0, 0.90106726, -950.5, -0.6439215, 268.5)
+
+[node name="BardaB2" parent="Vegetacion/MatorralDeLaBarda" unique_id=1468313652 instance=ExtResource("119_kqgeq")]
+transform = Transform3D(-0.16496578, 0, 0.9355673, 0, 0.95, 0, -0.9355673, 0, -0.16496578, -973.5, -0.61549014, 255)
+
+[node name="BardaA2" parent="Vegetacion/MatorralDeLaBarda" unique_id=488396905 instance=ExtResource("118_0telq")]
+transform = Transform3D(-0.8426489, 0, 0.7070664, 0, 1.1, 0, -0.7070664, 0, -0.8426489, -891.32465, 0.15367045, 436.67914)
+
+[node name="BardaB3" parent="Vegetacion/MatorralDeLaBarda" unique_id=1656208748 instance=ExtResource("119_kqgeq")]
+transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, -881.0753, 0.2998037, 428.13806)
+
+[node name="MatorralBardaB1" parent="Vegetacion/MatorralDeLaBarda" unique_id=616133702 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.16950296, 0, -1.0220959, 0, 1.0360557, 0, 1.0220959, 0, -0.16950296, -973.95667, -0.47110948, 267.15018)
+
+[node name="MatorralBardaA1" parent="Vegetacion/MatorralDeLaBarda" unique_id=1231330982 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.91344184, 0, 0.45504645, 0, 1.0205113, 0, -0.45504645, 0, 0.91344184, -953.33563, -0.5777058, 261.98288)
+
+[node name="MatorralBardaA2" parent="Vegetacion/MatorralDeLaBarda" unique_id=1783892206 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.30115363, 0, 0.86195314, 0, 0.913048, 0, -0.86195314, 0, -0.30115363, -949.4215, -0.5014222, 256.6977)
+
+[node name="MatorralBardaB2" parent="Vegetacion/MatorralDeLaBarda" unique_id=2085858761 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.9287181, 0, -0.32934418, 0, 0.98538566, 0, 0.32934418, 0, 0.9287181, -965.9974, -0.68798685, 246.9514)
+
+[node name="MatorralBardaA3" parent="Vegetacion/MatorralDeLaBarda" unique_id=7775056 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.7597627, 0, 0.5968683, 0, 0.96617347, 0, -0.5968683, 0, -0.7597627, -958.8472, -0.5322783, 264.94214)
+
+[node name="CalafateA1" parent="Vegetacion/MatorralDeLaBarda" unique_id=158956020 instance=ExtResource("40_im3ha")]
+transform = Transform3D(0.44146046, 0, -0.76473737, 0, 0.88301224, 0, 0.76473737, 0, 0.44146046, -975.7444, -0.5377584, 257.54544)
+
+[node name="MatorralBardaB3" parent="Vegetacion/MatorralDeLaBarda" unique_id=932126679 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(1.0952889, 0, 0.2896889, 0, 1.1329508, 0, -0.2896889, 0, 1.0952889, -888.32916, 0.39545625, 438.55807)
+
+[node name="MatorralBardaA4" parent="Vegetacion/MatorralDeLaBarda" unique_id=1298865577 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.33630988, 0, -1.0803912, 0, 1.1315253, 0, 1.0803912, 0, 0.33630988, -901.24, 0.4326496, 441.18564)
+
+[node name="MatorralBardaA5" parent="Vegetacion/MatorralDeLaBarda" unique_id=1364061604 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.017957585, 0, -0.8755645, 0, 0.8757487, 0, 0.8755645, 0, -0.017957585, -888.05536, 0.60097575, 428.8731)
+
+[node name="MatorralBardaB4" parent="Vegetacion/MatorralDeLaBarda" unique_id=14883916 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.9527334, 0, 0.5134428, 0, 1.0822774, 0, -0.5134428, 0, 0.9527334, -884.4529, 0.50134563, 437.54733)
+
+[node name="NireD1" parent="Vegetacion/MatorralDeLaBarda" unique_id=2093553638 instance=ExtResource("115_ug211")]
+transform = Transform3D(1.0995121, 0, -0.16533452, 0, 1.1118734, 0, 0.16533452, 0, 1.0995121, -902.12445, 0.32052958, 435.4582)
+
+[node name="MatorralBardaA6" parent="Vegetacion/MatorralDeLaBarda" unique_id=1311793566 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(1.0794516, 0, 0.22126126, 0, 1.1018949, 0, -0.22126126, 0, 1.0794516, -975.95685, -0.34310663, 311.12305)
+
+[node name="MatorralBardaA7" parent="Vegetacion/MatorralDeLaBarda" unique_id=1971361450 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.41112924, 0, 0.83403605, 0, 0.929862, 0, -0.83403605, 0, -0.41112924, -1042.4697, -0.29054105, 295.30118)
+
+[node name="MatorralBardaB5" parent="Vegetacion/MatorralDeLaBarda" unique_id=1065716661 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.48602307, 0, -0.98905015, 0, 1.1020157, 0, 0.98905015, 0, 0.48602307, -981.0592, -0.54612327, 273.3844)
+
+[node name="MatorralBardaA8" parent="Vegetacion/MatorralDeLaBarda" unique_id=554247935 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.6697942, 0, -0.92418844, 0, 1.1413801, 0, 0.92418844, 0, -0.6697942, -1006.9689, -0.17143856, 282.3284)
+
+[node name="MatorralBardaA9" parent="Vegetacion/MatorralDeLaBarda" unique_id=849907631 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.9604379, 0, 0.3294371, 0, 1.0153668, 0, -0.3294371, 0, 0.9604379, -1030.8801, 0.23622993, 403.3895)
+
+[node name="MatorralBardaB6" parent="Vegetacion/MatorralDeLaBarda" unique_id=608974670 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.13648336, 0, -1.0980746, 0, 1.1065241, 0, 1.0980746, 0, 0.13648336, -998.18475, 0.26642933, 396.44516)
+
+[node name="MatorralBardaA10" parent="Vegetacion/MatorralDeLaBarda" unique_id=2075968461 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.6007506, 0, 0.6598616, 0, 0.8923669, 0, -0.6598616, 0, -0.6007506, -972.62445, 0.20031202, 364.67422)
+
+[node name="MatorralBardaA11" parent="Vegetacion/MatorralDeLaBarda" unique_id=1149901305 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.042480003, 0, -1.0064797, 0, 1.0073758, 0, 1.0064797, 0, -0.042480003, -1053.487, -0.52540374, 275.8231)
+
+[node name="MatorralBardaB7" parent="Vegetacion/MatorralDeLaBarda" unique_id=206925547 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.9355881, 0, 0.048931632, 0, 0.9368668, 0, -0.048931632, 0, 0.9355881, -974.3591, -0.2826775, 288.02933)
+
+[node name="MatorralBardaA12" parent="Vegetacion/MatorralDeLaBarda" unique_id=213462918 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.9140616, 0, -0.37571084, 0, 0.98826474, 0, 0.37571084, 0, 0.9140616, -1028.0807, 0.04496273, 362.39178)
+
+[node name="MatorralBardaA13" parent="Vegetacion/MatorralDeLaBarda" unique_id=1530873186 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.5271712, 0, -0.8186484, 0, 0.97370154, 0, 0.8186484, 0, 0.5271712, -1031.9436, -0.6457234, 257.6867)
+
+[node name="MatorralBardaB8" parent="Vegetacion/MatorralDeLaBarda" unique_id=481304054 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.08258277, 0, -1.0046285, 0, 1.0080171, 0, 1.0046285, 0, -0.08258277, -987.00385, 0.3238444, 362.93826)
+
+[node name="MatorralBardaA14" parent="Vegetacion/MatorralDeLaBarda" unique_id=1373172051 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.2558894, 0, -0.97491777, 0, 1.0079405, 0, 0.97491777, 0, -0.2558894, -1010.0502, 0.19779061, 345.85986)
+
+[node name="MatorralBardaA15" parent="Vegetacion/MatorralDeLaBarda" unique_id=1801655595 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.8890231, 0, 0.57996213, 0, 1.0614698, 0, -0.57996213, 0, -0.8890231, -1003.0547, 0.42186087, 390.63287)
+
+[node name="MatorralBardaB9" parent="Vegetacion/MatorralDeLaBarda" unique_id=2006447003 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.957239, 0, -0.34694663, 0, 1.018174, 0, 0.34694663, 0, 0.957239, -1049.2147, -0.50133365, 283.448)
+
+[node name="MatorralBardaA16" parent="Vegetacion/MatorralDeLaBarda" unique_id=2076432619 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.78010935, 0, -0.6341404, 0, 1.0053381, 0, 0.6341404, 0, -0.78010935, -1094.7698, -1.3273338, 300.58047)
+
+[node name="MatorralBardaA17" parent="Vegetacion/MatorralDeLaBarda" unique_id=1739816359 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.7695424, 0, 0.80126965, 0, 1.1109583, 0, -0.80126965, 0, -0.7695424, -967.9758, -0.010806965, 320.42255)
+
+[node name="MatorralBardaB10" parent="Vegetacion/MatorralDeLaBarda" unique_id=1205569160 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.86836755, 0, 0.41095254, 0, 0.96069986, 0, -0.41095254, 0, -0.86836755, -990.23773, -0.2381676, 293.90985)
+
+[node name="MatorralBardaA18" parent="Vegetacion/MatorralDeLaBarda" unique_id=1219837466 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.22960395, 0, 0.8318111, 0, 0.8629181, 0, -0.8318111, 0, 0.22960395, -978.1958, 0.1788239, 372.37152)
+
+[node name="MatorralBardaA19" parent="Vegetacion/MatorralDeLaBarda" unique_id=324590925 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.30031875, 0, -0.82291114, 0, 0.8759989, 0, 0.82291114, 0, -0.30031875, -1000.2805, -0.3933748, 292.7717)
+
+[node name="MatorralBardaB11" parent="Vegetacion/MatorralDeLaBarda" unique_id=1354917366 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.9144399, 0, -0.4696869, 0, 1.0280107, 0, 0.4696869, 0, -0.9144399, -1083.2133, -1.0810444, 287.92453)
+
+[node name="MatorralBardaA20" parent="Vegetacion/MatorralDeLaBarda" unique_id=1387132455 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(0.8912393, 0, -0.4277636, 0, 0.9885794, 0, 0.4277636, 0, 0.8912393, -1007.2896, 0.3129577, 377.55206)
+
+[node name="MatorralBardaA21" parent="Vegetacion/MatorralDeLaBarda" unique_id=397636397 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.37990025, 0, -0.9140284, 0, 0.9898344, 0, 0.9140284, 0, -0.37990025, -939.9586, 0.4449773, 441.35632)
+
+[node name="MatorralBardaB12" parent="Vegetacion/MatorralDeLaBarda" unique_id=1556697559 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(0.9998416, 0, -0.28073415, 0, 1.038506, 0, 0.28073415, 0, 0.9998416, -929.3568, 0.36440945, 436.0055)
+
+[node name="MatorralBardaA22" parent="Vegetacion/MatorralDeLaBarda" unique_id=2064828284 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.9781293, 0, 0.087118275, 0, 0.9820013, 0, -0.087118275, 0, -0.9781293, -917.98193, 0.21326146, 386.28238)
+
+[node name="MatorralBardaA23" parent="Vegetacion/MatorralDeLaBarda" unique_id=275521908 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.6152289, 0, -0.71768254, 0, 0.94529086, 0, 0.71768254, 0, -0.6152289, -940.9602, 0.22816445, 412.39767)
+
+[node name="MatorralBardaB13" parent="Vegetacion/MatorralDeLaBarda" unique_id=702740713 instance=ExtResource("117_4i8j7")]
+transform = Transform3D(-0.12305724, 0, -0.9654886, 0, 0.9732992, 0, 0.9654886, 0, -0.12305724, -887.0125, 0.39959228, 449.40054)
+
+[node name="MatorralBardaA24" parent="Vegetacion/MatorralDeLaBarda" unique_id=1776579871 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.6063883, 0, -0.6212945, 0, 0.86816686, 0, 0.6212945, 0, -0.6063883, -932.7378, 0.20833667, 440.34442)
+
+[node name="CalafateA2" parent="Vegetacion/MatorralDeLaBarda" unique_id=567840894 instance=ExtResource("40_im3ha")]
+transform = Transform3D(1.0469718, 0, 0.28925505, 0, 1.0861944, 0, -0.28925505, 0, 1.0469718, -917.59705, 0.48312742, 445.15616)
+
+[node name="MatorralBardaA25" parent="Vegetacion/MatorralDeLaBarda" unique_id=1009160418 instance=ExtResource("116_jxgiq")]
+transform = Transform3D(-0.048447967, 0, 1.1161925, 0, 1.1172434, 0, -1.1161925, 0, -0.048447967, -871.2806, 0.42798796, 440.42545)
 
 [node name="Ceniza" type="Node3D" parent="." unique_id=109380368]
 transform = Transform3D(0.34202015, 0, 0.9396926, 0, 1, 0, -0.9396926, 0, 0.34202015, -3.5, 0.042745214, -6)
@@ -2100,18 +2984,24 @@ transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.173
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
 shape = SubResource("BoxShape3D_m4l42")
 
+[node name="CruzDelCamino" parent="Caminos" unique_id=524931180 instance=ExtResource("130_37rif")]
+transform = Transform3D(0.9781476, 0, -0.2079117, 0, 1, 0, 0.2079117, 0, 0.9781476, -221.3, 0.39470044, 92.5)
+
+[node name="Osamenta" parent="Caminos" unique_id=2063041708 instance=ExtResource("131_2vron")]
+transform = Transform3D(0.81915206, 0, 0.57357645, 0, 1, 0, -0.57357645, 0, 0.81915206, -758, -0.6574509, 198)
+
 [node name="FogonDeZenon" type="Node3D" parent="." unique_id=933116594]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.17058845, -1)
 
 [node name="Fogon" parent="FogonDeZenon" unique_id=1668897514 instance=ExtResource("16_2pad8")]
 
-[node name="Pava" parent="FogonDeZenon" unique_id=443263739 instance=ExtResource("73_85xta")]
+[node name="Pava" parent="FogonDeZenon" unique_id=289594056 instance=ExtResource("73_85xta")]
 transform = Transform3D(-0.9396926, 0, -0.34202015, 0, 1, 0, 0.34202015, 0, -0.9396926, 0.42000008, -0.0024942756, 0.3)
 
 [node name="Tronco" parent="FogonDeZenon" unique_id=1621806784 instance=ExtResource("74_w0et0")]
 transform = Transform3D(0.99026805, 0, 0.1391731, 0, 1, 0, -0.1391731, 0, 0.99026805, -0.19999981, -0.017598674, 1.25)
 
-[node name="Mate" parent="FogonDeZenon" unique_id=1450103834 instance=ExtResource("75_5xeb2")]
+[node name="Mate" parent="FogonDeZenon" unique_id=101084851 instance=ExtResource("75_5xeb2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5500002, 0.0011757165, 1)
 
 [node name="Boleadoras" parent="FogonDeZenon" unique_id=400187430 instance=ExtResource("76_3m48t")]

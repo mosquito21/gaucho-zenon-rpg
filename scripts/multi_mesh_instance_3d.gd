@@ -1,8 +1,8 @@
 extends MultiMeshInstance3D
 
 ## Coirón sembrado una sola vez alrededor del arranque.
-## Unos pajaritos, un choique, guanacos, un zorro, cóndores y los animales de la estancia
-## y la pulpería se mueven como hijos de este nodo.
+## Unos pajaritos, un choique, guanacos, un zorro, cóndores, los animales de la estancia
+## y la pulpería y el perro de la estancia se mueven como hijos de este nodo.
 ## Las matas salen de assets/flora/coiron.glb (tres formas); cada forma va en su propio MultiMesh.
 
 const COIRON_GLB := "res://assets/flora/coiron.glb"
@@ -19,6 +19,7 @@ const GALLINA_BATARAZA_GLB := "res://assets/animales/gallina_bataraza.glb"
 const GALLO_GLB := "res://assets/animales/gallo.glb"
 const POLLITO_GLB := "res://assets/animales/pollito.glb"
 const POLLITO_PARDO_GLB := "res://assets/animales/pollito_pardo.glb"
+const PERRO_GLB := "res://assets/animales/perro.glb"
 
 @export var terrain_path: NodePath = ^"../HTerrain"
 @export var count := 520
@@ -280,6 +281,8 @@ func _armar_bichos() -> void:
 		[GALLINA_GLB, "GallinaPulperia1", 1.0, 195.0, 165.0, 2.5, 0.22, 0.4],
 		[GALLINA_COLORADA_GLB, "GallinaPulperia2", 0.9, 195.0, 165.0, 3.2, 0.18, 3.0],
 		[POLLITO_PARDO_GLB, "Pollito4", 1.0, 195.0, 165.0, 2.4, 0.22, 0.55],
+		# El perro de la estancia da su vuelta por el patio, al paso.
+		[PERRO_GLB, "PerroEstancia", 1.0, -152.0, -240.0, 6.0, 0.14, 0.0],
 	]
 	for d in lista:
 		var bicho := _modelo_bicho(d[0], d[1], d[2])

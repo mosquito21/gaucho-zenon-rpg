@@ -171,7 +171,10 @@ estepa = np.ones((R, R))
 tierra = np.clip((ruido_grilla(60, 21) - 0.62) / 0.12, 0, 1) * 0.65
 # tierra pisada alrededor de los lugares
 lugares = [((202, 156), 16, 26), ((240, 160), 20, 30), ((-170, -250), 22, 34), ((-430, 60), 10, 26),
-           ((0, -220), 8, 14), ((90, -420), 5, 10), ((40, 320), 5, 9), ((-6.5, -1.0), 3, 6)]
+           ((0, -220), 8, 14), ((90, -420), 5, 10), ((40, 320), 5, 9), ((-6.5, -1.0), 3, 6),
+           # tanda 3: la calle del campamento de la tropa (tres manchas en hilera), el fortin nuevo y su corral.
+           # En la escena se pintaron a mano sobre splat.png (con un sendero fino entre los dos que aca no esta).
+           ((-1047, 320), 9, 20), ((-1029, 321), 9, 20), ((-1011, 322), 9, 20), ((-905, 415), 7.5, 15), ((-898.6, 402.5), 3, 8)]
 for (lx, lz), r0, r1 in lugares:
     if (lx, lz) == (-430, 60):
         # la tolderia es una hilera norte-sur: se usa la distancia a ese segmento
