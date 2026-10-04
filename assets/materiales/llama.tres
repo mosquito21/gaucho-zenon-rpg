@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dcjn1bsv2maak"]
 
 [sub_resource type="Shader" id="Shader_llama"]
 code = "shader_type spatial;
@@ -39,4 +39,11 @@ void fragment() {
 
 [resource]
 resource_name = "Llama"
+render_priority = 0
 shader = SubResource("Shader_llama")
+shader_parameter/emision = Color(1, 0.55, 0.18, 1)
+shader_parameter/energia = 4.5
+shader_parameter/base = 0.06
+shader_parameter/alto = 0.57
+shader_parameter/vaiven = 0.035
+shader_parameter/estirada = 0.1

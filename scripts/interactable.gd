@@ -4,13 +4,19 @@ class_name Interactable
 ## Cosa de la estepa con la que Zenón puede hablar o dejar un recado.
 ## El estado del trabajo vive en el jugador, así no se pierde al caminar.
 
-enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON }
+enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON }
 
 @export var rol: Rol = Rol.PIEDRA
 @export var interact_text := "Presioná E para inspeccionar la piedra"
 ## Lo que se lee al apretar E en un lugar que solo informa (por ejemplo la pulpería).
 ## Si queda vacío, sigue la frase de la piedra.
 @export_multiline var texto_al_usar := ""
+## Rol PERSONA: quién es (la clave de "personajes" en datos/historia.json) y cómo se llama.
+## A la gente y al fogón los suma scripts/Historia.gd al arrancar; no hace falta ponerlos a mano.
+@export var personaje := ""
+@export var nombre := ""
+## Rol PERSONA y FOGON: hasta cuántos metros se puede hablar.
+@export var alcance := 3.2
 
 
 func texto_mira(jugador: Node) -> String:
@@ -38,13 +44,11 @@ func texto_mira(jugador: Node) -> String:
 			return "Es el palo del hito. Todavía no traés recado."
 		Rol.FORTIN:
 			if exploracion == 0:
-				if periodo == "Noche" or periodo == "Crepúsculo":
-					return "Presioná E para hablar con el centinela. De noche la seña cuesta verla."
-				return "Presioná E para pedir la seña del cerro"
+				return "Presioná E para hablar con el sargento Lucero"
 			if exploracion == 1:
 				return "Andá al mojón del cerro, al sudoeste, y volvé."
 			if exploracion == 2:
-				return "Presioná E para contarle al centinela que viste el mojón"
+				return "Presioná E para contarle al sargento lo que viste desde el mojón"
 			return "La seña del cerro ya quedó anotada en el fortín."
 		Rol.MOJON:
 			if exploracion == 1:
@@ -52,6 +56,10 @@ func texto_mira(jugador: Node) -> String:
 			if exploracion >= 2:
 				return "El mojón ya está marcado. Volvé al fortín si falta."
 			return "Es un mojón del cerro. El fortín todavía no te mandó."
+		Rol.PERSONA:
+			return "Presioná E para hablar con %s" % nombre
+		Rol.FOGON:
+			return "Presioná E para sentarte al fogón"
 		_:
 			return interact_text
 
@@ -63,9 +71,17 @@ func al_interactuar(jugador: Node) -> String:
 		Rol.HITO:
 			return str(jugador.call("entregar_recado"))
 		Rol.FORTIN:
-			return str(jugador.call("hablar_en_el_fortin"))
+			# La seña la da y la recibe el sargento Lucero: mirar el fortín abre su charla.
+			Historia.hablar("lucero")
+			return ""
 		Rol.MOJON:
 			return str(jugador.call("marcar_mojon"))
+		Rol.PERSONA:
+			Historia.hablar(personaje)
+			return ""
+		Rol.FOGON:
+			Historia.sentarse_al_fogon()
+			return ""
 		_:
 			if texto_al_usar != "":
 				return texto_al_usar

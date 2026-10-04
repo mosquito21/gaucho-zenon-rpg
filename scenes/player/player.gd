@@ -58,11 +58,15 @@ var _distancia_actual := 3.8
 
 var current_interactable: Interactable = null
 
-# El recado y la seña viven acá para que no se borren al alejarse de la posta.
+# El recado y la seña viven en la historia (scripts/Historia.gd), para que se guarden con la partida.
 # Recado: 0 ninguno, 1 llevando, 2 entregado.
 # Exploración del fortín: 0 ninguna, 1 yendo al mojón, 2 mojón visto, 3 hecha.
-var estado_recado := 0
-var estado_exploracion := 0
+var estado_recado: int:
+	get: return Historia.v("recado")
+	set(valor): Historia.poner("recado", valor)
+var estado_exploracion: int:
+	get: return Historia.v("sena")
+	set(valor): Historia.poner("sena", valor)
 var _periodo := "Día"
 var _aviso: Label
 var _aviso_tiempo := 0.0
@@ -99,9 +103,14 @@ func _ready() -> void:
 	_armar_polvo()
 	_fov_base = camera.fov
 	call_deferred("_conectar_ciclo")
-	
+	# La historia suma la gente con la que se habla, acomoda el mundo y trae la partida guardada.
+	Historia.entrar_al_mundo.call_deferred(self)
+
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Con un diálogo abierto, Zenón no mira ni interactúa: las teclas son del cuadro.
+	if Historia.ocupado:
+		return
 	# togglear captura del mouse con ESC
 	if event.is_action_pressed("ui_cancel"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -124,6 +133,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			camera_distance = max(zoom_min, camera_distance - zoom_speed)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			camera_distance = min(zoom_max, camera_distance + zoom_speed)
+
+	# Tab: recordar adónde hay que ir.
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB:
+		Historia.recordar()
 
 	# 🔹 Interactuar con E
 	if event.is_action_pressed("interact") and current_interactable:
@@ -150,17 +163,29 @@ func _process(delta: float) -> void:
 func _check_interaction() -> void:
 	current_interactable = null
 
+	# La gente y el fogón no hace falta apuntarles: alcanza con tenerlos cerca y adelante.
+	current_interactable = Historia.persona_cerca(self)
+	if current_interactable != null:
+		return
+
 	if not ray_interact.is_colliding():
 		return
 
 	current_interactable = _buscar_interactable(ray_interact.get_collider())
+	# A la gente y al fogón se les habla de cerca: eso lo decide Historia.persona_cerca con su alcance.
+	if current_interactable != null and current_interactable.rol in [Interactable.Rol.PERSONA, Interactable.Rol.FOGON]:
+		current_interactable = null
 
 
 func _update_hud() -> void:
 	if not interact_label:
 		return
 
-	if current_interactable and current_interactable.has_method("texto_mira"):
+	if _aviso != null:
+		_aviso.visible = not Historia.ocupado
+	if Historia.ocupado:
+		interact_label.text = ""
+	elif current_interactable and current_interactable.has_method("texto_mira"):
 		interact_label.text = current_interactable.texto_mira(self)
 	elif current_interactable:
 		interact_label.text = current_interactable.interact_text
@@ -175,6 +200,8 @@ func _do_interact(obj: Interactable) -> void:
 		linea = str(obj.al_interactuar(self))
 	else:
 		linea = "No hay nada que hacer acá."
+	if linea == "":
+		return  # Se abrió un diálogo: no hay cartel que mostrar.
 	mostrar_aviso(linea)
 	print(linea)
 
@@ -187,13 +214,14 @@ func _physics_process(delta: float) -> void:
 	# movimiento relativo a hacia dónde mira el jugador
 	var move_dir := Vector3.ZERO
 
-	if Input.is_action_pressed("move_forward"):
+	var libre := not Historia.ocupado
+	if libre and Input.is_action_pressed("move_forward"):
 		move_dir -= transform.basis.z
-	if Input.is_action_pressed("move_backward"):
+	if libre and Input.is_action_pressed("move_backward"):
 		move_dir += transform.basis.z
-	if Input.is_action_pressed("move_left"):
+	if libre and Input.is_action_pressed("move_left"):
 		move_dir -= transform.basis.x
-	if Input.is_action_pressed("move_right"):
+	if libre and Input.is_action_pressed("move_right"):
 		move_dir += transform.basis.x
 
 	move_dir.y = 0.0
@@ -214,7 +242,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = 0.0
 
 	# salto
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if libre and Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
 		_empezar_salto()
 
@@ -401,7 +429,7 @@ func _conectar_ciclo() -> void:
 func _al_cambiar_periodo(nuevo_periodo: String) -> void:
 	_periodo = nuevo_periodo
 	if estado_recado == 1 and nuevo_periodo == "Atardecer":
-		mostrar_aviso("El sol baja sobre la estepa. Si dejás el recado ahora, el puestero anota un plus.")
+		mostrar_aviso("El sol baja sobre la estepa. Todavía hay luz para llegar al hito.")
 	elif estado_recado == 1 and (nuevo_periodo == "Noche" or nuevo_periodo == "Crepúsculo"):
 		mostrar_aviso("Se hizo de noche. Seguí el humo del palo: es la única seña del recado.")
 	elif estado_exploracion == 1 and nuevo_periodo == "Atardecer":
@@ -421,7 +449,7 @@ func tomar_recado() -> String:
 	if _periodo == "Noche" or _periodo == "Crepúsculo":
 		return "El puestero te da el recado a oscuras. Andá al noreste y no pierdas el humo del palo."
 	if _periodo == "Atardecer":
-		return "Tomás el recado con el sol bajo. El palo del hito queda al noreste; si llegás antes de que cierre la luz, hay un plus."
+		return "Tomás el recado con el sol bajo. El palo del hito queda al noreste, donde sale el humo."
 	return "El puestero te alcanza el recado. Llevalo al palo del hito, al noreste, donde se ve el humo."
 
 
@@ -432,10 +460,10 @@ func entregar_recado() -> String:
 		return "El recado ya quedó atado al palo."
 	estado_recado = 2
 	if _periodo == "Atardecer":
-		return "Dejás el recado con luz de atardecer. El puestero te anota un plus por llegar antes de la noche."
+		return "Dejás el recado con la última luz. Volvé a lo de Don Ceferino."
 	if _periodo == "Noche" or _periodo == "Crepúsculo":
-		return "Atás el recado al palo de noche. El humo te trajo derecho: el trabajo quedó hecho."
-	return "Dejás el recado en el palo. El trabajo de mensajería quedó cumplido."
+		return "Atás el recado al palo de noche. El humo te trajo derecho. Volvé a lo de Don Ceferino."
+	return "Dejás el recado en el palo. Volvé a lo de Don Ceferino."
 
 
 func hablar_en_el_fortin() -> String:
@@ -471,7 +499,7 @@ func mostrar_aviso(linea: String) -> void:
 	if _aviso == null:
 		return
 	_aviso.text = linea
-	_aviso_tiempo = 9.0
+	_aviso_tiempo = maxf(9.0, linea.length() * 0.1)
 
 
 func _armar_aviso() -> void:

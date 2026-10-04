@@ -109,3 +109,6 @@ shader_parameter/velocidad = 0.6
 shader_parameter/fuerza = 0.55
 shader_parameter/rugosidad = 0.16
 shader_parameter/especular = 0.5
+shader_parameter/color_espuma = Color(0.78, 0.82, 0.8, 1)
+shader_parameter/ancho_espuma = 0.45
+shader_parameter/fuerza_espuma = 0.55

@@ -82,6 +82,12 @@ func _al_terminar(_clip: StringName) -> void:
 	_turno = (_turno + 1) % clips.size()
 	_tocar()
 
+## Cuando Zenón le habla: si el modelo trae el clip "talking", lo hace una vez y después sigue
+## con su lista de siempre. Lo llama scripts/Historia.gd al abrir la charla.
+func gesto_de_hablar() -> void:
+	if _anim != null and _anim.has_animation("talking") and _anim.current_animation != "talking":
+		_anim.play("talking", -1.0, ritmo)
+
 ## Cada vez que empieza un clip va un poquito más rápido o más lento, para que no se repita igual.
 func _tocar() -> void:
 	_anim.play(clips[_turno], -1.0, ritmo * randf_range(0.93, 1.07))

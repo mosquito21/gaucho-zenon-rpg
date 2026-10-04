@@ -1,4 +1,4 @@
-[gd_resource type="ShaderMaterial" format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://5hdt3x7k7cxf"]
 
 [sub_resource type="Shader" id="Shader_mate"]
 code = "shader_type spatial;
@@ -24,6 +24,14 @@ void fragment() {
 
 [resource]
 resource_name = "Mate"
+render_priority = 0
 shader = SubResource("Shader_mate")
 shader_parameter/rugosidad = 1.0
 shader_parameter/especular = 0.2
+shader_parameter/u_bruma_color = Color(0.67, 0.75, 0.75, 1)
+shader_parameter/u_bruma_resplandor = Color(1, 0.6, 0.3, 0)
+shader_parameter/u_bruma_sol = Vector3(0, 1, 0)
+shader_parameter/u_bruma = Vector4(90, 1100, 0.85, 1)
+shader_parameter/u_bruma_cumbres = 0.3
+shader_parameter/u_bruma_baja = 10.0
+shader_parameter/u_bruma_alta = 70.0

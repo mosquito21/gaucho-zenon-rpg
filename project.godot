@@ -31,6 +31,7 @@ ManejadorMusica="*res://scripts/ManejadorMusica.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
+Historia="*res://scripts/Historia.gd"
 
 [display]
 

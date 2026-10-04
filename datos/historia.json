@@ -1,0 +1,599 @@
+{
+	"_leeme": "Todos los textos y números de la historia. Cómo se edita: docs/agente/ESTADO.md, 'Para Willy', Tanda 5. Cuidado con las comas y las comillas: si el archivo queda mal escrito, el juego avisa la línea en la consola.",
+
+	"config": {
+		"deuda_inicial": 180,
+		"minimos": { "ejercito": 3, "estancieros": 3, "tolderia": 3 },
+		"ocultos_hasta_la_linea": [ "Lugares/CampamentoDeLaTropa", "Lugares/FortinNuevo" ]
+	},
+
+	"avisos": {
+		"momento_1": "La cuenta en la pulpería de Don Ceferino no espera. La pulpería queda al sudeste, pegada al fortín; la cordillera, al oeste. (Con Tab volvés a ver adónde ir.)",
+		"momento_2": "Hay trabajo en la estancia de Don Rufino, en el fortín y en la huella de la toldería. Si no sabés qué falta, sentate a tu fogón.",
+		"segun": [
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": [0, 1] } }, "texto": "El recado: de la Posta del Coirón (al norte de tu fogón) al Hito del Humo (donde sale el humo). Después, a la pulpería." },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 2 } }, "texto": "El recado llegó. Volvé a la pulpería: Don Ceferino te descuenta." },
+			{ "si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "texto": "No queda encargo pendiente. Volvé a tu fogón, donde quedó Ceniza, y sentate." }
+		],
+		"momento_3": "La línea llegó al lago. En el fortín, en la estancia y en la toldería tienen algo que decirte. O saldás la cuenta y te vas.",
+		"cartel_momento_3": [
+			"Pasaron las semanas. El fiado creció, como crece siempre.",
+			"Abril de 1881.\n\nEl general Villegas llegó al lago Nahuel Huapi con mil setecientos hombres."
+		]
+	},
+
+	"notas_de_trabajos": {
+		"recado=1": "Tomé el recado en la posta. Papel doblado, lacre rojo.",
+		"recado=2": "Dejé el recado en el Hito del Humo. No sé qué decía.",
+		"sena=2": "Marqué el mojón. Desde arriba se ve la aguada, y más allá los toldos."
+	},
+
+	"fogon": {
+		"nodo": "FogonDeZenon",
+		"quien": "Zenón, junto al fogón",
+		"hora_noche": 22.0,
+		"hora_amanecer": 7.0,
+		"sin_notas": "Hoy no hice nada que valga contarle al fuego.",
+		"pensamientos": [
+			{ "si": { "momento": 1, "no": ["cuenta_vista"] }, "texto": "Mañana, la pulpería. La cuenta no se va a ir sola." },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": [0, 1] } }, "texto": "Me falta el recado de la posta. De la Posta del Coirón al Hito del Humo." },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 2 } }, "texto": "El recado llegó. Mañana paso por lo de Ceferino a que me descuente." },
+			{ "si": { "momento": 2, "no": ["dolores_pensada"] }, "una_vez": "dolores_pensada", "texto": "La Dolores decía que yo no elegía: que me dejaba llevar. Tal vez tenía razón." },
+			{ "si": { "momento": 2, "var": { "sellado": 0 } }, "texto": "Don Rufino tiene un papel para llevar. Todavía no fui a la estancia." },
+			{ "si": { "momento": 2, "var": { "sellado": 1 }, "no": ["sellado_leido"] }, "texto": "Llevo encima un papel que no sé leer. Doña Rosario sabe." },
+			{ "si": { "momento": 2, "var": { "sellado": 1 }, "si": ["sellado_leido"] }, "texto": "Sé lo que dice el papel de Don Rufino. Sigue en mi cinto." },
+			{ "si": { "momento": 2, "var": { "sena": 0 }, "no": ["sena_rechazada"] }, "texto": "El sargento preguntó por mí. Todavía no sé para qué." },
+			{ "si": { "momento": 2, "var": { "sena": 1 } }, "texto": "Me falta el mojón del cerro, al sudoeste del fortín." },
+			{ "si": { "momento": 2, "var": { "sena": 2 } }, "texto": "Me falta volver al fortín a contar lo que vi. O lo que quiera contar." },
+			{ "si": { "momento": 2, "var": { "favor": 0 }, "si": ["nicasio_aviso"] }, "texto": "El cacique quiere hablarme. Todavía no fui a la toldería." },
+			{ "si": { "momento": 2, "var": { "favor": 0 }, "no": ["nicasio_aviso"] }, "texto": "El lenguaraz Nicasio algo quiere. Todavía no pasé por la huella." },
+			{ "si": { "momento": 2, "var": { "favor": 1 } }, "texto": "Painefil espera que le cuente algo. O que le diga que no." },
+			{ "si": { "momento": 2, "si": ["sellado_leido"], "var": { "sena": [2, 3], "favor": [1, 2, 3] }, "no": ["aguada_pensada"] }, "una_vez": "aguada_pensada", "texto": "El estanciero, el sargento y el cacique. Había sido la misma agua para los tres. Y yo ando en el medio, llevando y trayendo." },
+			{ "si": { "momento": [2, 3], "min": { "ejercito": "minimo" }, "no": ["lucero_rechazado"] }, "texto": "El sargento ya me habla como a uno de los suyos." },
+			{ "si": { "momento": [2, 3], "min": { "estancieros": "minimo" }, "no": ["rufino_rechazado"] }, "texto": "Don Rufino me mira como a hombre de confianza. Confianza de patrón." },
+			{ "si": { "momento": [2, 3], "min": { "tolderia": "minimo" }, "no": ["millaray_rechazada"] }, "texto": "En la toldería me miran de frente. No sé si lo merezco." },
+			{ "si": { "momento": 3, "menos": { "ejercito": "minimo", "estancieros": "minimo", "tolderia": "minimo" } }, "texto": "A nadie le debo un favor, y nadie me lo debe a mí. Queda la cuenta." },
+			{ "si": { "momento": 3 }, "texto": "Llegó la línea. El que ofrezca algo, no lo va a regalar." },
+			{ "si": { "momento": 4 }, "texto": "Ya elegí. Falta andar." }
+		],
+		"cierre": {
+			"si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] },
+			"ir": "cierre_capitulo"
+		}
+	},
+
+	"personajes": {
+		"ceferino": { "nombre": "Don Ceferino", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "alcance": 4.0, "charla": "ceferino" },
+		"rosario": { "nombre": "Doña Rosario", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario", "charla": "rosario" },
+		"lucero": { "nombre": "el sargento Lucero", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "charla": "lucero" },
+		"rufino": { "nombre": "Don Rufino", "nodo": "Lugares/EstanciaDonRufino/Cuerpo/DonRufino", "charla": "rufino" },
+		"nicasio": { "nombre": "Nicasio, el lenguaraz", "nodo": "Caminos/ParadaDeNicasio/Nicasio", "charla": "nicasio" },
+		"painefil": { "nombre": "Painefil", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Painefil", "charla": "painefil" },
+		"millaray": { "nombre": "Millaray", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "charla": "millaray" },
+
+		"soldado1": { "nombre": "un soldado", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado1", "charla": "soldado1" },
+		"soldado2": { "nombre": "un soldado joven", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado2", "charla": "soldado2" },
+		"soldado3": { "nombre": "un veterano", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado3", "charla": "soldado3" },
+		"gaucho1": { "nombre": "un paisano viejo", "nodo": "Lugares/PulperiaDonCeferino/Gaucho1", "charla": "gaucho1" },
+		"gaucho3": { "nombre": "el capataz", "nodo": "Lugares/PulperiaDonCeferino/Gaucho3", "charla": "gaucho3" },
+		"gaucho2": { "nombre": "un peón", "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "charla": "gaucho2" },
+		"anciana": { "nombre": "una anciana", "nodo": "Lugares/TolderiaPainefil/Anciana", "charla": "anciana" },
+		"tejedora": { "nombre": "una tejedora", "nodo": "Lugares/TolderiaPainefil/Tejedora", "charla": "tejedora" },
+		"muchacho": { "nombre": "un muchacho", "nodo": "Lugares/TolderiaPainefil/Muchacho", "charla": "muchacho" },
+		"centinela": { "nombre": "el centinela", "nodo": "Lugares/CampamentoDeLaTropa/Gente/Centinela", "charla": "centinela" },
+		"soldado_fogon": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon", "charla": "soldado_fogon" },
+		"soldado_carga": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga", "charla": "soldado_carga" },
+		"soldado_fortin_nuevo": { "nombre": "un soldado", "nodo": "Lugares/FortinNuevo/Soldado", "charla": "soldado_fortin_nuevo" }
+	},
+
+	"nodos": {
+		"despedida": { "texto": "Andá nomás." },
+		"despedida_tolderia": { "texto": "Andá bien." },
+
+		"cierre_capitulo": {
+			"texto": "Ya no queda recado por llevar. Lo que hice, hecho está.",
+			"hace": { "momento": 3, "deuda": 15 }
+		},
+
+		"ceferino": { "segun": [
+			{ "si": { "final": "solitario" }, "ir": "ceferino_adios" },
+			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "momento": 3 }, "ir": "ceferino_linea" },
+			{ "si": { "momento": 2 }, "ir": "ceferino_cuenta2" },
+			{ "si": { "no": ["cuenta_vista"] }, "ir": "ceferino_cuenta" },
+			{ "si": { "var": { "recado": 2 } }, "ir": "ceferino_vuelta" },
+			{ "ir": "ceferino_espera" }
+		] },
+		"ceferino_cuenta": {
+			"texto": [
+				"Zenón. Pasá, que no muerdo. Vos sabés a qué viniste.",
+				"Acá está el libro. Los remedios de la Dolores, la yerba, el fiado del invierno. Todo apuntado: son {deuda} pesos.",
+				"No te apuro. Pero el fiado no duerme: lo que no se paga, crece."
+			],
+			"opciones": [
+				{ "texto": "¿Y con qué le he de pagar?", "ir": "ceferino_trabajo" },
+				{ "texto": "Yo no sé leer ese libro, Don Ceferino.", "ir": "ceferino_libreta" }
+			]
+		},
+		"ceferino_libreta": {
+			"texto": "Para eso está Doña Rosario, ahí afuera. Ella lee y a mí no me debe nada: preguntale a ella si te miento.",
+			"ir": "ceferino_trabajo"
+		},
+		"ceferino_trabajo": {
+			"hace": { "flag": ["cuenta_vista"], "nota": "Ceferino me mostró la cuenta. Los remedios de la Dolores siguen ahí, apuntados." },
+			"texto": [
+				"Pagame con las piernas. En la Posta del Coirón, al norte de tu fogón, el puestero tiene un recado para el Hito del Humo. Es gente de Don Rufino.",
+				"Llevalo y volvé. Te descuento veinte."
+			],
+			"opciones": [
+				{ "texto": "Voy.", "si": { "var": { "recado": [0, 1] } } },
+				{ "texto": "Ese recado ya lo dejé en el hito.", "si": { "var": { "recado": 2 } }, "ir": "ceferino_vuelta" },
+				{ "texto": "Gracias, pero me voy.", "ir": "ceferino_me_voy" }
+			]
+		},
+		"ceferino_me_voy": { "texto": "Irte, podés. La cuenta se queda." },
+		"ceferino_adios": { "texto": "Ya no me debés nada, Zenón. Andá, antes de que me arrepienta." },
+		"ceferino_espera": { "texto": "El recado, Zenón. De la Posta del Coirón al Hito del Humo. La posta queda al norte de tu fogón; el hito, al noreste, donde sale el humo." },
+		"ceferino_vuelta": {
+			"hace": { "deuda": -20, "confianza": { "estancieros": 1 }, "momento": 2, "nota": "Ceferino me descontó veinte. La cuenta casi no se movió." },
+			"texto": [
+				"Ya me avisaron que llegó. Veinte menos: quedan {deuda}.",
+				"Hay más trabajo, si querés. Don Rufino busca quien le lleve un papel; lo encontrás en la galería de su casa, al oeste de la posta.",
+				"El sargento Lucero preguntó por vos. Ahí nomás, en el fortín.",
+				"Y el lenguaraz, Nicasio, anda parado en la huella que va a la toldería, al oeste. Algo quiere.",
+				"Ah, y vos que no leés: Doña Rosario sí. Está ahí afuera, bajo el alero, por si te dan papel."
+			]
+		},
+		"ceferino_cuenta2": {
+			"texto": "La cuenta anda en {deuda} pesos, Zenón.",
+			"opciones": [
+				{ "texto": "¿Qué se dice?", "ir": "ceferino_noticia" },
+				{ "texto": "Nada más." }
+			]
+		},
+		"ceferino_noticia": {
+			"texto": [
+				"Dicen que Roca quiere paz y administración. Acá la administración es este libro.",
+				"Y que Villegas viene para el lago con tres brigadas; una sube por el Limay. Cuando llegue, esto cambia de dueño."
+			]
+		},
+		"ceferino_linea": {
+			"texto": [
+				"Llegó Villegas y en tres días vendí más caña que en todo el verano.",
+				"Tu cuenta: {deuda} pesos."
+			],
+			"opciones": [
+				{ "texto": "Vengo a arreglarla toda. Me voy para el sur.", "ir": "ceferino_salda" },
+				{ "texto": "Todavía no." }
+			]
+		},
+		"ceferino_salda": {
+			"hace": { "saldar": true, "final": "solitario" },
+			"texto": [
+				"¿Toda? A ver… Las boleadoras, el lazo trenzado y lo que juntaste. Alcanza. Raspando, pero alcanza.",
+				"Cierro el libro, Zenón. No me debés nada. Es raro decirlo."
+			]
+		},
+
+		"rosario": { "segun": [
+			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "var": { "sellado": 1 }, "no": ["sellado_leido"] }, "ir": "rosario_papel" },
+			{ "si": { "momento": 1, "no": ["rosario_conocida"] }, "ir": "rosario_presenta" },
+			{ "si": { "momento": 2, "si": ["sellado_leido"], "var": { "sena": [2, 3], "favor": [1, 2, 3] }, "no": ["rosario_aguada"] }, "ir": "rosario_aguada" },
+			{ "si": { "momento": 3 }, "ir": "rosario_linea" },
+			{ "ir": "rosario_charla" }
+		] },
+		"rosario_presenta": {
+			"hace": { "flag": ["rosario_conocida"] },
+			"texto": [
+				"Zenón. Lo de la Dolores lo sentí mucho.",
+				"Si un día te dan un papel y querés saber qué llevás, traémelo. Leer no cuesta nada. No saber, a veces sí."
+			]
+		},
+		"rosario_papel": {
+			"texto": "Eso que llevás tiene el lacre de Don Rufino. ¿Querés que te lo lea? El lacre se vuelve a pegar. Lo que se sabe, no se despega.",
+			"opciones": [
+				{ "texto": "Léamelo.", "ir": "rosario_lee" },
+				{ "texto": "No. Lo que no sé, no me pesa." }
+			]
+		},
+		"rosario_lee": {
+			"hace": { "flag": ["sellado_leido"], "nota": "Doña Rosario me leyó el papel de Don Rufino. Pide soldados para cerrar la aguada del cerro." },
+			"texto": [
+				"«Al sargento Lucero. La indiada de Painefil abreva en la aguada del cerro, que por la ley nueva cae dentro de mi campo.»",
+				"«Pido cuatro hombres para cerrarla antes del invierno. Rufino.»",
+				"Eso dice. Ahora sabés qué llevás. Qué hacés con eso es cosa tuya."
+			]
+		},
+		"rosario_aguada": {
+			"hace": { "flag": ["rosario_aguada"] },
+			"texto": [
+				"Mirá, Zenón: el estanciero la quiere cerrar, el sargento la manda mirar y el cacique pregunta por ella. Los tres hablan de la misma agua.",
+				"Y vos sos el único que anduvo por los tres lados."
+			]
+		},
+		"rosario_charla": {
+			"texto": [
+				"Acá ando, mirando pasar soldados.",
+				"Dicen que en Buenos Aires andan por arreglar con Chile por dónde va la raya de la cordillera. Como si la cordillera supiera de rayas."
+			]
+		},
+		"rosario_linea": { "texto": "Llegó Villegas al lago. Si alguno te ofrece algo, fijate qué te pide a cambio." },
+
+		"lucero": { "segun": [
+			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "momento": 1 }, "ir": "lucero_antes" },
+			{ "si": { "momento": 3, "si": ["lucero_rechazado"] }, "ir": "lucero_despues" },
+			{ "si": { "momento": 3, "min": { "ejercito": "minimo" } }, "ir": "lucero_oferta" },
+			{ "si": { "momento": 3 }, "ir": "lucero_frio" },
+			{ "si": { "var": { "sellado": 1 } }, "ir": "lucero_hub" },
+			{ "ir": "lucero_resto" }
+		] },
+		"lucero_resto": { "segun": [
+			{ "si": { "var": { "sena": 0 }, "no": ["sena_rechazada"] }, "ir": "lucero_pide" },
+			{ "si": { "var": { "sena": 1 } }, "ir": "lucero_espera" },
+			{ "si": { "var": { "sena": 2 } }, "ir": "lucero_informe" },
+			{ "ir": "lucero_hecho" }
+		] },
+		"lucero_antes": { "texto": "Zenón. Arreglá primero lo tuyo con el pulpero. Después hablamos." },
+		"lucero_hub": {
+			"texto": "¿Qué traés, baqueano?",
+			"opciones": [
+				{ "texto": "Un papel de Don Rufino, sargento.", "ir": "lucero_recibe" },
+				{ "texto": "Otra cosa.", "ir": "lucero_resto" }
+			]
+		},
+		"lucero_recibe": {
+			"hace": { "var": { "sellado": 2 }, "confianza": { "estancieros": 2, "ejercito": 1, "tolderia": -1 }, "deuda": -40, "nota": "Entregué el papel de Don Rufino en el fortín." },
+			"texto": [
+				"A ver… Mm. Esto no lo resuelvo yo.",
+				"Lo pide con la ley en la mano, y la ley viene subiendo con el general Villegas. Se lo paso a él.",
+				"Don Rufino dejó dicho que te descuenten cuarenta en la pulpería."
+			]
+		},
+		"lucero_pide": {
+			"texto": [
+				"Vos anduviste con la columna en el setenta y nueve. Conocés esto mejor que mis mapas.",
+				"Necesito una seña del Mojón del Cerro, al sudoeste. Desde ahí se ve la aguada. Quiero saber si hay gente y hacienda.",
+				"Vas, mirás, volvés. Hago que te descuenten en lo de Ceferino."
+			],
+			"opciones": [
+				{ "texto": "Voy, sargento.", "hace": { "var": { "sena": 1 }, "confianza": { "ejercito": 1 }, "nota": "Lucero me mandó al mojón del cerro. Quiere saber quién toma agua en la aguada." } },
+				{ "texto": "Ya miré bastante para el ejército. Gracias, pero me voy.", "hace": { "flag": ["sena_rechazada"], "confianza": { "ejercito": -1 }, "nota": "Le dije que no a Lucero. Ya miré bastante para el ejército." }, "ir": "lucero_rechazo" }
+			]
+		},
+		"lucero_rechazo": { "texto": "Como quieras. Yo tampoco elegí estar acá." },
+		"lucero_espera": { "texto": "El mojón, al sudoeste. Y volvé a contarme." },
+		"lucero_informe": {
+			"texto": "¿Y? ¿Qué se ve desde el mojón?",
+			"opciones": [
+				{ "texto": "Agua buena. Toldos cerca, y hacienda abrevando.", "hace": { "var": { "sena": 3 }, "confianza": { "ejercito": 2, "tolderia": -1 }, "deuda": -25, "nota": "Le conté a Lucero todo lo que se ve desde el mojón. Los toldos también." }, "ir": "lucero_anota" },
+				{ "texto": "Agua hay. Gente no vi.", "hace": { "var": { "sena": 3 }, "confianza": { "ejercito": 1 }, "deuda": -15, "nota": "Le dije a Lucero que agua hay. De los toldos no dije nada." }, "ir": "lucero_anota" },
+				{ "texto": "Mucho polvo. No se veía nada.", "hace": { "var": { "sena": 3 }, "nota": "Le dije a Lucero que no se veía nada. No me creyó, y no insistió." }, "ir": "lucero_polvo" }
+			]
+		},
+		"lucero_anota": { "texto": "Va al parte. Pasá por lo de Ceferino: ya avisé que te descuenten." },
+		"lucero_polvo": { "texto": "Polvo. Pa eso no te mandaba. Está bien, baqueano. Andá." },
+		"lucero_hecho": {
+			"texto": [
+				"Por ahora no tengo otro encargo.",
+				"Villegas está cerca. Cuando llegue al lago va a hacer falta gente que conozca."
+			]
+		},
+		"lucero_oferta": {
+			"texto": [
+				"Llegó el general al Nahuel Huapi. Mil setecientos hombres, y ninguno conoce los pasos como vos.",
+				"Hay plaza para un baqueano. Ración, sueldo y la papeleta en regla: a nadie lo llevan de leva si ya es de los nuestros.",
+				"Con el tiempo, las jinetas. Yo respondo por vos. Y la cuenta del pulpero se arregla cuando venga el comisario con la paga."
+			],
+			"opciones": [
+				{ "texto": "Voy con usted, sargento.", "hace": { "saldar": true, "final": "sargento" } },
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["lucero_rechazado"] }, "ir": "lucero_despues" }
+			]
+		},
+		"lucero_despues": { "texto": "Como quieras. Cuidate de andar sin papeleta: ahora van a pedirla en todos lados." },
+		"lucero_frio": { "texto": "El general ya tiene sus baqueanos, Zenón. Gente que no anda preguntando para qué." },
+
+		"rufino": { "segun": [
+			{ "si": { "final": "encargado" }, "ir": "rufino_encargado" },
+			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "momento": 1 }, "ir": "rufino_antes" },
+			{ "si": { "momento": 3, "si": ["rufino_rechazado"] }, "ir": "rufino_despues" },
+			{ "si": { "momento": 3, "min": { "estancieros": "minimo" } }, "ir": "rufino_oferta" },
+			{ "si": { "momento": 3 }, "ir": "rufino_frio" },
+			{ "si": { "var": { "sellado": 0 } }, "ir": "rufino_pide" },
+			{ "si": { "var": { "sellado": 1 } }, "ir": "rufino_espera" },
+			{ "si": { "var": { "sellado": 2 } }, "ir": "rufino_gracias" },
+			{ "ir": "rufino_seco" }
+		] },
+		"rufino_antes": { "texto": "Vos sos el que debe en lo de Ceferino. Cuando hayas llevado el recado de mi puestero, vení a verme." },
+		"rufino_pide": {
+			"texto": [
+				"Zenón. Me dicen que llevás los recados derecho y sin preguntar.",
+				"Este papel es para el sargento Lucero, en mano. Va lacrado: no es desconfianza, es costumbre.",
+				"Cuarenta pesos menos en tu cuenta, cuando llegue."
+			],
+			"opciones": [
+				{ "texto": "Lo llevo.", "hace": { "var": { "sellado": 1 }, "confianza": { "estancieros": 1 }, "nota": "Don Rufino me dio un papel lacrado para Lucero. No sé qué dice." } },
+				{ "texto": "¿Qué dice el papel?", "ir": "rufino_que_dice" },
+				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" }
+			]
+		},
+		"rufino_que_dice": {
+			"texto": "Lo que dicen los papeles: lo que le conviene al que los escribe. ¿Lo llevás o no?",
+			"opciones": [
+				{ "texto": "Lo llevo.", "hace": { "var": { "sellado": 1 }, "confianza": { "estancieros": 1 }, "nota": "Don Rufino me dio un papel lacrado para Lucero. No quiso decirme qué dice." } },
+				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" }
+			]
+		},
+		"rufino_espera": {
+			"texto": "Ese papel no llega solo, Zenón.",
+			"opciones": [
+				{ "texto": "Ya va." },
+				{ "texto": "Ya sé lo que dice. No lo llevo. Tome.", "si": { "si": ["sellado_leido"] }, "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -2 }, "nota": "Le devolví el papel a Don Rufino. La aguada no la cierro yo." }, "ir": "rufino_devuelto" },
+				{ "texto": "No lo voy a llevar. Tome.", "si": { "no": ["sellado_leido"] }, "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "Le devolví el papel a Don Rufino sin saber qué decía." }, "ir": "rufino_seco" }
+			]
+		},
+		"rufino_devuelto": { "texto": "Así que alguien te lo leyó. Está bien. Otro lo va a llevar; la aguada se cierra de todos modos." },
+		"rufino_gracias": {
+			"texto": [
+				"Llegó el papel. Cumplís, Zenón. Eso acá vale.",
+				"El gobierno vende la tierra por leguas, y el que no la alambra, la pierde. Yo no la he de perder."
+			]
+		},
+		"rufino_seco": { "texto": "Entonces no tengo nada para vos." },
+		"rufino_oferta": {
+			"texto": [
+				"Villegas está en el lago. Ahora la tierra tiene dueño, y el dueño necesita quien la cuide.",
+				"Le ofrezco el puesto de encargado, amigo Zenón. Casa, sueldo, y su cuenta con Ceferino la arreglo yo.",
+				"Lo primero: la aguada del cerro. Se cierra antes del invierno."
+			],
+			"opciones": [
+				{ "texto": "Acepto, Don Rufino.", "hace": { "saldar": true, "final": "encargado" } },
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["rufino_rechazado"] }, "ir": "rufino_despues" }
+			]
+		},
+		"rufino_encargado": { "texto": "La tranquera, Zenón. Andá a ver lo que ahora cuidás." },
+		"rufino_despues": { "texto": "Vos sabrás. El puesto no va a quedar vacío." },
+		"rufino_frio": { "texto": "Encargado necesito. Pero uno que lleve lo que se le da." },
+
+		"nicasio": { "segun": [
+			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "momento": 1 }, "ir": "nicasio_antes" },
+			{ "si": { "momento": 3 }, "ir": "nicasio_linea" },
+			{ "si": { "no": ["nicasio_aviso"], "var": { "favor": 0 } }, "ir": "nicasio_aviso" },
+			{ "ir": "nicasio_charla" }
+		] },
+		"nicasio_antes": {
+			"texto": [
+				"Zenón. Yo te conozco del setenta y nueve. Vos a mí no, y mejor así.",
+				"Cuando arregles lo del pulpero, pasá. Hay quien quiere hablarte."
+			]
+		},
+		"nicasio_aviso": {
+			"hace": { "flag": ["nicasio_aviso"], "nota": "Nicasio, el lenguaraz, dice que el cacique Painefil quiere hablar conmigo." },
+			"texto": [
+				"Manda decir el cacique Painefil que quiere hablar con vos. No con el sargento ni con el estanciero: con vos.",
+				"La toldería está al oeste, siguiendo esta huella, sobre el Limay. Andá con respeto y sin apuro.",
+				"Y un consejo de lenguaraz: lo que se dice de un lado, se sabe del otro. Siempre."
+			]
+		},
+		"nicasio_charla": { "texto": "Acá ando. De un lado me dicen indio y del otro, cristiano. Y los dos me necesitan para entenderse." },
+		"nicasio_linea": {
+			"texto": [
+				"Ya está. Llegaron. Ahora cada uno va a decir que siempre estuvo de este lado.",
+				"Yo hablo las dos lenguas, y en ninguna me creen."
+			]
+		},
+
+		"painefil": { "segun": [
+			{ "si": { "momento": 4 }, "ir": "despedida_tolderia" },
+			{ "si": { "momento": 1 }, "ir": "painefil_antes" },
+			{ "si": { "momento": 3, "si": ["millaray_rechazada"] }, "ir": "painefil_despues" },
+			{ "si": { "momento": 3, "min": { "tolderia": "minimo" } }, "ir": "painefil_linea_si" },
+			{ "si": { "momento": 3 }, "ir": "painefil_linea_no" },
+			{ "si": { "var": { "favor": 0 } }, "ir": "painefil_pide" },
+			{ "si": { "var": { "favor": 1 } }, "ir": "painefil_cuenta" },
+			{ "si": { "var": { "favor": 2 } }, "ir": "painefil_gracias" },
+			{ "ir": "painefil_respeta" }
+		] },
+		"painefil_antes": {
+			"texto": [
+				"Sos el baqueano. Te vi pasar con la columna, hace dos inviernos.",
+				"Hoy no tengo nada que pedirte."
+			]
+		},
+		"painefil_pide": {
+			"hace": { "var": { "favor": 1 }, "nota": "Painefil quiere saber qué pidió el estanciero y qué mira el ejército desde el cerro." },
+			"texto": [
+				"Baqueano. A vos te buscan el estanciero y el sargento.",
+				"No te pido que les digas que no. Te pido saber: qué quiere el estanciero, y qué mira el ejército desde el mojón.",
+				"Mi gente lleva la hacienda a esa aguada. La llevó mi padre. El fortín vino después."
+			],
+			"ir": "painefil_cuenta"
+		},
+		"painefil_cuenta": {
+			"texto": "¿Qué me decís, baqueano?",
+			"opciones": [
+				{ "texto": "El estanciero pidió soldados para cerrar la aguada. Y el sargento manda contar gente.", "si": { "si": ["sellado_leido"], "var": { "sena": [2, 3] } }, "hace": { "var": { "favor": 2 }, "confianza": { "tolderia": 3, "estancieros": -1, "ejercito": -1 }, "deuda": -20, "nota": "Le conté a Painefil lo del papel y lo del mojón. Todo." }, "ir": "painefil_recibe" },
+				{ "texto": "El estanciero pidió cuatro soldados para cerrar la aguada antes del invierno.", "si": { "si": ["sellado_leido"] }, "hace": { "var": { "favor": 2 }, "confianza": { "tolderia": 2, "estancieros": -1 }, "deuda": -20, "nota": "Le conté a Painefil lo que dice el papel de Don Rufino." }, "ir": "painefil_recibe" },
+				{ "texto": "Desde el mojón, el sargento quiere saber cuánta gente y cuánta hacienda hay en la aguada.", "si": { "var": { "sena": [2, 3] } }, "hace": { "var": { "favor": 2 }, "confianza": { "tolderia": 2, "ejercito": -1 }, "deuda": -20, "nota": "Le conté a Painefil qué mira el ejército desde el mojón." }, "ir": "painefil_recibe" },
+				{ "texto": "Todavía no tengo nada que decirle. Si sé algo, vuelvo.", "si": { "o": [ { "no": ["sellado_leido"] }, { "var": { "sena": [0, 1] } } ] } },
+				{ "texto": "Yo no llevo cuentos de un lado a otro. Gracias, pero me voy.", "hace": { "var": { "favor": 3 }, "confianza": { "tolderia": -1 }, "nota": "Le dije a Painefil que no llevo cuentos. No se enojó." }, "ir": "painefil_respeta" }
+			]
+		},
+		"painefil_recibe": {
+			"texto": [
+				"Está bien. Ahora sé con qué voy a hablar.",
+				"Llevate dos cueros de guanaco para tu cuenta. No es paga: es para que nadie diga que recibo y no doy."
+			]
+		},
+		"painefil_gracias": { "texto": "Lo que me dijiste, lo guardo. No digo de quién vino." },
+		"painefil_respeta": { "texto": "No llevás cuentos. Eso también es saber quién sos." },
+		"painefil_linea_si": {
+			"texto": [
+				"Los soldados ya están en el lago. Yo voy a ir a hablar con el general, porque alguien tiene que hablar.",
+				"Pero no toda mi gente quiere esperar a ver qué contesta. Hablá con Millaray."
+			]
+		},
+		"painefil_despues": { "texto": "Mi hija ya te lo pidió. Yo no pido dos veces." },
+		"painefil_linea_no": {
+			"texto": [
+				"Llegaron. Vos sabías que venían.",
+				"Andá bien, baqueano."
+			]
+		},
+
+		"millaray": { "segun": [
+			{ "si": { "final": "chile" }, "ir": "millaray_paso" },
+			{ "si": { "momento": 4 }, "ir": "despedida_tolderia" },
+			{ "si": { "momento": 1 }, "ir": "millaray_antes" },
+			{ "si": { "momento": 3, "si": ["millaray_rechazada"] }, "ir": "millaray_despues" },
+			{ "si": { "momento": 3, "min": { "tolderia": "minimo" } }, "ir": "millaray_oferta" },
+			{ "si": { "momento": 3 }, "ir": "millaray_linea_no" },
+			{ "si": { "no": ["paso_preguntado"] }, "ir": "millaray_pregunta" },
+			{ "si": { "si": ["paso_contado"] }, "ir": "millaray_charla_paso" },
+			{ "ir": "millaray_charla" }
+		] },
+		"millaray_antes": { "texto": "Mi padre habla con los que llegan. Yo miro cómo se van." },
+		"millaray_pregunta": {
+			"hace": { "flag": ["paso_preguntado"] },
+			"texto": [
+				"Vos conocés la cordillera. Mi abuela cruzaba a vender ponchos y volvía con trigo.",
+				"¿Hay paso, al sur del lago, que no miren los fortines?"
+			],
+			"opciones": [
+				{ "texto": "Hay uno. Una quebrada al sur del lago, entre lengas. Se pasa antes de la nieve.", "hace": { "flag": ["paso_contado"], "confianza": { "tolderia": 1 }, "nota": "Le dije a Millaray qué quebrada no miran los fortines." }, "ir": "millaray_escucha" },
+				{ "texto": "Con nieve no hay paso que valga.", "hace": { "nota": "Millaray preguntó por los pasos. No le dije ni que sí ni que no." }, "ir": "millaray_escucha" },
+				{ "texto": "Eso no me lo pregunte a mí.", "ir": "millaray_escucha" }
+			]
+		},
+		"millaray_escucha": { "texto": "Bien. No pregunto para hoy." },
+		"millaray_charla": { "texto": "Mi padre cree que hablando se arregla. Puede ser. Yo, de todos modos, quiero saber por dónde se sale." },
+		"millaray_charla_paso": { "texto": "Mi padre cree que hablando se arregla. Puede ser. Yo ya sé por dónde se sale." },
+		"millaray_paso": { "texto": "Andá adelante. Te seguimos." },
+		"millaray_oferta": {
+			"texto": [
+				"Mi padre va a ir a hablar con el general. Yo no voy a esperar la respuesta acá, con los chicos y las viejas.",
+				"Los que queremos irnos, nos vamos por el sur del lago. Los pasos viejos los conozco. El que no miran los fortines, lo conocés vos.",
+				"No te pido que nos lleves. Te pido que vayas adelante hasta el portezuelo. Después seguimos solos."
+			],
+			"opciones": [
+				{ "texto": "Voy adelante.", "hace": { "final": "chile" } },
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["millaray_rechazada"] }, "ir": "millaray_despues" }
+			]
+		},
+		"millaray_despues": { "texto": "Entonces andá bien. Nos vamos de todos modos." },
+		"millaray_linea_no": { "texto": "Ya llegaron. Vos los trajiste una vez. No sé si los trajiste dos." },
+
+		"soldado1": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado1_b" }, { "ir": "soldado1_a" } ] },
+		"soldado1_a": { "texto": "Cuatro años de frontera y no he cobrado ni el primero." },
+		"soldado1_b": { "texto": "Dicen que en el lago hay carpas hasta donde da la vista. A nosotros nos dejan acá, cuidando la polvareda al ñudo." },
+		"soldado2": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado2_b" }, { "ir": "soldado2_a" } ] },
+		"soldado2_a": { "texto": "A mí me agarraron sin papeleta en el Azul y me echaron a la línea. Tres años, dijeron. Van dos." },
+		"soldado2_b": { "texto": "¿Usté vio el lago? Dicen que es como un mar." },
+		"soldado3": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado3_b" }, { "ir": "soldado3_a" } ] },
+		"soldado3_a": { "texto": "El sargento es hombre güeno. No se lo diga, amigo." },
+		"soldado3_b": { "texto": "Llega el general y los partes dicen que fue fácil. Los partes siempre dicen lo mesmo." },
+
+		"gaucho1": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "gaucho1_b" }, { "ir": "gaucho1_a" } ] },
+		"gaucho1_a": { "texto": "Yo crucé esto cuando no había ni fortín ni pulpería. Tampoco había cuenta: naides debía nada." },
+		"gaucho1_b": { "texto": "Ahora todo tiene dueño. Hasta el agua." },
+		"gaucho3": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "gaucho3_b" }, { "ir": "gaucho3_a" } ] },
+		"gaucho3_a": { "texto": "Don Rufino paga, pero paga con papel pa lo de Ceferino. Y ese papel vale acá nomás." },
+		"gaucho3_b": { "texto": "El patrón anda midiendo campo con la vista. Malo para el que quede en el medio." },
+		"gaucho2": { "segun": [ { "si": { "final": "encargado" }, "ir": "gaucho2_c" }, { "si": { "momento": [3, 4] }, "ir": "gaucho2_b" }, { "ir": "gaucho2_a" } ] },
+		"gaucho2_a": { "texto": "El patrón dice que va a alambrar todo el campo. No sé con qué gente." },
+		"gaucho2_b": { "texto": "Dicen que busca encargao. A mí no me ha de tocar." },
+		"gaucho2_c": { "texto": "Así que el encargao es usted. Mande nomás." },
+
+		"anciana": { "segun": [ { "si": { "final": "chile" }, "ir": "anciana_paso" }, { "si": { "momento": [3, 4] }, "ir": "anciana_b" }, { "ir": "anciana_a" } ] },
+		"anciana_a": {
+			"texto": [
+				"Yo no quiero tratos. Ni con el estanciero, ni con el fortín, ni con sus papeles.",
+				"Mi madre tampoco quería, y vivió más que todos ellos."
+			]
+		},
+		"anciana_b": { "texto": "Que hablen. Yo vi irse a muchos que venían a quedarse." },
+		"anciana_paso": { "texto": "No quise tratos con ninguno. Por eso me voy." },
+		"tejedora": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "tejedora_b" }, { "ir": "tejedora_a" } ] },
+		"tejedora_a": { "texto": "Este poncho ya tiene comprador en la pulpería. Con paz, vendo. Con pelea no vende nadie." },
+		"tejedora_b": { "texto": "Los soldados también compran ponchos. Eso no lo dice nadie, pero compran." },
+		"muchacho": { "segun": [ { "si": { "final": "chile" }, "ir": "muchacho_paso" }, { "si": { "momento": [3, 4] }, "ir": "muchacho_b" }, { "ir": "muchacho_a" } ] },
+		"muchacho_a": { "texto": "Los caballos están gordos. Yo no pienso irme a ningún lado." },
+		"muchacho_b": { "texto": "Unos dicen hablar. Otros dicen irse. A mí nadie me pregunta." },
+		"muchacho_paso": { "texto": "A mí nadie me preguntó. Vine de todos modos, con los caballos." },
+
+		"centinela": { "texto": "Alto. Ah, el baqueano. Pase nomás." },
+		"soldado_fogon": { "texto": "Mil setecientos milicos y un solo fogón que tira bien. Este." },
+		"soldado_carga": { "texto": "Cajones y más cajones: yerba y tabaco. Los vicios llegan; la paga, no." },
+		"soldado_fortin_nuevo": { "texto": "Este fortín todavía huele a palo verde. Dicen que el general quiere una fila de estos al pie de la cordillera." }
+	},
+
+	"finales": {
+		"sargento": {
+			"titulo": "Sargento",
+			"cartel": [ "Dos días después, Zenón sigue al sargento Lucero por la huella del Limay, hacia el lago." ],
+			"tp": [-975, 345],
+			"hora": 9.0,
+			"aviso": "El campamento de la tropa. El general está al fondo, detrás de la carpa grande, mirando el lago.",
+			"llegada": [-1062, 309],
+			"radio": 9,
+			"epilogo": [
+				"Zenón se enroló a las órdenes del general Villegas. Le dieron un Remington, una chaqueta que había sido de otro y la papeleta en regla.",
+				"Guio a la tropa por los pasos que conocía. Con los años llegó a sargento.",
+				"Vio avanzar la línea desde adentro. Ya no la miraba de afuera: era parte.",
+				"La cuenta de la pulpería se pagó cuando vino el comisario con la paga. Nadie volvió a nombrarla."
+			]
+		},
+		"encargado": {
+			"titulo": "Encargado",
+			"aviso": "Don Rufino señala el corral grande: desde hoy la hacienda es cosa tuya. Andá hasta la tranquera.",
+			"llegada": [-163, -262],
+			"radio": 5,
+			"epilogo": [
+				"Zenón quedó de encargado en la estancia de Don Rufino. Casa de adobe, sueldo en papel de la pulpería y un caballo de la marca.",
+				"La aguada del cerro se cerró antes del invierno. La cerró él.",
+				"La cuenta con Don Ceferino la arregló el patrón. Zenón durmió bajo techo ese invierno, y los que siguieron.",
+				"A veces, de noche, miraba hacia el Limay y no preguntaba."
+			]
+		},
+		"chile": {
+			"titulo": "El paso",
+			"color": "#c4c8c9",
+			"cartel": [
+				"Antes de la primera nieve, de madrugada, los de la toldería que quisieron irse llegaron a la boca de la quebrada.",
+				"Zenón va adelante."
+			],
+			"tp": [-1046, 590],
+			"hora": 7.0,
+			"aviso": "La senda sube por la quebrada hasta el portezuelo. Andá adelante.",
+			"llegada": [-1545, 900],
+			"radio": 28,
+			"mover": [
+				{ "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "a": [-1056, 598], "mira": [-1046, 590] },
+				{ "nodo": "Lugares/TolderiaPainefil/Anciana", "a": [-1053, 604], "mira": [-1046, 590] },
+				{ "nodo": "Lugares/TolderiaPainefil/Muchacho", "a": [-1050, 600], "mira": [-1100, 630] },
+				{ "nodo": "Lugares/TolderiaPainefil/CaballoZaino", "a": [-1048, 603], "mira": [-1100, 630] },
+				{ "nodo": "Lugares/TolderiaPainefil/CaballoAlazan", "a": [-1046, 606], "mira": [-1100, 630] }
+			],
+			"epilogo": [
+				"Arriba, en el portezuelo, la niebla tapaba el otro lado.",
+				"Zenón se hizo a un lado. Millaray pasó primera. No miró para atrás; los demás, sí.",
+				"Nadie supo decir después si los dejaron cruzar.",
+				"Zenón se quedó en el paso hasta que la nieve borró las huellas."
+			]
+		},
+		"solitario": {
+			"titulo": "Gracias, pero me voy",
+			"aviso": "Ceniza espera junto a tu fogón. Ya no queda nada que te ate acá.",
+			"llegada": [-3.5, -6],
+			"radio": 3.5,
+			"epilogo": [
+				"Zenón saldó la cuenta con lo poco que tenía y no aceptó nada de nadie.",
+				"Ensilló a Ceniza y salió hacia el sur, donde todavía no había línea, ni cerco, ni cuenta.",
+				"No se supo más de él. Dicen que eso era lo que quería."
+			]
+		}
+	}
+}
