@@ -60,6 +60,16 @@ const COLOR_LUNA := Color(0.62, 0.72, 1.0)
 ## Altura, en metros, desde donde el suelo es "cumbre" y la bruma llega solo al tope de arriba.
 @export var bruma_alta: float = 70.0
 
+## La luz de la cordillera del fondo (assets/materiales/cordillera.gdshader). Lo demás (cuánto marcan
+## las quebradas, el contraluz, la luna) está en el material, grupo "ajustes".
+@export_group("Cordillera")
+## El sol que alumbra la cordillera nunca sube más que esto (1 es el cenit; 0,55 son unos 35 grados).
+@export_range(0.1, 1.0, 0.01) var altura_sol_relieve: float = 0.55
+## Cuánto se corre ese sol hacia el norte (0: sale y se pone como el de verdad).
+@export_range(0.0, 2.0, 0.05) var norte_sol_relieve: float = 0.75
+## Cuánta luz reciben las laderas en sombra (toman el color del cielo de la hora).
+@export_range(0.0, 1.5, 0.05) var sombra_cordillera: float = 0.6
+
 signal cambio_periodo(nuevo_periodo: String)
 signal nueva_hora(hora: int, minutos: int)
 
@@ -215,12 +225,9 @@ func _buscar_cielo_y_cordillera() -> void:
 		cielo = ambiente_mundo.environment.sky.sky_material as ShaderMaterial
 	var cordillera := get_node_or_null("../Estrellas/Cordillera") as MeshInstance3D
 	if cordillera and cordillera.mesh and cordillera.mesh.get_surface_count() > 0:
+		# La cordillera no usa las luces de la escena: su luz se la pasa actualizar_iluminacion()
+		# (assets/materiales/cordillera.gdshader).
 		material_cordillera = cordillera.get_active_material(0) as ShaderMaterial
-		# La luna no alumbra la cordillera (va en la capa 2): de noche queda como una silueta
-		# oscura con la nieve apenas clara, en vez de verse celeste y más clara que el cielo.
-		cordillera.layers = 2
-		if luz_luna:
-			luz_luna.light_cull_mask &= ~2
 	terreno = get_node_or_null("../HTerrain") as Node3D
 	if terreno and not terreno.has_method("set_shader_param"):
 		terreno = null
@@ -349,6 +356,21 @@ func actualizar_iluminacion():
 	if material_cordillera:
 		var lado_oeste := pow(clampf(-direccion_sol.x * 0.5 + 0.5, 0.0, 1.0), 3.0)
 		material_cordillera.set_shader_parameter("color_bruma", (k.horizonte as Color).lerp(k.resp, float(k.resp_f) * lado_oeste))
+		# La luz de la cordillera (tanda 6). De día, un sol "de relieve": el de verdad, pero nunca más
+		# alto que `altura_sol_relieve` y corrido hacia el norte (-Z), que es por donde anda el sol en la
+		# Patagonia, así al mediodía las laderas no quedan todas iguales. La sombra toma el color del
+		# cielo. De noche, la luna según su fase; el material cuida que la roca no pase al cielo.
+		var relieve := Vector3(direccion_sol.x, minf(direccion_sol.y, altura_sol_relieve), direccion_sol.z - norte_sol_relieve)
+		material_cordillera.set_shader_parameter("direccion_relieve", relieve.normalized())
+		material_cordillera.set_shader_parameter("direccion_sol", direccion_sol)
+		material_cordillera.set_shader_parameter("color_sol", k.sol)
+		material_cordillera.set_shader_parameter("fuerza_sol", float(k.sol_e) * smoothstep(-0.07, 0.04, direccion_sol.y))
+		material_cordillera.set_shader_parameter("color_sombra", k.cenit)
+		material_cordillera.set_shader_parameter("fuerza_sombra", sombra_cordillera)
+		material_cordillera.set_shader_parameter("color_luna", COLOR_LUNA)
+		material_cordillera.set_shader_parameter("fuerza_luna", energia_luna)
+		material_cordillera.set_shader_parameter("direccion_luna", direccion_luna)
+		material_cordillera.set_shader_parameter("cielo_noche", k.horizonte)
 
 	# El piso, las hojas y el material mate hacen su propia niebla de lejos (assets/materiales/
 	# bruma.gdshaderinc): usan los mismos números que la niebla del ambiente y los colores del

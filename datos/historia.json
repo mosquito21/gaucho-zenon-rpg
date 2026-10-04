@@ -11,6 +11,7 @@
 		"momento_1": "La cuenta en la pulpería de Don Ceferino no espera. La pulpería queda al sudeste, pegada al fortín; la cordillera, al oeste. (Con Tab volvés a ver adónde ir.)",
 		"momento_2": "Hay trabajo en la estancia de Don Rufino, en el fortín y en la huella de la toldería. Si no sabés qué falta, sentate a tu fogón.",
 		"segun": [
+			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "El arreo: la punta de Don Rufino anda al este de la Posta del Coirón, campo afuera. Montado, llevala hasta el corral grande de la estancia; la tranquera da a la casa." },
 			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": [0, 1] } }, "texto": "El recado: de la Posta del Coirón (al norte de tu fogón) al Hito del Humo (donde sale el humo). Después, a la pulpería." },
 			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 2 } }, "texto": "El recado llegó. Volvé a la pulpería: Don Ceferino te descuenta." },
 			{ "si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "texto": "No queda encargo pendiente. Volvé a tu fogón, donde quedó Ceniza, y sentate." }
@@ -49,6 +50,7 @@
 			{ "si": { "momento": 2, "var": { "favor": 0 }, "no": ["nicasio_aviso"] }, "texto": "El lenguaraz Nicasio algo quiere. Todavía no pasé por la huella." },
 			{ "si": { "momento": 2, "var": { "favor": 1 } }, "texto": "Painefil espera que le cuente algo. O que le diga que no." },
 			{ "si": { "momento": 2, "si": ["sellado_leido"], "var": { "sena": [2, 3], "favor": [1, 2, 3] }, "no": ["aguada_pensada"] }, "una_vez": "aguada_pensada", "texto": "El estanciero, el sargento y el cacique. Había sido la misma agua para los tres. Y yo ando en el medio, llevando y trayendo." },
+			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "Me falta arrimar la punta de Don Rufino al corral grande." },
 			{ "si": { "momento": [2, 3], "min": { "ejercito": "minimo" }, "no": ["lucero_rechazado"] }, "texto": "El sargento ya me habla como a uno de los suyos." },
 			{ "si": { "momento": [2, 3], "min": { "estancieros": "minimo" }, "no": ["rufino_rechazado"] }, "texto": "Don Rufino me mira como a hombre de confianza. Confianza de patrón." },
 			{ "si": { "momento": [2, 3], "min": { "tolderia": "minimo" }, "no": ["millaray_rechazada"] }, "texto": "En la toldería me miran de frente. No sé si lo merezco." },
@@ -62,12 +64,34 @@
 		}
 	},
 
+	"arreo": {
+		"_leeme": "La changa del capataz (tanda 6): traer la punta de vacas al corral grande. Acá van los números y los lugares; cómo se portan las vacas, en scripts/arreo.gd. Se explica en docs/agente/ESTADO.md, 'Para Willy', Tanda 6.",
+		"vacas": 7,
+		"paga": 15,
+		"veces": 3,
+		"donde": [330, -200],
+		"alcance_montado": 16,
+		"alcance_a_pie": 5,
+		"paso": 0.9,
+		"trote": 3.0,
+		"junta": 7,
+		"rezago": 30,
+		"entrada": { "cerca": 14, "camino": [ [-150, -255], [-165.6, -260.2], [-161.2, -267.0] ] },
+		"lugares_en_el_corral": [ [-157.9, -264.7], [-164.0, -269.9], [-154.4, -267.3], [-155.3, -271.4], [-161.1, -276.4], [-153.9, -280.0], [-148.0, -278.0] ],
+		"corral": [-156.9, -273.75, 15.5],
+		"obstaculos": [ [0, -220, 9], [-171.4, -248.8, 11.5], [-158.5, -247.6, 3.2], [-164.8, -235.2, 3.5], [-160.1, -272.2, 1.6], [-151.9, -274.6, 1.6] ],
+		"nota": "Arreé la punta de Don Rufino hasta el corral grande. Pagó con papel para lo de Ceferino.",
+		"aviso_hecho": "La punta entró al corral. El peón cuenta las vacas y te da el papel de Don Rufino: quince patacones menos en lo de Ceferino. Quedan {deuda}.",
+		"aviso_rezagada": "Una vaca quedó atrás, pastando. Hay que volver a buscarla."
+	},
+
 	"personajes": {
 		"ceferino": { "nombre": "Don Ceferino", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "alcance": 4.0, "charla": "ceferino" },
 		"rosario": { "nombre": "Doña Rosario", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario", "charla": "rosario" },
 		"lucero": { "nombre": "el sargento Lucero", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "charla": "lucero" },
 		"rufino": { "nombre": "Don Rufino", "nodo": "Lugares/EstanciaDonRufino/Cuerpo/DonRufino", "charla": "rufino" },
-		"nicasio": { "nombre": "Nicasio, el lenguaraz", "nodo": "Caminos/ParadaDeNicasio/Nicasio", "charla": "nicasio" },
+		"nicasio": { "nombre": "Nicasio, el lenguaraz", "nodo": "Caminos/ParadaDeNicasio/Nicasio", "charla": "nicasio",
+			"encuentro": { "si": { "momento": 2, "no": ["nicasio_aviso"], "var": { "favor": 0 } }, "desde": 30 } },
 		"painefil": { "nombre": "Painefil", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Painefil", "charla": "painefil" },
 		"millaray": { "nombre": "Millaray", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "charla": "millaray" },
 
@@ -89,6 +113,7 @@
 	"nodos": {
 		"despedida": { "texto": "Andá nomás." },
 		"despedida_tolderia": { "texto": "Andá bien." },
+		"despedida_usted": { "texto": "Vaya nomás." },
 
 		"cierre_capitulo": {
 			"texto": "Ya no queda recado por llevar. Lo que hice, hecho está.",
@@ -107,7 +132,7 @@
 		"ceferino_cuenta": {
 			"texto": [
 				"Zenón. Pasá, que no muerdo. Vos sabés a qué viniste.",
-				"Acá está el libro. Los remedios de la Dolores, la yerba, el fiado del invierno. Todo apuntado: son {deuda} pesos.",
+				"Acá está el libro. Los remedios de la Dolores, la yerba, el fiado del invierno. Todo apuntado: son {deuda} patacones.",
 				"No te apuro. Pero el fiado no duerme: lo que no se paga, crece."
 			],
 			"opciones": [
@@ -145,7 +170,7 @@
 			]
 		},
 		"ceferino_cuenta2": {
-			"texto": "La cuenta anda en {deuda} pesos, Zenón.",
+			"texto": "La cuenta anda en {deuda} patacones, Zenón.",
 			"opciones": [
 				{ "texto": "¿Qué se dice?", "ir": "ceferino_noticia" },
 				{ "texto": "Nada más." }
@@ -160,7 +185,7 @@
 		"ceferino_linea": {
 			"texto": [
 				"Llegó Villegas y en tres días vendí más caña que en todo el verano.",
-				"Tu cuenta: {deuda} pesos."
+				"Tu cuenta: {deuda} patacones."
 			],
 			"opciones": [
 				{ "texto": "Vengo a arreglarla toda. Me voy para el sur.", "ir": "ceferino_salda" },
@@ -311,7 +336,7 @@
 			"texto": [
 				"Zenón. Me dicen que llevás los recados derecho y sin preguntar.",
 				"Este papel es para el sargento Lucero, en mano. Va lacrado: no es desconfianza, es costumbre.",
-				"Cuarenta pesos menos en tu cuenta, cuando llegue."
+				"Cuarenta patacones menos en tu cuenta, cuando llegue."
 			],
 			"opciones": [
 				{ "texto": "Lo llevo.", "hace": { "var": { "sellado": 1 }, "confianza": { "estancieros": 1 }, "nota": "Don Rufino me dio un papel lacrado para Lucero. No sé qué dice." } },
@@ -358,7 +383,7 @@
 		"rufino_frio": { "texto": "Encargado necesito. Pero uno que lleve lo que se le da." },
 
 		"nicasio": { "segun": [
-			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "momento": 4 }, "ir": "despedida_usted" },
 			{ "si": { "momento": 1 }, "ir": "nicasio_antes" },
 			{ "si": { "momento": 3 }, "ir": "nicasio_linea" },
 			{ "si": { "no": ["nicasio_aviso"], "var": { "favor": 0 } }, "ir": "nicasio_aviso" },
@@ -366,15 +391,15 @@
 		] },
 		"nicasio_antes": {
 			"texto": [
-				"Zenón. Yo te conozco del setenta y nueve. Vos a mí no, y mejor así.",
-				"Cuando arregles lo del pulpero, pasá. Hay quien quiere hablarte."
+				"Zenón. Yo lo conozco del setenta y nueve. Usted a mí no, y mejor así.",
+				"Cuando arregle lo del pulpero, pase. Hay quien quiere hablarle."
 			]
 		},
 		"nicasio_aviso": {
 			"hace": { "flag": ["nicasio_aviso"], "nota": "Nicasio, el lenguaraz, dice que el cacique Painefil quiere hablar conmigo." },
 			"texto": [
-				"Manda decir el cacique Painefil que quiere hablar con vos. No con el sargento ni con el estanciero: con vos.",
-				"La toldería está al oeste, siguiendo esta huella, sobre el Limay. Andá con respeto y sin apuro.",
+				"Manda decir el cacique Painefil que quiere hablar con usted. No con el sargento ni con el estanciero: con usted.",
+				"La toldería está al oeste, siguiendo esta huella, sobre el Limay. Vaya con respeto y sin apuro.",
 				"Y un consejo de lenguaraz: lo que se dice de un lado, se sabe del otro. Siempre."
 			]
 		},
@@ -499,9 +524,26 @@
 		"gaucho1": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "gaucho1_b" }, { "ir": "gaucho1_a" } ] },
 		"gaucho1_a": { "texto": "Yo crucé esto cuando no había ni fortín ni pulpería. Tampoco había cuenta: naides debía nada." },
 		"gaucho1_b": { "texto": "Ahora todo tiene dueño. Hasta el agua." },
-		"gaucho3": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "gaucho3_b" }, { "ir": "gaucho3_a" } ] },
+		"gaucho3": { "segun": [
+			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "ir": "gaucho3_arreo_espera" },
+			{ "si": { "momento": 2, "var": { "arreo": 0 } }, "ir": "gaucho3_arreo" },
+			{ "si": { "momento": [3, 4] }, "ir": "gaucho3_b" },
+			{ "ir": "gaucho3_a" }
+		] },
 		"gaucho3_a": { "texto": "Don Rufino paga, pero paga con papel pa lo de Ceferino. Y ese papel vale acá nomás." },
 		"gaucho3_b": { "texto": "El patrón anda midiendo campo con la vista. Malo para el que quede en el medio." },
+		"gaucho3_arreo": {
+			"texto": [
+				"Don Rufino paga, pero paga con papel pa lo de Ceferino. Y ese papel vale acá nomás.",
+				"Si le sirve, amigo: al patrón se le fue una punta de vacas campo afuera, al este de la posta. Hay que traerla al corral grande de la estancia.",
+				"De a pie no se arrea. Son quince patacones menos en su cuenta."
+			],
+			"opciones": [
+				{ "texto": "La traigo.", "hace": { "var": { "arreo": 1 } } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"gaucho3_arreo_espera": { "texto": "La punta sigue campo afuera, al este de la posta. La tranquera del corral grande da a la casa." },
 		"gaucho2": { "segun": [ { "si": { "final": "encargado" }, "ir": "gaucho2_c" }, { "si": { "momento": [3, 4] }, "ir": "gaucho2_b" }, { "ir": "gaucho2_a" } ] },
 		"gaucho2_a": { "texto": "El patrón dice que va a alambrar todo el campo. No sé con qué gente." },
 		"gaucho2_b": { "texto": "Dicen que busca encargao. A mí no me ha de tocar." },
@@ -539,6 +581,15 @@
 			"aviso": "El campamento de la tropa. El general está al fondo, detrás de la carpa grande, mirando el lago.",
 			"llegada": [-1062, 309],
 			"radio": 9,
+			"mover": [
+				{ "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "a": [-981, 342], "mira": [-996, 322] },
+				{ "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga", "a": [-1010.8, 324.3], "mira": [-1016.5, 319.5] }
+			],
+			"camina": [
+				{ "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "velocidad": 1.45,
+					"por": [[-996, 322], [-1010, 318.5], [-1016.5, 319.5], [-1021, 323.5], [-1028.7, 324.35], [-1044, 324.4], [-1046, 316], [-1056, 312], [-1059, 310.5]] },
+				{ "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga", "por": [[-1010.8, 324.3]] }
+			],
 			"epilogo": [
 				"Zenón se enroló a las órdenes del general Villegas. Le dieron un Remington, una chaqueta que había sido de otro y la papeleta en regla.",
 				"Guio a la tropa por los pasos que conocía. Con los años llegó a sargento.",
@@ -565,18 +616,31 @@
 				"Antes de la primera nieve, de madrugada, los de la toldería que quisieron irse llegaron a la boca de la quebrada.",
 				"Zenón va adelante."
 			],
-			"tp": [-1046, 590],
-			"hora": 7.0,
+			"tp": [-1120, 654],
+			"hora": 6.0,
 			"aviso": "La senda sube por la quebrada hasta el portezuelo. Andá adelante.",
 			"llegada": [-1545, 900],
 			"radio": 28,
 			"mover": [
-				{ "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "a": [-1056, 598], "mira": [-1046, 590] },
-				{ "nodo": "Lugares/TolderiaPainefil/Anciana", "a": [-1053, 604], "mira": [-1046, 590] },
-				{ "nodo": "Lugares/TolderiaPainefil/Muchacho", "a": [-1050, 600], "mira": [-1100, 630] },
-				{ "nodo": "Lugares/TolderiaPainefil/CaballoZaino", "a": [-1048, 603], "mira": [-1100, 630] },
-				{ "nodo": "Lugares/TolderiaPainefil/CaballoAlazan", "a": [-1046, 606], "mira": [-1100, 630] }
+				{ "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "a": [-1114, 648.6], "mira": [-1120, 654] },
+				{ "nodo": "Lugares/TolderiaPainefil/CaballoZaino", "a": [-1111.2, 646.1], "mira": [-1120, 654] },
+				{ "nodo": "Lugares/TolderiaPainefil/Anciana", "a": [-1111.2, 646.1], "mira": [-1120, 654] },
+				{ "nodo": "Lugares/TolderiaPainefil/Muchacho", "a": [-1107.4, 642.8], "mira": [-1120, 654] },
+				{ "nodo": "Lugares/TolderiaPainefil/CaballoAlazan", "a": [-1104.6, 640.3], "mira": [-1120, 654] }
 			],
+			"mostrar": [ "Lugares/TolderiaPainefil/CaballoAlazan/Carga", "Lugares/TolderiaPainefil/CaballoZaino/Mantas" ],
+			"fila": {
+				"paso": 1.7,
+				"espera_desde": 40,
+				"holgura": 16,
+				"aviso_espera": "Te adelantaste. La gente quedó esperando más abajo.",
+				"orden": [
+					{ "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "detras": 3.2 },
+					{ "nodo": "Lugares/TolderiaPainefil/CaballoZaino", "detras": 2.4, "lleva": "Lugares/TolderiaPainefil/Anciana" },
+					{ "nodo": "Lugares/TolderiaPainefil/Muchacho", "detras": 3.4 },
+					{ "nodo": "Lugares/TolderiaPainefil/CaballoAlazan", "detras": 2.4 }
+				]
+			},
 			"epilogo": [
 				"Arriba, en el portezuelo, la niebla tapaba el otro lado.",
 				"Zenón se hizo a un lado. Millaray pasó primera. No miró para atrás; los demás, sí.",
@@ -586,9 +650,8 @@
 		},
 		"solitario": {
 			"titulo": "Gracias, pero me voy",
-			"aviso": "Ceniza espera junto a tu fogón. Ya no queda nada que te ate acá.",
-			"llegada": [-3.5, -6],
-			"radio": 3.5,
+			"aviso": "Ya no queda nada que te ate acá. Montá a Ceniza y salí hacia el sur, con la cordillera a tu derecha.",
+			"alejarse": { "de": [202, 156], "hacia": [0, 1], "metros": 300, "montado": true },
 			"epilogo": [
 				"Zenón saldó la cuenta con lo poco que tenía y no aceptó nada de nadie.",
 				"Ensilló a Ceniza y salió hacia el sur, donde todavía no había línea, ni cerco, ni cuenta.",

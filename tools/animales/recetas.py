@@ -9,6 +9,24 @@
 #   walk / trot: T dura el ciclo, zancada es lo que el pie viaja apoyado, apoyo es la parte del ciclo que apoya,
 #                agache es cuanto baja el cuerpo para que las patas alcancen. Velocidad natural = zancada / (apoyo * T)
 #   graze: cuanto baja cada hueso del cuello y la cabeza (negativo: la cabeza se estira en vez de doblarse)
+# Para las marchas largas hay claves de mas, todas optativas (sin ellas la marcha sale como siempre):
+#   otras_marchas: los clips de mas del animal, en orden; van despues de idle, walk, graze y trot. Cada uno es otra
+#                  marcha (como walk y trot) guardada con su nombre.
+#   fases: en que parte del ciclo empieza a apoyar cada pata (si falta: las diagonales del trote)
+#   adelanta_del / adelanta_tras: el apoyo entero corrido hacia adelante (metros; negativo, hacia atras)
+#   empalme: que parte de la velocidad del apoyo conserva el pie al despegar y al llegar (1 = toda)
+#   vuelo: 2 el pie sube y baja suave; 1 sube y baja de golpe (se ve la suspension)      despegue: grados que levanta el talon
+#   carpo_apoyo: reparto de la flexion de la mano MIENTRAS APOYA, en lugar del segundo numero de "flex". Con zancada larga
+#                el cuerpo va bajo y la mano apoyada se encoge: con 0,5 lo hace desde el codo, con la cana a plomo.
+#   una vez por ciclo (galope): bote1 (metros) y bote1_en (fase en que el cuerpo va mas alto); cabeceo1 (grados que se
+#                hamaca el tronco) y cabeceo1_en (fase con la grupa mas alta); cuello1 (grados que el cuello va en contra
+#                del cabeceo); recoge_tras y recoge_del (grados que se arquean la cadera y el pecho) y recoge_en (fase en
+#                que va mas recogido)
+#   cuello_baja, hocico: grados que baja el cuello y que estira la cabeza      cola_alza, cola_ondea: la cola en alto y flameando
+#   detalle: los dos momentos del ciclo (0 a 1) que salen en grande en la hoja de detalle
+# Para tantear una marcha nueva: que "le falto pata" de 0, que APOYO de menos de 1 cm y que la mano y la pata del mismo
+# lado no se toquen (con zancadas de un metro la pata llega adonde todavia esta la mano: se corren los apoyos con
+# adelanta_*, se baja empalme o se adelanta la fase de las manos).
 
 RECETAS = {
     'ceniza': dict(
@@ -25,6 +43,20 @@ RECETAS = {
         trot=dict(T=0.72, zancada=0.68, apoyo=0.44, alto_del=0.20, alto_tras=0.14, giro_del=70, giro_tras=45,
                   agache=0.088, bote=0.022, ladeo=1.0, quiebre=1.0, asiente=0.8, cola=1.3),
         graze=dict(T=9.0, baja=1.6, cuello=[62, 32, 20], cabeza=-74, pecho=2, cuerpo=1, agache=0.01, ritmo=1.4),
+        # Los andares montados: paso largo (1,8 m/s), trote largo (5,8 m/s) y galope (12,5 m/s).
+        otras_marchas=('walk_long', 'trot_long', 'gallop'),
+        walk_long=dict(T=29 / 30, zancada=1.0, apoyo=0.58, alto_del=0.14, alto_tras=0.10, giro_del=50, giro_tras=32,
+                       agache=0.074, cabeceo=2.0, ladeo=2.5, quiebre=2.0, asiente=3.5, adelanta_del=-0.06, adelanta_tras=-0.04,
+                       empalme=0.5, carpo_apoyo=0.5, fases=dict(tras_L=0.0, del_L=0.25, tras_R=0.5, del_R=0.75)),
+        trot_long=dict(T=16 / 30, zancada=0.96, apoyo=0.31, alto_del=0.23, alto_tras=0.12, giro_del=80, giro_tras=50,
+                       agache=0.072, bote=0.03, ladeo=0.8, quiebre=0.8, asiente=1.0, cola=1.5, cola_alza=15, cuello_baja=6,
+                       adelanta_del=-0.08, adelanta_tras=-0.06, empalme=0.15, despegue=25, carpo_apoyo=0.5, vuelo=1,
+                       detalle=(0.40, 0.16), fases=dict(tras_L=0.0, del_R=0.97, tras_R=0.5, del_L=0.47)),
+        gallop=dict(T=13 / 30, zancada=1.08, apoyo=0.20, alto_del=0.38, alto_tras=0.14, giro_del=85, giro_tras=55,
+                    agache=0.062, bote1=0.04, bote1_en=0.84, cabeceo1=4.0, cabeceo1_en=0.50, cuello1=5, cuello_baja=10, hocico=8,
+                    recoge_tras=6, recoge_del=4, recoge_en=0.9, ladeo=0.5, quiebre=0.5, cola=1.5, cola_alza=35, cola_ondea=6,
+                    adelanta_del=-0.04, adelanta_tras=0.05, empalme=0.15, despegue=35, carpo_apoyo=0.5, vuelo=1,
+                    detalle=(0.85, 0.30), fases=dict(tras_L=0.0, tras_R=0.11, del_L=0.37, del_R=0.48)),
     ),
     'caballo_zaino': 'ceniza', 'caballo_alazan': 'ceniza', 'caballo_moro': 'ceniza', 'caballo_bayo': 'ceniza',
     'vaca': dict(
@@ -39,6 +71,10 @@ RECETAS = {
         estilo=dict(cola_vaiven=6, coletazo=26, mira=10),
         walk=dict(T=1.25, zancada=0.52, apoyo=0.65, alto_del=0.07, alto_tras=0.06, giro_del=35, giro_tras=25,
                   agache=0.04, cabeceo=0.6, ladeo=2.2, quiebre=1.5, asiente=2.0),
+        # Trote de arreo (2,4 m/s): pesado, con poco bote y bastante bamboleo.
+        trot=dict(T=17 / 30, zancada=0.62, apoyo=0.46, alto_del=0.10, alto_tras=0.08, giro_del=45, giro_tras=30,
+                  agache=0.038, bote=0.012, ladeo=1.8, quiebre=1.6, asiente=1.2, cola=1.4, cuello_baja=4,
+                  adelanta_del=-0.05, adelanta_tras=-0.03, empalme=0.6, carpo_apoyo=0.5),
         graze=dict(T=9.0, baja=1.7, cuello=[60, 42], cabeza=-54, pecho=2, cuerpo=1, agache=0.01, ritmo=1.1),
     ),
     'oveja': dict(

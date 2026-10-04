@@ -34,6 +34,7 @@ func _initialize() -> void:
 	_final_chile()
 	_final_solitario_sin_hacer_nada()
 	_borde_del_minimo()
+	_arreo()
 	_guardado()
 	print("FALLAS: %d" % fallas)
 	H.free()
@@ -94,10 +95,11 @@ func _revisar_datos() -> void:
 	for id in H.datos.get("personajes", {}):
 		if not nodos.has(str(H.datos["personajes"][id].get("charla", ""))):
 			_mal("el personaje '%s' no tiene charla" % id)
+		_condicion(H.datos["personajes"][id].get("encuentro", {}).get("si", {}), "el encuentro de '%s'" % id)
 	for id in H.datos.get("finales", {}):
 		var final: Dictionary = H.datos["finales"][id]
-		if final.get("epilogo", []).is_empty() or final.get("llegada", []).size() != 2:
-			_mal("al final '%s' le falta el epílogo o la llegada" % id)
+		if final.get("epilogo", []).is_empty() or (final.get("llegada", []).size() != 2 and final.get("alejarse", {}).is_empty()):
+			_mal("al final '%s' le falta el epílogo o cómo se llega (llegada o alejarse)" % id)
 
 
 ## Una clave mal escrita en "si" o en "hace" solo da un aviso en la consola: acá es una falla.
@@ -268,6 +270,32 @@ func _borde_del_minimo() -> void:
 			H.hablar(par[1])
 			var ofrece: bool = not H.vista().get("opciones", []).is_empty()
 			_espero(ofrece == (falta == 0), "%s ofrezca con el mínimo y no con uno menos (falta %d)" % [par[1], falta])
+
+
+## La changa del capataz baja la cuenta y nada más: no mueve la confianza ni la trama. Se repite
+## al otro día y se acaba después de las veces que dice datos/historia.json.
+func _arreo() -> void:
+	_momento_1()
+	var d: Dictionary = H.datos.get("arreo", {})
+	var veces := int(d.get("veces", 0))
+	_espero(veces > 0 and int(d.get("paga", 0)) > 0, "datos/historia.json traiga los números del arreo")
+	for vuelta in veces:
+		var confianza_antes: Dictionary = H.confianza.duplicate()
+		var deuda_antes: int = H.deuda
+		_hablar("gaucho3", ["La traigo."])
+		_espero(H.v("arreo") == 1 and H._aviso_del_momento().contains("arreo"), "al tomar el arreo el aviso diga adónde ir (vuelta %d)" % vuelta)
+		_hablar("gaucho3")
+		H._arreo_cumplido()
+		_espero(H.deuda == deuda_antes - int(d.get("paga", 0)), "el arreo baje la cuenta %d pesos" % int(d.get("paga", 0)))
+		_espero(H.confianza == confianza_antes and H.final_elegido == "" and H.momento == 2, "el arreo no mueva la confianza ni la trama")
+		H.hablar("gaucho3")
+		_espero(H.vista().get("opciones", []).is_empty(), "el mismo día el capataz no ofrezca otra punta")
+		_seguir([], "gaucho3")
+		H.sentarse_al_fogon()
+		_seguir([], "el fogón")
+	H.hablar("gaucho3")
+	_espero(H.vista().get("opciones", []).is_empty(), "después de %d arreos el capataz no ofrezca más" % veces)
+	_seguir([], "gaucho3")
 
 
 func _guardado() -> void:

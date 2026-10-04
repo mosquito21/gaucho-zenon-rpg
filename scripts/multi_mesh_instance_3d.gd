@@ -23,6 +23,8 @@ const POLLITO_GLB := "res://assets/animales/pollito.glb"
 const POLLITO_PARDO_GLB := "res://assets/animales/pollito_pardo.glb"
 const PERRO_GLB := "res://assets/animales/perro.glb"
 const HUEMUL_GLB := "res://assets/animales/huemul.glb"
+const CABALLO_MORO_GLB := "res://assets/animales/caballo_moro.glb"
+const CABALLO_BAYO_GLB := "res://assets/animales/caballo_bayo.glb"
 
 const MATAS_SHADER := "res://assets/materiales/matas.gdshader"
 
@@ -34,7 +36,7 @@ const MATAS_SHADER := "res://assets/materiales/matas.gdshader"
 # Las de los animales con esqueleto salen de sus clips (tools/animales); la gallina se mueve por código.
 const PASO_NATURAL := {
 	"caballo": {"walk": 0.94, "trot": 2.11},
-	"vaca": {"walk": 0.63},
+	"vaca": {"walk": 0.63, "trot": 2.38},
 	"oveja": {"walk": 0.48},
 	"guanaco": {"walk": 0.84, "trot": 2.01},
 	"zorro": {"walk": 0.5, "trot": 1.23},
@@ -57,6 +59,7 @@ const PLANES := {
 	"choique": [["walk", 12.0], ["graze", 1.0], ["walk", 8.0], ["idle", 1.0], ["trot", 6.0]],
 	"gallina": [["walk", 3.0], ["graze", 1.0], ["walk", 2.0], ["idle", 1.0], ["graze", 1.0]],
 	"huemul": [["graze", 2.0], ["walk", 8.0], ["idle", 1.0], ["walk", 6.0], ["graze", 1.0], ["idle", 2.0]],
+	"caballo": [["graze", 2.0], ["walk", 9.0], ["idle", 1.0], ["graze", 1.0], ["walk", 6.0], ["idle", 1.0]],
 }
 
 var _pajaros: Array[Node3D] = []
@@ -177,8 +180,13 @@ func _mapa_pisado(terreno: Node) -> ImageTexture:
 	var imagen := Image.create(lado, lado, false, Image.FORMAT_R8)
 	var a_mapa: Transform3D = terreno.get_internal_transform().affine_inverse()
 	var celdas := float(terreno.get_data().get_resolution())
-	var camino := get_node_or_null("../Caminos/CaminoFortinTolderia")
-	if camino != null:
+	# Los caminos hechos con calcos y cuánto se limpia a cada lado (en puntos de 2 m): la huella de
+	# carros es ancha; los senderos de la hacienda de la aguada, angostos.
+	for dato: Array in [["../Caminos/CaminoFortinTolderia", 1], ["../Caminos/HuellasDeLaAguada", 0]]:
+		var camino := get_node_or_null(dato[0])
+		if camino == null:
+			continue
+		var ancho: int = dato[1]
 		for tramo in camino.get_children():
 			var calco := tramo as Decal
 			if calco == null:
@@ -188,8 +196,8 @@ func _mapa_pisado(terreno: Node) -> ImageTexture:
 				var punto: Vector3 = a_mapa * (calco.global_transform * Vector3(0.0, 0.0, (float(i) / pasos - 0.5) * calco.size.z))
 				var px := int((punto.x + 0.5) / celdas * lado)
 				var pz := int((punto.z + 0.5) / celdas * lado)
-				for dz in range(-1, 2):
-					for dx in range(-1, 2):
+				for dz in range(-ancho, ancho + 1):
+					for dx in range(-ancho, ancho + 1):
 						imagen.set_pixel(clampi(px + dx, 0, lado - 1), clampi(pz + dz, 0, lado - 1), Color.WHITE)
 	return ImageTexture.create_from_image(imagen)
 
@@ -484,6 +492,13 @@ func _armar_bichos() -> void:
 		# Huemules en el paso a Chile: uno en el borde del bosque, a la entrada, y otro ladera arriba.
 		[HUEMUL_GLB, "Huemul1", 1.0, -1100.0, 620.0, 12.0, 0.0, "huemul", "huemul"],
 		[HUEMUL_GLB, "Huemul2", 0.92, -1120.0, 780.0, 14.0, 2.0, "huemul", "huemul"],
+		# La hacienda de la toldería que abreva en la aguada del cerro (tanda 6): es lo que se ve
+		# desde el mojón. Las vueltas pasan por la orilla del agua.
+		[VACA_GLB, "VacaAguada1", 0.95, -122.0, 228.0, 9.0, 0.3, "vaca", "vaca"],
+		[VACA_GLB, "VacaAguada2", 1.0, -122.0, 228.0, 11.5, 2.2, "vaca", "vaca"],
+		[VACA_GLB, "VacaAguada3", 0.9, -122.0, 228.0, 7.5, 4.1, "vaca", "vaca"],
+		[CABALLO_MORO_GLB, "CaballoAguada1", 1.0, -88.0, 256.0, 9.0, 1.0, "caballo", "caballo"],
+		[CABALLO_BAYO_GLB, "CaballoAguada2", 0.97, -88.0, 256.0, 11.0, 3.4, "caballo", "caballo"],
 	]
 	for d in lista:
 		var nodo := _modelo_bicho(d[0], d[1], d[2])

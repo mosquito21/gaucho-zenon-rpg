@@ -8,7 +8,9 @@ extends Node
 ## La lógica no necesita el mundo: tools/pruebas/probar_historia.gd la recorre sin abrirlo.
 
 const RUTA_DATOS := "res://datos/historia.json"
-const RUTA_PARTIDA := "user://partida.json"
+## Dónde se guarda la partida. Las pruebas que corren el juego solas lo arrancan con
+## "-- --partida-de-prueba" y guardan en otro archivo, para no pisar la partida de quien juega.
+var ruta_partida := "user://partida.json"
 
 var datos: Dictionary = {}
 
@@ -42,9 +44,16 @@ var _partida: Dictionary = {}
 var _llegada_revisar := 0.0
 var _en_fogon := false
 var _ultimo_aviso := ""
+var _terreno: Node3D
+var _saliendo := {}
+var _fila: Array[Node3D] = []
+var _fila_esperando := false
+var _arreo: Node
 
 
 func _init() -> void:
+	if OS.get_cmdline_user_args().has("--partida-de-prueba"):
+		ruta_partida = "user://partida_prueba.json"
 	_cargar_datos()
 	nueva()
 
@@ -307,6 +316,7 @@ func _cerrar() -> void:
 		if aviso != _ultimo_aviso:
 			_avisar(aviso)
 	if _sucio:
+		_acomodar_arreo()
 		guardar()
 
 
@@ -348,6 +358,9 @@ func _amanecer() -> void:
 	var ciclo := _ciclo()
 	if ciclo != null:
 		ciclo.establecer_hora(float(datos.get("fogon", {}).get("hora_amanecer", 7.0)))
+	# Al otro día el capataz vuelve a tener una punta que traer.
+	if v("arreo") == 2:
+		poner("arreo", 0)
 	# El salto a la noche pudo dejar cargado un aviso ("Se hizo de noche…") que a las 7 ya no vale.
 	if _jugador != null and is_instance_valid(_jugador) and _jugador.has_method("mostrar_aviso"):
 		_jugador.mostrar_aviso("")
@@ -366,7 +379,7 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	_jugador = jugador
 	_mundo = jugador.get_parent()
 	_personas = []
-	if _partida.is_empty() and momento == 1 and flags.is_empty() and FileAccess.file_exists(RUTA_PARTIDA):
+	if _partida.is_empty() and momento == 1 and flags.is_empty() and FileAccess.file_exists(ruta_partida):
 		# World.tscn se abrió sin pasar por el menú: sigue la partida que haya.
 		# Si esa partida ya llegó a un final, empieza una nueva.
 		cargar()
@@ -382,12 +395,18 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	var fogon := _mundo.get_node_or_null(str(datos.get("fogon", {}).get("nodo", "")))
 	if fogon != null:
 		_personas.append(_sumar_interactuable(fogon, Interactable.Rol.FOGON, "", "", 3.0))
+	# Ceniza se monta arrimándose a ella (el resto lo hace player.gd).
+	var caballo := _mundo.get_node_or_null("Ceniza")
+	if caballo != null:
+		_personas.append(_sumar_interactuable(caballo, Interactable.Rol.CABALLO, "", "Ceniza", 2.8))
 	_acomodar_mundo()
 	if not _partida.is_empty():
 		var pos: Array = _partida.get("pos", [])
 		if pos.size() == 3:
 			jugador.global_position = Vector3(pos[0], pos[1], pos[2])
 		jugador.set("yaw", float(_partida.get("yaw", 0.0)))
+		if jugador.has_method("poner_caballo"):
+			jugador.call("poner_caballo", _partida)
 		if _partida.has("hora"):
 			# El ciclo de día y noche pone su hora inicial un cuadro después de arrancar:
 			# la hora guardada se pone recién después.
@@ -425,7 +444,10 @@ func _sumar_interactuable(padre: Node, rol: int, id: String, nombre: String, alc
 func persona_cerca(jugador: Node3D) -> Interactable:
 	var mejor: Interactable = null
 	var mejor_dist := 1e9
-	var frente := -jugador.global_transform.basis.z
+	# "Adelante" es hacia donde mira la cámara. A pie el cuerpo la sigue; montado no (el caballo va
+	# por su rumbo), y alcanza con arrimarse y mirar a la persona.
+	var giro: float = jugador.rotation.y if jugador.get("yaw") == null else float(jugador.get("yaw"))
+	var frente := Vector3(-sin(giro), 0.0, -cos(giro))
 	for area: Interactable in _personas:
 		if not is_instance_valid(area) or not area.is_visible_in_tree():
 			continue
@@ -454,6 +476,47 @@ func _acomodar_mundo() -> void:
 		lugar.visible = prendido
 		# Apagado, el nodo deja de procesar y sus cuerpos de choque salen de la física.
 		lugar.process_mode = Node.PROCESS_MODE_INHERIT if prendido else Node.PROCESS_MODE_DISABLED
+	_acomodar_arreo()
+
+
+## El arreo (la changa del capataz): mientras dura, la punta anda suelta en el campo; cuando ya se
+## hizo alguno, queda encerrada en el corral grande. Los números están en datos/historia.json
+## ("arreo") y las vacas las mueve scripts/arreo.gd.
+func _acomodar_arreo() -> void:
+	var d: Dictionary = datos.get("arreo", {})
+	if d.is_empty() or _mundo == null or not is_instance_valid(_mundo) or _jugador == null:
+		return
+	var suelta := momento == 2 and v("arreo") == 1
+	var hay := _arreo != null and is_instance_valid(_arreo)
+	if not suelta and v("arreos") == 0:
+		if hay:
+			_arreo.queue_free()
+			_arreo = null
+		return
+	if not hay:
+		_arreo = (load("res://scripts/arreo.gd") as GDScript).new()
+		_arreo.name = "Arreo"
+		_arreo.set("datos", d)
+		_arreo.set("jinete", _jugador)
+		_arreo.connect("cumplido", _arreo_cumplido)
+		_arreo.connect("quedo_atras", func() -> void: _avisar(str(d.get("aviso_rezagada", ""))))
+		_mundo.add_child(_arreo)
+		# Si la partida se guardó a medio arreo, cada vaca vuelve adonde había quedado.
+		_arreo.call("poner", suelta, _partida.get("vacas", []) if suelta else [])
+		_partida.erase("vacas")
+	elif _arreo.get("suelta") != suelta and (suelta or _arreo.get("_pagado") != true):
+		_arreo.call("poner", suelta)
+
+
+## La última vaca pasó la tranquera: se cobra. No mueve la confianza de nadie ni toca los finales.
+func _arreo_cumplido() -> void:
+	var d: Dictionary = datos.get("arreo", {})
+	var hechos := v("arreos") + 1
+	# Hasta el otro día no hay otra punta (2); después de tantas veces, ninguna más (3).
+	aplicar({"deuda": -int(d.get("paga", 0)), "nota": str(d.get("nota", "")),
+		"var": {"arreos": hechos, "arreo": 3 if hechos >= int(d.get("veces", 1)) else 2}})
+	_avisar(str(d.get("aviso_hecho", "")))
+	guardar()
 
 
 func _al_cambiar_de_momento() -> void:
@@ -525,11 +588,17 @@ func _empezar_final() -> void:
 	_cuadro.fundido(cartel, al_terminar, preparar)
 
 
-## En algunos finales la gente espera a Zenón en otro lugar (nadie camina todavía).
+## Acomoda a la gente del final elegido. En datos/historia.json, cada final puede traer:
+##   "mover": a quién se lleva a otro lugar y hacia dónde mira;
+##   "mostrar": qué aparece recién ahora (la carga de un caballo);
+##   "fila": quiénes siguen a Zenón, uno detrás de otro, y a quién lleva montado cada caballo;
+##   "camina": quién va por su cuenta por unos puntos (el sargento, adelante). Con un solo punto,
+##     el suyo, deja la ronda y se queda ahí (el soldado de la carga, para no cruzarse con el sargento).
 func _mover_gente_del_final() -> void:
 	if _mundo == null or not is_instance_valid(_mundo):
 		return
-	for mov in datos.get("finales", {}).get(final_elegido, {}).get("mover", []):
+	var final: Dictionary = datos.get("finales", {}).get(final_elegido, {})
+	for mov in final.get("mover", []):
 		var nodo := _mundo.get_node_or_null(str(mov.get("nodo", ""))) as Node3D
 		if nodo == null:
 			continue
@@ -538,22 +607,96 @@ func _mover_gente_del_final() -> void:
 		if mov.has("mira"):
 			var m: Array = mov["mira"]
 			nodo.look_at(Vector3(m[0], nodo.global_position.y, m[1]), Vector3.UP, true)
+	for ruta in final.get("mostrar", []):
+		var cosa := _mundo.get_node_or_null(str(ruta)) as Node3D
+		if cosa != null:
+			cosa.visible = true
+	_fila = []
+	var fila: Dictionary = final.get("fila", {})
+	var guia: Node3D = _jugador
+	for puesto: Dictionary in fila.get("orden", []):
+		var nodo := _mundo.get_node_or_null(str(puesto.get("nodo", ""))) as Node3D
+		if nodo == null or not nodo.has_method("seguir") or guia == null:
+			continue
+		nodo.call("seguir", guia, float(puesto.get("detras", 2.5)), float(fila.get("espera_desde", 40.0)), float(fila.get("paso", 0.0)))
+		if puesto.has("lleva"):
+			var jinete := _mundo.get_node_or_null(str(puesto["lleva"]))
+			if jinete != null and jinete.has_method("sentarse_en"):
+				jinete.call("sentarse_en", nodo)
+		_fila.append(nodo)
+		guia = nodo
+	for andar: Dictionary in final.get("camina", []):
+		var nodo := _mundo.get_node_or_null(str(andar.get("nodo", ""))) as Node3D
+		if nodo == null or not nodo.has_method("andar_por"):
+			continue
+		var puntos := PackedVector3Array()
+		for p: Array in andar.get("por", []):
+			puntos.append(Vector3(p[0], altura_suelo(p[0], p[1]), p[1]))
+		nodo.call("andar_por", puntos, float(andar.get("velocidad", 1.3)))
 
 
 func _process(delta: float) -> void:
-	if final_elegido == "" or terminado or ocupado or _jugador == null or not is_instance_valid(_jugador):
+	if terminado or ocupado or _jugador == null or not is_instance_valid(_jugador):
 		return
 	_llegada_revisar -= delta
 	if _llegada_revisar > 0.0:
 		return
 	_llegada_revisar = 0.25
+	_salir_al_encuentro()
+	if final_elegido == "":
+		return
 	var final: Dictionary = datos.get("finales", {}).get(final_elegido, {})
+	var aqui := Vector2(_jugador.global_position.x, _jugador.global_position.z)
+	# Un final puede terminar al alejarse (montado, hacia un rumbo) en vez de al llegar a un lugar.
+	var alejarse: Dictionary = final.get("alejarse", {})
+	if not alejarse.is_empty():
+		var de: Array = alejarse.get("de", [0, 0])
+		var hacia: Array = alejarse.get("hacia", [0, 1])
+		var andado := (aqui - Vector2(de[0], de[1])).dot(Vector2(hacia[0], hacia[1]).normalized())
+		if andado >= float(alejarse.get("metros", 300.0)) and (not alejarse.get("montado", false) or _jugador.get("montado") == true):
+			terminar()
+		return
 	var llegada: Array = final.get("llegada", [])
 	if llegada.size() != 2:
 		return
-	var plano := Vector2(_jugador.global_position.x - float(llegada[0]), _jugador.global_position.z - float(llegada[1]))
-	if plano.length() <= float(final.get("radio", 8.0)):
-		terminar()
+	var meta := Vector2(llegada[0], llegada[1])
+	# Si la fila quedó esperando porque Zenón se adelantó, se lo dice (una vez por espera).
+	var fila: Dictionary = final.get("fila", {})
+	if not _fila.is_empty() and is_instance_valid(_fila[0]):
+		var lejos: float = aqui.distance_to(Vector2(_fila[0].global_position.x, _fila[0].global_position.z))
+		var esperando := lejos > float(fila.get("espera_desde", 40.0))
+		if esperando and not _fila_esperando and fila.has("aviso_espera"):
+			_avisar(str(fila["aviso_espera"]))
+		_fila_esperando = esperando
+	if aqui.distance_to(meta) > float(final.get("radio", 8.0)):
+		return
+	# Con gente detrás, el final llega cuando llega la gente, no solo Zenón.
+	for nodo: Node3D in _fila:
+		if is_instance_valid(nodo) and Vector2(nodo.global_position.x, nodo.global_position.z).distance_to(meta) > float(final.get("radio", 8.0)) + float(fila.get("holgura", 16.0)):
+			return
+	terminar()
+
+
+## Hay gente que, cuando la trama lo pide, no espera a Zenón parada: le sale al cruce (Nicasio en
+## la huella). En datos/historia.json: "encuentro": {"si": {condición}, "desde": metros}.
+func _salir_al_encuentro() -> void:
+	if _mundo == null or not is_instance_valid(_mundo):
+		return
+	for id: String in datos.get("personajes", {}):
+		var cruce: Dictionary = datos["personajes"][id].get("encuentro", {})
+		if cruce.is_empty():
+			continue
+		var nodo := _mundo.get_node_or_null(str(datos["personajes"][id].get("nodo", ""))) as Node3D
+		if nodo == null or not nodo.has_method("venir"):
+			continue
+		var lejos := Vector2(nodo.global_position.x - _jugador.global_position.x, nodo.global_position.z - _jugador.global_position.z).length()
+		if lejos < float(cruce.get("desde", 30.0)) and cumple(cruce.get("si", {})):
+			if not _saliendo.has(id):
+				_saliendo[id] = true
+				nodo.call("venir", _jugador, 3.0)
+		elif _saliendo.has(id):
+			_saliendo.erase(id)
+			nodo.call("quedarse")
 
 
 ## Cierra la historia con el final elegido y muestra el epílogo.
@@ -582,30 +725,47 @@ func _mostrar_epilogo() -> void:
 	_cuadro.epilogo(str(final.get("titulo", "")), paginas, Color(str(final.get("color", "#0b0907"))), al_menu)
 
 
-## Altura del piso en un punto del mapa (para acomodar gente en los finales).
+## Altura del piso en un punto del mapa, la misma que se ve y se pisa: cada cuadrado del terreno son
+## dos triángulos partidos por la diagonal 10-01 (promediar las cuatro esquinas se equivoca hasta
+## 13 cm en las laderas). La usan los finales, la gente que camina y Ceniza.
 func altura_suelo(x: float, z: float) -> float:
-	if _mundo == null or not is_instance_valid(_mundo):
-		return 0.0
-	var terreno := _mundo.get_node_or_null("HTerrain")
-	if terreno == null or not terreno.has_method("world_to_map"):
-		return 0.0
-	var datos_terreno = terreno.get_data()
+	if _terreno == null or not is_instance_valid(_terreno):
+		if not is_inside_tree() or get_tree().current_scene == null:
+			return 0.0
+		_terreno = get_tree().current_scene.get_node_or_null("HTerrain") as Node3D
+		if _terreno == null or not _terreno.has_method("world_to_map"):
+			_terreno = null
+			return 0.0
+	var datos_terreno = _terreno.get_data()
 	if datos_terreno == null:
 		return 0.0
-	var mapa: Vector3 = terreno.world_to_map(Vector3(x, 0.0, z))
-	var h: float = datos_terreno.get_interpolated_height_at(Vector3(mapa.x, 0.0, mapa.z))
-	return (terreno.get_internal_transform() * Vector3(mapa.x, h, mapa.z)).y
+	var mapa: Vector3 = _terreno.world_to_map(Vector3(x, 0.0, z))
+	var tope: int = datos_terreno.get_resolution() - 2
+	var cx := clampi(floori(mapa.x), 0, tope)
+	var cz := clampi(floori(mapa.z), 0, tope)
+	var fx := clampf(mapa.x - cx, 0.0, 1.0)
+	var fz := clampf(mapa.z - cz, 0.0, 1.0)
+	var h00: float = datos_terreno.get_height_at(cx, cz)
+	var h10: float = datos_terreno.get_height_at(cx + 1, cz)
+	var h01: float = datos_terreno.get_height_at(cx, cz + 1)
+	var h: float
+	if fx + fz <= 1.0:
+		h = h00 + (h10 - h00) * fx + (h01 - h00) * fz
+	else:
+		var h11: float = datos_terreno.get_height_at(cx + 1, cz + 1)
+		h = h11 + (h01 - h11) * (1.0 - fx) + (h10 - h11) * (1.0 - fz)
+	return (_terreno.get_internal_transform() * Vector3(mapa.x, h, mapa.z)).y
 
 
 # ------------------------------------------------------------------ guardado
 
 func hay_partida() -> bool:
-	return FileAccess.file_exists(RUTA_PARTIDA)
+	return FileAccess.file_exists(ruta_partida)
 
 
 ## ¿La partida guardada ya llegó a un final? (El menú no ofrece "Continuar".)
 func partida_terminada() -> bool:
-	var json = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PARTIDA))
+	var json = JSON.parse_string(FileAccess.get_file_as_string(ruta_partida))
 	return json is Dictionary and bool(json.get("terminado", false))
 
 
@@ -639,17 +799,23 @@ func guardar() -> void:
 		var ciclo := _ciclo()
 		if ciclo != null:
 			e["hora"] = ciclo.get("hora_del_dia")
+		# Dónde quedó Ceniza y si Zenón va montado.
+		if _jugador.has_method("estado_del_caballo"):
+			e.merge(_jugador.call("estado_del_caballo"))
+		# Un arreo a medias: dónde quedó cada vaca.
+		if v("arreo") == 1 and _arreo != null and is_instance_valid(_arreo):
+			e["vacas"] = _arreo.call("guardar")
 	else:
 		return  # Sin mundo (pruebas) no se escribe nada en el disco.
-	var archivo := FileAccess.open(RUTA_PARTIDA, FileAccess.WRITE)
+	var archivo := FileAccess.open(ruta_partida, FileAccess.WRITE)
 	if archivo == null:
-		push_warning("No se pudo guardar la partida en %s" % RUTA_PARTIDA)
+		push_warning("No se pudo guardar la partida en %s" % ruta_partida)
 		return
 	archivo.store_string(JSON.stringify(e, "\t"))
 
 
 func cargar() -> bool:
-	var json = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PARTIDA))
+	var json = JSON.parse_string(FileAccess.get_file_as_string(ruta_partida))
 	if not (json is Dictionary):
 		return false
 	poner_estado(json)
@@ -658,6 +824,6 @@ func cargar() -> bool:
 
 
 func borrar_partida() -> void:
-	if FileAccess.file_exists(RUTA_PARTIDA):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(RUTA_PARTIDA))
+	if FileAccess.file_exists(ruta_partida):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_partida))
 	nueva()

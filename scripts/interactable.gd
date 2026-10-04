@@ -4,7 +4,7 @@ class_name Interactable
 ## Cosa de la estepa con la que Zenón puede hablar o dejar un recado.
 ## El estado del trabajo vive en el jugador, así no se pierde al caminar.
 
-enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON }
+enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON, CABALLO }
 
 @export var rol: Rol = Rol.PIEDRA
 @export var interact_text := "Presioná E para inspeccionar la piedra"
@@ -15,7 +15,7 @@ enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON }
 ## A la gente y al fogón los suma scripts/Historia.gd al arrancar; no hace falta ponerlos a mano.
 @export var personaje := ""
 @export var nombre := ""
-## Rol PERSONA y FOGON: hasta cuántos metros se puede hablar.
+## Rol PERSONA, FOGON y CABALLO: hasta cuántos metros se puede hablar (o montar).
 @export var alcance := 3.2
 
 
@@ -59,7 +59,11 @@ func texto_mira(jugador: Node) -> String:
 		Rol.PERSONA:
 			return "Presioná E para hablar con %s" % nombre
 		Rol.FOGON:
+			if jugador.get("montado") == true:
+				return "Para sentarte al fogón, bajate de Ceniza (Q)"
 			return "Presioná E para sentarte al fogón"
+		Rol.CABALLO:
+			return "Presioná E para montar a %s" % nombre
 		_:
 			return interact_text
 
@@ -80,7 +84,12 @@ func al_interactuar(jugador: Node) -> String:
 			Historia.hablar(personaje)
 			return ""
 		Rol.FOGON:
+			if jugador.get("montado") == true:
+				return "Desde arriba del caballo no hay fogón que valga. Bajate de Ceniza con la Q."
 			Historia.sentarse_al_fogon()
+			return ""
+		Rol.CABALLO:
+			jugador.call("montar")
 			return ""
 		_:
 			if texto_al_usar != "":

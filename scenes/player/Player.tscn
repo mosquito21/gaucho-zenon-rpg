@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c4aatou864l5c" path="res://scenes/player/player.gd" id="1_wr5hl"]
 [ext_resource type="PackedScene" uid="uid://rggsqh1t0i1e" path="res://assets/personajes/gaucho_zenon_animado.glb" id="2_gaucho"]
 [ext_resource type="PackedScene" uid="uid://b4petybc0wok" path="res://assets/props/facon.glb" id="3_4kuee"]
+[ext_resource type="PackedScene" uid="uid://cpk21q17te6tg" path="res://assets/props/boleadoras_al_cinto.glb" id="4_524rm"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4kuee"]
 radius = 0.35
@@ -55,5 +56,15 @@ bone_idx = 0
 use_external_skeleton = true
 external_skeleton = NodePath("../Zenon/Zenon/Skeleton3D")
 
-[node name="Facon" type="Node3D" parent="Cuerpo/FaconEnElCinto" unique_id=1289845199 instance=ExtResource("3_4kuee")]
+[node name="Facon" parent="Cuerpo/FaconEnElCinto" unique_id=1289845199 instance=ExtResource("3_4kuee")]
 transform = Transform3D(96.59258, -1.131334e-06, -25.881905, -25.881905, -4.222196e-06, -96.59258, 0, 100, -4.371139e-06, -9, 7, -14)
+
+[node name="BoleadorasAlCinto" type="BoneAttachment3D" parent="Cuerpo" unique_id=2043988739]
+transform = Transform3D(-0.01, 0, 0, 0, 0.01, 0, 0, 0, -0.01, 0.0018241374, 0.06944114, 0.0013411392)
+bone_name = "mixamorig_Hips"
+bone_idx = 0
+use_external_skeleton = true
+external_skeleton = NodePath("../Zenon/Zenon/Skeleton3D")
+
+[node name="Boleadoras" type="Node3D" parent="Cuerpo/BoleadorasAlCinto" unique_id=624973376 instance=ExtResource("4_524rm")]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)

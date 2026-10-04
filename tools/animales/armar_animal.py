@@ -1,4 +1,4 @@
-# Le arma el esqueleto y los ciclos (idle, walk, graze, trot) a un animal de assets/animales/ y escribe
+# Le arma el esqueleto y los ciclos (idle, walk, graze, trot y las marchas de mas de su receta) a un animal de assets/animales/ y escribe
 # assets/animales/<nombre>_animado.blend y .glb. No toca el modelo original.
 # Uso, desde la raiz del proyecto:
 #   "C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b --factory-startup -P tools/animales/armar_animal.py -- ceniza vaca
@@ -223,24 +223,35 @@ class Pata:
         ang = lambda a, b: math.atan2(a[0] * b[1] - a[1] * b[0], a[0] * b[0] + a[1] * b[1])
         self.g1 = math.copysign(flex[0], ang(self.u, self.v))
         self.g2 = math.copysign(flex[1], ang(self.v, self.w))
-        qs = np.linspace(-1.2, 2.4, 721)
-        largos = np.array([np.linalg.norm(self.forma(q)[3]) for q in qs])
-        tope = int(np.argmax(largos))
-        self.qs, self.largos = qs[tope:], np.minimum.accumulate(largos[tope:])
+        self.qs, self.largos = self.tabla(self.g2)
         self.largo_max = float(self.largos[0])
         self.largo_reposo = float(np.linalg.norm(self.u + self.v + self.w))
 
-    def forma(self, q):
+    def tabla(self, g2):
+        """Cuanto mide la pata segun cuanto se dobla (q), de lo mas estirada en adelante."""
+        qs = np.linspace(-1.2, 2.4, 721)
+        largos = np.array([np.linalg.norm(self.forma(q, g2)[3]) for q in qs])
+        tope = int(np.argmax(largos))
+        return qs[tope:], np.minimum.accumulate(largos[tope:])
+
+    def forma(self, q, g2=None):
         v = rot2(self.v, self.g1 * q)
-        w = rot2(self.w, (self.g1 + self.g2) * q)
+        w = rot2(self.w, (self.g1 + (self.g2 if g2 is None else g2)) * q)
         return self.u, v, w, self.u + v + w
 
-    def resolver(self, A, T):
-        """Devuelve las orientaciones (3x3, espacio de la armadura) de sup, med e inf y cuanto falto para llegar."""
+    def resolver(self, A, T, flex2=None):
+        """Devuelve las orientaciones (3x3, espacio de la armadura) de sup, med e inf y cuanto falto para llegar.
+        flex2: otro reparto de la flexion para la articulacion de abajo (ver 'carpo_apoyo' en paso)."""
         t = T - A
         d = t.length
-        q = float(np.interp(-min(d, self.largo_max), -self.largos, self.qs))
-        u, v, w, e = self.forma(q)
+        if flex2 is None:
+            g2, qs, largos, largo_max = None, self.qs, self.largos, self.largo_max
+        else:
+            g2 = math.copysign(flex2, self.g2)
+            qs, largos = self.tabla(g2)
+            largo_max = float(largos[0])
+        q = float(np.interp(-min(d, largo_max), -largos, qs))
+        u, v, w, e = self.forma(q, g2)
         ae = e / np.linalg.norm(e)
         be = np.array((-ae[1], ae[0]))
         a = t / d
@@ -250,7 +261,7 @@ class Pata:
         for h in (u, v, w):
             dire = (a * float(h @ ae) + b * float(h @ be)).normalized()
             Q.append(Matrix((n, dire, n.cross(dire))).transposed())
-        return Q, n, max(0.0, d - self.largo_max)
+        return Q, n, max(0.0, d - largo_max)
 
 
 # ---------------------------------------------------------------- 5. animacion
@@ -296,15 +307,16 @@ class Animador:
 
     def pies(self, pies):
         """pies: {pata: (corrimiento de la punta del pie (x, y, z), giro del pie en radianes, punta hacia abajo)}.
-        Las patas que no figuran quedan apoyadas donde estan en reposo."""
+        Las patas que no figuran quedan apoyadas donde estan en reposo. Un tercer dato, si viene, es el reparto
+        de la flexion de esa pata en ese momento (ver 'carpo_apoyo' en paso)."""
         bpy.context.view_layer.update()
         for clave, pata in self.patas.items():
-            mov, giro = pies.get(clave, ((0.0, 0.0, 0.0), 0.0))
+            mov, giro, *flex2 = pies.get(clave, ((0.0, 0.0, 0.0), 0.0))
             padre = self.pb[pata.padre].matrix
             A = (padre @ pata.rel).translation
             R = Matrix.Rotation(giro, 3, 'X')
             T = pata.E0 + Vector(mov) + R @ (pata.D0 - pata.E0)
-            Q, n, falta = pata.resolver(A, T)
+            Q, n, falta = pata.resolver(A, T, *flex2)
             self.falta = max(self.falta, falta)
             Q.append(R @ pata.M[3])
             P_ = padre.to_3x3()
@@ -350,19 +362,28 @@ class Animador:
         alto = m['alto_del' if delantera else 'alto_tras']
         giro_max = math.radians(m['giro_del' if delantera else 'giro_tras'])
         despegue = math.radians(m.get('despegue', 18.0))
+        ade = m.get('adelanta_del' if delantera else 'adelanta_tras', 0.0)      # el apoyo entero corrido hacia adelante
+        # 'carpo_apoyo': con zancadas largas el cuerpo va bajo y la mano apoyada tiene que encogerse; con el reparto de
+        # la receta ('flex') lo hace quebrando el carpo hacia adelante. Mientras apoya usa este otro reparto (0,5 deja
+        # la cana a plomo y encoge desde el codo) y en el vuelo vuelve al suyo, que es el que pliega la mano.
+        ca = m.get('carpo_apoyo') if delantera else None
         if fase < beta:
             s = fase / beta
-            return (0.0, -S / 2 + S * s, 0.0), despegue * suave((s - 0.78) / 0.22)
+            return ((0.0, -S / 2 + S * s - ade, 0.0), despegue * suave((s - 0.78) / 0.22)) + (() if ca is None else (ca,))
         s = (fase - beta) / (1.0 - beta)
-        vel = S * (1.0 - beta) / beta                 # la velocidad del apoyo, para que el pie salga y llegue sin tiron
+        if ca is not None:
+            ca += (self.r['del'].get('flex', (1.0, 1.0))[1] - ca) * suave(s / 0.25) * suave((1.0 - s) / 0.25)
+        # La velocidad del apoyo, para que el pie salga y llegue sin tiron. Con apoyos cortos (galope) eso lo manda
+        # mucho mas atras y mas adelante de lo que la pata alcanza: 'empalme' dice que parte de esa velocidad conserva.
+        vel = S * (1.0 - beta) / beta * m.get('empalme', 1.0)
         h00, h10, h01, h11 = 2 * s ** 3 - 3 * s ** 2 + 1, s ** 3 - 2 * s ** 2 + s, -2 * s ** 3 + 3 * s ** 2, s ** 3 - s ** 2
         y = h00 * S / 2 + h10 * vel - h01 * S / 2 + h11 * vel
-        z = alto * math.sin(math.pi * s ** 0.9) ** 2
+        z = alto * math.sin(math.pi * s ** 0.9) ** m.get('vuelo', 2)      # 'vuelo' 1: el pie sube y baja de golpe (suspension)
         if s < 0.35:
             giro = despegue + (giro_max - despegue) * suave(s / 0.35)
         else:
             giro = giro_max * (1.0 - suave((s - 0.35) / 0.55))
-        return (0.0, y, z), giro
+        return ((0.0, y - ade, z), giro) + (() if ca is None else (ca,))
 
 
 def mover(an, r):
@@ -374,30 +395,40 @@ def mover(an, r):
     rad = math.radians
     est = r.get('estilo', {})
 
-    def cola_y_orejas(t, vaiven=1.0, periodo=3.0):
+    def cola_y_orejas(t, vaiven=1.0, periodo=3.0, alza=0.0, ondea=0.0):
         for i, nm in enumerate(cola):
-            an.gira(nm, rx=rad(est.get('cola_alza', 0.0)) * (i == 0),
+            an.gira(nm, rx=rad(est.get('cola_alza', 0.0)) * (i == 0) + rad(alza) * (1.0 if i == 0 else 0.25)
+                    + rad(ondea) * math.sin(2 * math.pi * (t / periodo - 0.18 * i)),
                     rz=rad(est.get('cola_vaiven', 4.0)) * vaiven * math.sin(2 * math.pi * (t / periodo - 0.13 * i)))
 
     def marcha(nombre, m, fases):
+        """Las marchas de siempre (paso, trote) mueven el cuerpo dos veces por ciclo. Una marcha que no es pareja a los
+        dos lados (galope) trae en la receta sus 'fases' por pata y los movimientos de una vez por ciclo: 'cabeceo1'
+        (el tronco se hamaca), 'bote1', 'recoge_tras' y 'recoge_del', 'cuello1'. Sin esas claves todo eso da cero."""
         T = m['T']
+        fases = m.get('fases', fases)
 
         def pose(t, f):
             dos = 4 * math.pi * (f - m['apoyo'] / 2)            # lo mas bajo, a mitad del apoyo
             una = 2 * math.pi * f
-            an.cuerpo(dz=-m['agache'] - m.get('bote', 0.0) * math.cos(dos),
-                      rx=rad(m.get('cabeceo', 0.0)) * math.cos(4 * math.pi * (f - fases['tras_L'] - m['apoyo'] / 2)),
+            vez = lambda en: math.cos(2 * math.pi * (f - m.get(en, 0.0)))      # una vez por ciclo, lo mas alto en esa fase
+            an.cuerpo(dz=-m['agache'] - m.get('bote', 0.0) * math.cos(dos) + m.get('bote1', 0.0) * vez('bote1_en'),
+                      rx=rad(m.get('cabeceo', 0.0)) * math.cos(4 * math.pi * (f - fases['tras_L'] - m['apoyo'] / 2))
+                      + rad(m.get('cabeceo1', 0.0)) * vez('cabeceo1_en'),
                       dx=m.get('vaiven', 0.0) * math.cos(una - 2 * math.pi * fases['tras_L'] - math.pi * m['apoyo']))
-            an.gira('cadera', ry=-rad(m.get('ladeo', 0.0)) * math.cos(una - 2 * math.pi * fases['tras_L'] - math.pi * m['apoyo']),
+            an.gira('cadera', rx=-rad(m.get('recoge_tras', 0.0)) * vez('recoge_en'),
+                    ry=-rad(m.get('ladeo', 0.0)) * math.cos(una - 2 * math.pi * fases['tras_L'] - math.pi * m['apoyo']),
                     rz=-rad(m.get('quiebre', 0.0)) * math.cos(una - 2 * math.pi * fases['tras_L']))
             if cuadrupedo:
-                an.gira('pecho', ry=-rad(m.get('ladeo', 0.0)) * 0.6 * math.cos(una - 2 * math.pi * fases['del_L'] - math.pi * m['apoyo']),
+                an.gira('pecho', rx=rad(m.get('recoge_del', 0.0)) * vez('recoge_en'),
+                        ry=-rad(m.get('ladeo', 0.0)) * 0.6 * math.cos(una - 2 * math.pi * fases['del_L'] - math.pi * m['apoyo']),
                         rz=-rad(m.get('quiebre', 0.0)) * 0.7 * math.cos(una - 2 * math.pi * fases['del_L']))
             asiente = rad(m.get('asiente', 0.0)) * math.cos(4 * math.pi * (f - fases.get('del_L', 0.25) - m['apoyo'] / 2))
             for i, nm in enumerate(cuello):
-                an.gira(nm, rx=asiente / len(cuello) + rad(m.get('cuello_baja', 0.0)) / len(cuello))
-            an.gira('cabeza', rx=-asiente * 0.6)
-            cola_y_orejas(t, m.get('cola', 1.0), T)
+                an.gira(nm, rx=asiente / len(cuello) + rad(m.get('cuello_baja', 0.0)) / len(cuello)
+                        - rad(m.get('cuello1', 0.0)) * vez('cabeceo1_en') / len(cuello))
+            an.gira('cabeza', rx=-asiente * 0.6 - rad(m.get('hocico', 0.0)))
+            cola_y_orejas(t, m.get('cola', 1.0), T, m.get('cola_alza', 0.0), m.get('cola_ondea', 0.0))
             an.pies({clave: an.paso((f - fases[clave]) % 1.0, m, clave.startswith('del')) for clave in an.patas})
         an.fases[nombre] = fases
         accion = an.clip(nombre, T, pose)
@@ -455,6 +486,8 @@ def mover(an, r):
 
     if 'trot' in r:
         clips.append(marcha('trot', r['trot'], fases_trote))
+    for nombre in r.get('otras_marchas', ()):         # las marchas de mas van despues de las de siempre
+        clips.append(marcha(nombre, r[nombre], fases_trote))
     return clips
 
 
@@ -518,7 +551,7 @@ def guardar(nombre, arm, malla, clips, prueba):
         nombre, os.path.getsize(base + '.glb') / 1e6, os.path.getsize(base + '.blend') / 1e6, len(g['skins'][0]['joints']), traidos, len(g.get('images', []))))
 
 
-def hojas(nombre, arm, malla, clips):
+def hojas(nombre, arm, malla, clips, r):
     """Dos hojas por animal: <nombre>_costado.png (una fila por clip, ocho momentos de cada uno; la raya roja es el suelo)
     y <nombre>_detalle.png (cuatro momentos en grande, de tres cuartos, para mirar como se dobla la malla)."""
     esc = bpy.context.scene
@@ -576,6 +609,9 @@ def hojas(nombre, arm, malla, clips):
     marcha2 = 'trot' if 'trot' in por_nombre else 'idle'
     adelante, atras = (0.9, -0.8, 0.22), (0.9, 1, 0.22)
     detalle = [(('walk', 0.15, adelante), ('walk', 0.65, atras)), (('graze', 0.5, adelante), (marcha2, 0.3 if marcha2 == 'trot' else 0.76, atras))]
+    for c in r.get('otras_marchas', ()):              # una fila por marcha de mas, en los dos momentos que diga su receta
+        a, b = r[c].get('detalle', (0.15, 0.65))
+        detalle.append(((c, a, adelante), (c, b, atras)))
     escribir([np.concatenate([foto(por_nombre[c], parte, desde, 740, largo * 1.12) for c, parte, desde in fila], axis=1) for fila in detalle],
              '%s/%s_detalle.png' % (PREVIAS, nombre))
     arm.animation_data.action = None
@@ -599,5 +635,5 @@ if __name__ == '__main__':
         clips = mover(an, r)
         apoyo(an, W, nombres, clips, r)
         if '--sin-previa' not in args:
-            hojas(nombre, arm, malla, clips)
+            hojas(nombre, arm, malla, clips, r)
         guardar(nombre, arm, malla, clips, '--prueba' in args)
