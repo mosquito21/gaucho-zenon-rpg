@@ -41,6 +41,11 @@ materials/extract_format=0
 materials/extract_path=""
 _subresources={
 "materials": {
+"Hoja": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://assets/materiales/hoja.tres",
+"use_external/path": "res://assets/materiales/hoja.tres"
+},
 "Mate": {
 "use_external/enabled": true,
 "use_external/fallback_path": "res://assets/materiales/mate.tres",

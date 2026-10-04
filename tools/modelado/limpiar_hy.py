@@ -16,6 +16,9 @@ MODELOS = {
     'gaucho_2': dict(cat='personajes/npc', alto=1.76, giro=0.0, gente=True),
     'gaucho_3': dict(cat='personajes/npc', alto=1.72, giro=0.0, gente=True),
     'perro': dict(cat='animales', alto=0.82, giro=0.0, gente=False),
+    # Huemul macho: el alto es con las astas (la cruz queda a 0,90 m). caras: Hunyuan entrega 40 mil
+    # triangulos y los animales van de 8 a 15 mil puntos, asi que se simplifica a esa cantidad de caras.
+    'huemul': dict(cat='animales', alto=1.39, giro=0.0, gente=False, caras=26000),
 }
 
 args = sys.argv[sys.argv.index('--') + 1:]
@@ -53,6 +56,10 @@ for nombre in [a for a in args if not a.startswith('--')]:
         f.smooth = True
     bm.to_mesh(obj.data)
     bm.free()
+    if cfg.get('caras') and len(obj.data.polygons) > cfg['caras']:
+        mod = obj.modifiers.new('Simplificar', 'DECIMATE')       # junta aristas cuidando la forma y la textura
+        mod.ratio = cfg['caras'] / len(obj.data.polygons)
+        bpy.ops.object.modifier_apply(modifier=mod.name)
     if obj.data.has_custom_normals:
         bpy.ops.mesh.customdata_custom_splitnormals_clear()
     # material mate con la textura de color sola

@@ -27,6 +27,9 @@ func _process(_delta: float) -> void:
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		global_position = cam.global_position
+	# El brillo sigue a la hora de forma continua (antes saltaba al cambiar de período).
+	if sistema_dia_noche:
+		cambiar_opacidad_estrellas(sistema_dia_noche.brillo_estrellas * intensidad_estrellas)
 
 func configurar_estrellas():
 	print("✨ Armando campo de estrellas y Vía Láctea...")
@@ -45,13 +48,17 @@ func _crear_campo(cantidad: int, es_via_lactea: bool) -> MultiMeshInstance3D:
 	material.vertex_color_use_as_albedo = true
 	material.albedo_color = Color(1, 1, 1, 0)
 	material.no_depth_test = false
+	# Sin niebla (si no, toman el color de la niebla y de noche desaparecen), redondas y de borde
+	# suave en vez de cuadraditos, y cada una con su tamaño.
+	material.disable_fog = true
+	material.billboard_keep_scale = true
+	material.albedo_texture = _punto_suave()
 	materiales_cielo.append(material)
 	
-	# Cada estrella es un cuadrado de 1 m visto a 420 m; si están más lejos, el cuadrado crece en la misma
-	# proporción para que se vean del mismo tamaño. (El "tamano" de cada una no cambia nada: en modo
-	# billboard Godot descarta la escala de cada instancia.)
+	# Cada estrella es un punto de 1,2 m visto a 420 m; si están más lejos, crece en la misma
+	# proporción para que se vean del mismo tamaño. El "tamano" de cada una lo multiplica.
 	var quad := QuadMesh.new()
-	quad.size = Vector2.ONE * (distancia_estrellas / 420.0)
+	quad.size = Vector2.ONE * 1.2 * (distancia_estrellas / 420.0)
 	
 	var malla := MultiMesh.new()
 	malla.transform_format = MultiMesh.TRANSFORM_3D
@@ -71,16 +78,16 @@ func _crear_campo(cantidad: int, es_via_lactea: bool) -> MultiMeshInstance3D:
 			punto = punto.rotated(Vector3(1, 0, 0), inclinacion_galactica).normalized()
 			if punto.y < 0.0:
 				punto.y = absf(punto.y)
-			tamano = randf_range(1.4, 5.5)
+			tamano = randf_range(0.5, 1.3)
 			color = Color(randf_range(0.75, 0.95), randf_range(0.8, 0.95), 1.0, randf_range(0.15, 0.55))
 		else:
 			var altura := randf()
 			var anillo := sqrt(maxf(1.0 - altura * altura, 0.0))
 			var angulo := randf() * TAU
 			punto = Vector3(cos(angulo) * anillo, altura, sin(angulo) * anillo)
-			tamano = randf_range(0.35, 1.6)
+			tamano = randf_range(0.5, 1.4)
 			if randf() < 0.08:
-				tamano *= 2.2
+				tamano *= 2.0
 			color = Color(randf_range(0.85, 1.0), randf_range(0.88, 1.0), randf_range(0.95, 1.0), randf_range(0.45, 1.0))
 		
 		var base := Basis.from_scale(Vector3.ONE * tamano)
@@ -97,11 +104,23 @@ func _crear_campo(cantidad: int, es_via_lactea: bool) -> MultiMeshInstance3D:
 func conectar_con_sistema_dia_noche():
 	sistema_dia_noche = encontrar_sistema_dia_noche()
 	if sistema_dia_noche:
-		sistema_dia_noche.cambio_periodo.connect(_on_cambio_periodo)
 		print("🔗 Estrellas conectadas al ciclo día/noche")
-		_on_cambio_periodo(sistema_dia_noche.obtener_periodo_dia())
 	else:
 		print("⚠️ No se encontró el sistema día/noche")
+
+## Un punto blanco que se apaga hacia el borde, para que cada estrella sea redonda.
+func _punto_suave() -> GradientTexture2D:
+	var degrade := Gradient.new()
+	degrade.set_color(0, Color(1, 1, 1, 1))
+	degrade.set_color(1, Color(1, 1, 1, 0))
+	var punto := GradientTexture2D.new()
+	punto.gradient = degrade
+	punto.fill = GradientTexture2D.FILL_RADIAL
+	punto.fill_from = Vector2(0.5, 0.5)
+	punto.fill_to = Vector2(1.0, 0.5)
+	punto.width = 32
+	punto.height = 32
+	return punto
 
 func encontrar_sistema_dia_noche() -> CicloDiaNoche:
 	var nodos_encontrados: Array = []
@@ -116,36 +135,11 @@ func buscar_nodos_recursivo(nodo: Node, tipo: Variant, resultado: Array):
 	for child in nodo.get_children():
 		buscar_nodos_recursivo(child, tipo, resultado)
 
-func _on_cambio_periodo(periodo: String):
-	match periodo:
-		"Día", "Amanecer":
-			animar_opacidad_estrellas(0.0)
-		"Atardecer":
-			animar_opacidad_estrellas(0.35)
-		"Crepúsculo":
-			animar_opacidad_estrellas(0.75)
-		"Noche":
-			animar_opacidad_estrellas(intensidad_estrellas)
-			print("🌟 La Vía Láctea cruza la pampa")
-
-func animar_opacidad_estrellas(opacidad_objetivo: float):
-	if materiales_cielo.is_empty():
-		return
-	var opacidad_actual := materiales_cielo[0].albedo_color.a
-	var tween := create_tween()
-	tween.tween_method(cambiar_opacidad_estrellas, opacidad_actual, opacidad_objetivo, 2.0)
-
 func cambiar_opacidad_estrellas(opacidad: float):
 	for material in materiales_cielo:
 		if is_instance_valid(material):
 			var color := material.albedo_color
 			material.albedo_color = Color(color.r, color.g, color.b, opacidad)
-
-func mostrar_estrellas():
-	animar_opacidad_estrellas(intensidad_estrellas)
-
-func ocultar_estrellas():
-	animar_opacidad_estrellas(0.0)
 
 func cambiar_cantidad_estrellas(nueva_cantidad: int):
 	cantidad_estrellas = nueva_cantidad

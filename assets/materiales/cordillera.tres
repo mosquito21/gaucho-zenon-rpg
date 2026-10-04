@@ -33,7 +33,7 @@ code = "shader_type spatial;
 			NORMAL = -NORMAL;
 		}
 		// los colores de la malla estan en sRGB: se pasan a lineal
-		ALBEDO = mix(pow(COLOR.rgb, vec3(2.2)), color_bruma, bruma) * (1.0 - pie);
+		ALBEDO = mix(pow(max(COLOR.rgb, vec3(0.0)), vec3(2.2)), color_bruma, bruma) * (1.0 - pie);
 		EMISSION = color_bruma * pie * brillo_pie;
 		ROUGHNESS = 1.0;
 	}

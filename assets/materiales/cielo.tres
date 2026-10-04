@@ -1,0 +1,107 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bn6rh0ls63o1b"]
+
+[sub_resource type="Shader" id="Shader_cielo"]
+code = "shader_type sky;
+
+// Cielo de la Patagonia: degrade del horizonte al cenit, resplandor del lado del sol,
+// disco del sol, halo de la luna y nubes altas estiradas por el viento del oeste.
+// Los colores los pone a cada hora scripts/CicloDiaNoche.gd; los que quedan aca son los del mediodia,
+// que es lo que muestra el editor. Lo que se puede tocar a mano esta en el grupo de las nubes.
+uniform vec3 color_cenit : source_color = vec3(0.40, 0.57, 0.71);
+uniform vec3 color_horizonte : source_color = vec3(0.67, 0.75, 0.75);
+uniform float curva : hint_range(0.1, 2.0) = 0.5;
+uniform vec3 direccion_sol = vec3(0.0, 1.0, 0.0);
+uniform vec3 color_sol : source_color = vec3(1.0, 0.95, 0.86);
+uniform float brillo_sol = 1.0;
+uniform float radio_sol : hint_range(0.2, 5.0) = 1.1;
+uniform vec3 color_resplandor : source_color = vec3(1.0, 0.6, 0.3);
+uniform float fuerza_resplandor : hint_range(0.0, 1.0) = 0.0;
+uniform vec3 direccion_luna = vec3(0.0, -1.0, 0.0);
+uniform vec3 color_luna : source_color = vec3(0.6, 0.7, 1.0);
+uniform float halo_luna = 0.0;
+
+group_uniforms nubes;
+uniform sampler2D ruido_nubes : repeat_enable, filter_linear_mipmap;
+uniform vec3 color_nube : source_color = vec3(0.95, 0.95, 0.93);
+uniform vec3 color_nube_sombra : source_color = vec3(0.66, 0.69, 0.72);
+uniform float cobertura : hint_range(0.0, 1.0) = 0.45;
+uniform float opacidad_nubes : hint_range(0.0, 1.0) = 0.8;
+uniform float escala_nubes = 0.1;
+uniform float estirado : hint_range(0.2, 1.0) = 0.45;
+uniform vec2 deriva = vec2(0.0);
+
+void sky() {
+	vec3 dir = EYEDIR;
+	float alto = clamp(dir.y, 0.0, 1.0);
+	vec3 col = mix(color_horizonte, color_cenit, pow(alto, curva));
+
+	// resplandor: pegado al horizonte y hacia el lado donde esta el sol
+	float cos_sol = dot(dir, direccion_sol);
+	float lado = pow(clamp(cos_sol * 0.5 + 0.5, 0.0, 1.0), 3.0);
+	float bajo = pow(1.0 - alto, 6.0);
+	col = mix(col, color_resplandor, fuerza_resplandor * lado * bajo);
+
+	// nubes: una capa plana alla arriba, vista en perspectiva
+	if (dir.y > 0.0) {
+		vec2 uv = dir.xz / (dir.y + 0.12) * escala_nubes;
+		uv.x *= estirado;
+		float n = texture(ruido_nubes, uv + deriva).r * 0.62
+			+ texture(ruido_nubes, uv * 2.3 + deriva * 1.7 + vec2(0.37, 0.11)).r * 0.38;
+		float umbral = 1.0 - cobertura;
+		float d = smoothstep(umbral - 0.06, umbral + 0.24, n);
+		d *= smoothstep(0.0, 0.12, dir.y);
+		float luz = clamp(1.0 - d * 0.8 + lado * 0.35, 0.0, 1.0);
+		vec3 nube = mix(color_nube_sombra, color_nube, luz);
+		nube = mix(nube, color_resplandor, fuerza_resplandor * lado * 0.5 * (1.0 - alto));
+		col = mix(col, nube, d * opacidad_nubes);
+	}
+
+	// sol: halo siempre, disco solo en la imagen (no en el reflejo ni en la niebla)
+	float sobre = smoothstep(-0.03, 0.01, dir.y);
+	float c = max(cos_sol, 0.0);
+	col += color_sol * brillo_sol * sobre * (pow(c, 220.0) * 0.5 + pow(c, 14.0) * 0.10);
+	if (!AT_CUBEMAP_PASS) {
+		float ang = degrees(acos(clamp(cos_sol, -1.0, 1.0)));
+		col += color_sol * brillo_sol * sobre * 5.0 * (1.0 - smoothstep(radio_sol * 0.6, radio_sol, ang));
+	}
+
+	// luna: solo el halo; el disco con sus fases es una malla aparte
+	float cl = max(dot(dir, direccion_luna), 0.0);
+	col += color_luna * halo_luna * sobre * (pow(cl, 90.0) * 0.35 + pow(cl, 8.0) * 0.05);
+
+	COLOR = col;
+}
+"
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_nubes"]
+seed = 4
+frequency = 0.0055
+fractal_octaves = 4
+fractal_gain = 0.55
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_nubes"]
+noise = SubResource("FastNoiseLite_nubes")
+seamless = true
+
+[resource]
+shader = SubResource("Shader_cielo")
+shader_parameter/color_cenit = Color(0.4, 0.57, 0.71, 1)
+shader_parameter/color_horizonte = Color(0.67, 0.75, 0.75, 1)
+shader_parameter/curva = 0.7
+shader_parameter/direccion_sol = Vector3(0, 1, 0)
+shader_parameter/color_sol = Color(1, 0.95, 0.86, 1)
+shader_parameter/brillo_sol = 1.0
+shader_parameter/radio_sol = 1.1
+shader_parameter/color_resplandor = Color(1, 0.6, 0.3, 1)
+shader_parameter/fuerza_resplandor = 0.0
+shader_parameter/direccion_luna = Vector3(0, -1, 0)
+shader_parameter/color_luna = Color(0.6, 0.7, 1, 1)
+shader_parameter/halo_luna = 0.0
+shader_parameter/ruido_nubes = SubResource("NoiseTexture2D_nubes")
+shader_parameter/color_nube = Color(0.95, 0.95, 0.93, 1)
+shader_parameter/color_nube_sombra = Color(0.66, 0.69, 0.72, 1)
+shader_parameter/cobertura = 0.45
+shader_parameter/opacidad_nubes = 0.8
+shader_parameter/escala_nubes = 0.1
+shader_parameter/estirado = 0.45
+shader_parameter/deriva = Vector2(0, 0)

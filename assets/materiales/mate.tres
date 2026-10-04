@@ -1,7 +1,29 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
+
+[sub_resource type="Shader" id="Shader_mate"]
+code = "shader_type spatial;
+
+// El material mate de casi todo lo que no es piso: edificios, objetos, troncos, rocas.
+// Pinta con los colores que trae cada modelo en sus vertices, sin brillo.
+// Era un material comun de Godot (colores de vertice, rugosidad 1, especular 0.2). Paso a tener
+// este programa por una sola razon: usar la misma bruma de lejos que el piso (bruma.gdshaderinc)
+// en vez de la niebla del ambiente. Asi lo que esta parado en un cerro no se borra antes que la
+// ladera que pisa (los troncos y las rocas del paso a Chile se veian como puntitos claros).
+uniform float rugosidad : hint_range(0.0, 1.0) = 1.0;
+uniform float especular : hint_range(0.0, 1.0) = 0.2;
+
+#include \"res://assets/materiales/bruma.gdshaderinc\"
+
+void fragment() {
+	ALBEDO = max(COLOR.rgb, vec3(0.0));
+	ROUGHNESS = rugosidad;
+	SPECULAR = especular;
+	FOG = bruma_del_mundo(VERTEX, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y, INV_VIEW_MATRIX);
+}
+"
 
 [resource]
 resource_name = "Mate"
-vertex_color_use_as_albedo = true
-metallic_specular = 0.2
-roughness = 1.0
+shader = SubResource("Shader_mate")
+shader_parameter/rugosidad = 1.0
+shader_parameter/especular = 0.2

@@ -17,6 +17,29 @@ extends CharacterBody3D
 @export var altura_camara := 0.4
 @export var suavizado_camara := 10.0
 
+## El porte de Zenón: un gaucho cansado, con el peso en los hombros (ver scripts/porte.gd).
+## Se suma por encima de los clips de Mixamo; con todo en cero queda como venía de Mixamo.
+@export_group("Porte")
+## Espalda encorvada, en grados.
+@export_range(-10.0, 25.0, 0.5) var porte_encorvar := 7.0
+## Cabeza gacha, en grados.
+@export_range(-10.0, 20.0, 0.5) var porte_cabeza := 4.0
+## Hombros caídos, en grados.
+@export_range(-10.0, 15.0, 0.5) var porte_hombros := 5.0
+## Cuando está quieto, cada tanto mira hacia un lado: cuántos grados gira la cabeza.
+@export_range(0.0, 45.0, 1.0) var porte_mirar := 24.0
+## Vaivén lento del tronco cuando está quieto, en grados.
+@export_range(0.0, 5.0, 0.1) var porte_mecer := 1.6
+## Cuánto se abren los brazos hacia afuera, en grados, para que las manos no se metan en las caderas.
+@export_range(0.0, 20.0, 0.5) var porte_abrir_brazos := 5.0
+## Largo de los dedos: 1 es como viene el modelo (muy largos); 0.6 los acorta al 60 %.
+@export_range(0.4, 1.0, 0.01) var porte_dedos := 0.6
+## El cuerpo sigue a la cámara con un instante de atraso en vez de girar clavado a ella (0: clavado).
+@export_range(0.0, 1.0, 0.05) var soltura_giro := 0.6
+## Con la S, Zenón se da vuelta y camina hacia la cámara. Apagado, camina para atrás sin darse
+## vuelta, como antes.
+@export var darse_vuelta_al_volver := true
+
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 var yaw: float = 0.0
@@ -50,6 +73,14 @@ const CLIPS_EN_LOOP := ["idle", "walk", "run", "strafe_left", "strafe_left_walk"
 const PASO_CLIP := {"walk": 1.55, "run": 4.0, "strafe_left_walk": 1.6, "strafe_right_walk": 1.6, "strafe_left": 4.1, "strafe_right": 4.1}
 var _anim: AnimationPlayer
 var _saltando := false
+var _porte: Porte
+var _polvo: GPUParticles3D
+var _fov_base := 60.0
+var _yaw_anterior := 0.0
+var _atraso_giro := 0.0
+# Cuánto está girado el cuerpo respecto de la cámara (0: mira hacia donde mira la cámara;
+# media vuelta: mira hacia la cámara).
+var _vuelta := 0.0
 
 
 func _ready() -> void:
@@ -65,6 +96,8 @@ func _ready() -> void:
 	safe_margin = 0.08
 	floor_snap_length = 0.05
 	_armar_aviso()
+	_armar_polvo()
+	_fov_base = camera.fov
 	call_deferred("_conectar_ciclo")
 	
 
@@ -105,6 +138,13 @@ func _process(delta: float) -> void:
 	rotation.y = yaw
 	camera_pivot.rotation.x = pitch
 	_acomodar_camara(delta)
+	_soltar_giro(delta)
+	# Al correr, el polvo se levanta de las botas y la cámara abre apenas el campo de visión.
+	# "Corriendo" es ir más rápido que a mitad de camino entre el paso y la corrida, valgan lo que valgan.
+	var corriendo := absf(velocity.y) < 2.5 and Vector2(velocity.x, velocity.z).length() > (walk_speed + run_speed) * 0.5
+	if _polvo != null:
+		_polvo.emitting = corriendo
+	camera.fov = lerpf(camera.fov, _fov_base + (4.0 if corriendo else 0.0), clampf(3.0 * delta, 0.0, 1.0))
 
 
 func _check_interaction() -> void:
@@ -182,6 +222,81 @@ func _physics_process(delta: float) -> void:
 	_frenar_en_el_borde()
 	_recuperar_suelo()
 	_animar_gaucho(delta)
+
+
+## Polvo de tierra a la altura de las botas. Se prende solo al correr. Usa el material del humo
+## (bocanadas suaves que reciben la luz), teñido de tierra, y lo lleva el viento del oeste.
+func _armar_polvo() -> void:
+	var material := load("res://assets/materiales/humo.tres") as Material
+	if material == null:
+		return
+	var proceso := ParticleProcessMaterial.new()
+	proceso.direction = Vector3(0.0, 1.0, 0.0)
+	proceso.spread = 55.0
+	proceso.initial_velocity_min = 0.3
+	proceso.initial_velocity_max = 0.9
+	proceso.gravity = Vector3(0.5, 0.25, 0.1)
+	proceso.scale_min = 0.5
+	proceso.scale_max = 1.1
+	proceso.angle_min = -180.0
+	proceso.angle_max = 180.0
+	var crece := Curve.new()
+	crece.add_point(Vector2(0.0, 0.4))
+	crece.add_point(Vector2(1.0, 1.0))
+	var textura_crece := CurveTexture.new()
+	textura_crece.curve = crece
+	proceso.scale_curve = textura_crece
+	var rampa := Gradient.new()
+	rampa.offsets = PackedFloat32Array([0.0, 0.2, 1.0])
+	rampa.colors = PackedColorArray([Color(0.8, 0.7, 0.55, 0.0), Color(0.8, 0.7, 0.55, 0.45), Color(0.8, 0.7, 0.55, 0.0)])
+	var textura_rampa := GradientTexture1D.new()
+	textura_rampa.gradient = rampa
+	proceso.color_ramp = textura_rampa
+	var bocanada := QuadMesh.new()
+	bocanada.size = Vector2(1.0, 1.0)
+	_polvo = GPUParticles3D.new()
+	_polvo.name = "Polvo"
+	_polvo.amount = 14
+	_polvo.lifetime = 1.1
+	_polvo.local_coords = false
+	_polvo.emitting = false
+	_polvo.process_material = proceso
+	_polvo.draw_pass_1 = bocanada
+	_polvo.material_override = material
+	_polvo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_polvo.position = Vector3(0.0, -0.8, 0.2)
+	add_child(_polvo)
+
+
+## El cuerpo de Zenón gira con la cámara, pero con un instante de atraso, y al doblar caminando
+## se inclina apenas hacia adentro de la curva. Solo mueve el modelo: el choque y la dirección
+## en la que camina siguen clavados a la cámara, como antes.
+func _soltar_giro(delta: float) -> void:
+	if cuerpo == null:
+		return
+	var giro := wrapf(yaw - _yaw_anterior, -PI, PI)
+	_yaw_anterior = yaw
+	# Hacia dónde va, visto desde la cámara: -Z es alejarse de ella y +Z es venir hacia ella.
+	var local := global_transform.basis.inverse() * Vector3(velocity.x, 0.0, velocity.z)
+	var peso_vuelta := clampf(8.0 * delta, 0.0, 1.0)
+	if darse_vuelta_al_volver and local.z > 0.1:
+		# Viene hacia la cámara: se da vuelta y mira hacia donde camina.
+		_vuelta = lerp_angle(_vuelta, atan2(-local.x, -local.z), peso_vuelta)
+	elif local.length() > 0.25 or absf(_vuelta) < 0.3:
+		# Avanza, va de costado o ya está casi de espaldas a la cámara: vuelve a mirar hacia adelante.
+		_vuelta = lerp_angle(_vuelta, 0.0, peso_vuelta)
+	else:
+		# Quieto y dado vuelta: se queda mirando hacia donde venía aunque la cámara gire a su
+		# alrededor, hasta que la cámara vuelve a quedarle a la espalda.
+		_vuelta -= giro
+		giro = 0.0
+	_vuelta = wrapf(_vuelta, -PI, PI)
+	_atraso_giro = clampf(_atraso_giro - giro * soltura_giro, -0.8, 0.8)
+	_atraso_giro = lerpf(_atraso_giro, 0.0, clampf(9.0 * delta, 0.0, 1.0))
+	cuerpo.rotation.y = _atraso_giro + _vuelta
+	var andando := local.length() > 1.0
+	var ladeo := clampf(giro / maxf(delta, 0.001) * 0.02, -0.07, 0.07) if andando else 0.0
+	cuerpo.rotation.z = lerpf(cuerpo.rotation.z, ladeo * soltura_giro, clampf(6.0 * delta, 0.0, 1.0))
 
 
 func _acomodar_camara(delta: float) -> void:
@@ -402,6 +517,17 @@ func _armar_animaciones() -> void:
 		if _anim.has_animation(nombre):
 			_anim.get_animation(nombre).loop_mode = Animation.LOOP_LINEAR
 	_anim.play("idle")
+	var esqueleto := cuerpo.find_child("Skeleton3D", true, false) as Skeleton3D
+	if esqueleto != null:
+		_porte = Porte.new()
+		_porte.name = "Porte"
+		_porte.encorvar = porte_encorvar
+		_porte.cabeza = porte_cabeza
+		_porte.hombros = porte_hombros
+		_porte.abrir_brazos = porte_abrir_brazos
+		_porte.dedos = porte_dedos
+		_porte.mirar_cada = 6.0
+		esqueleto.add_child(_porte)
 
 
 func _empezar_salto() -> void:
@@ -425,20 +551,28 @@ func _animar_gaucho(_delta: float) -> void:
 	# Velocidad vista desde el gaucho: -Z es adelante, +X es a su derecha.
 	var local := global_transform.basis.inverse() * Vector3(velocity.x, 0.0, velocity.z)
 	var rapidez := local.length()
+	if _porte != null:
+		# Quieto, mira alrededor y se mece; andando, mira al frente y al correr se echa un poco adelante.
+		_porte.mirar = porte_mirar if rapidez < 0.25 else 0.0
+		_porte.mecer = lerpf(_porte.mecer, porte_mecer if rapidez < 0.25 else 0.0, 0.08)
+		_porte.encorvar = lerpf(_porte.encorvar, porte_encorvar + (5.0 if rapidez > 2.5 else 0.0), 0.1)
 	if rapidez < 0.25:
 		_poner_clip("idle", 1.0)
 		return
 
 	var clip := ""
 	var sentido := 1.0
-	if absf(local.z) >= absf(local.x):
+	if darse_vuelta_al_volver and local.z > 0.1:
+		# Viene hacia la cámara: el cuerpo se da vuelta (_soltar_giro), así que camina de frente.
+		clip = "walk" if rapidez < 2.5 else "run"
+	elif absf(local.z) >= absf(local.x):
 		clip = "walk" if rapidez < 2.5 else "run"
 		if local.z > 0.0:
 			sentido = -1.0
 	else:
 		var lado := "strafe_right" if local.x > 0.0 else "strafe_left"
 		clip = lado + "_walk" if rapidez < 2.5 else lado
-	var escala := clampf(rapidez / float(PASO_CLIP.get(clip, rapidez)), 0.6, 1.8)
+	var escala := clampf(rapidez / float(PASO_CLIP.get(clip, rapidez)), 0.6, 2.0)
 	_poner_clip(clip, escala * sentido)
 
 
@@ -446,4 +580,4 @@ func _poner_clip(nombre: String, escala: float) -> void:
 	if not _anim.has_animation(nombre):
 		return
 	# Con el mismo clip, play() no lo reinicia: solo actualiza la velocidad.
-	_anim.play(nombre, 0.2, escala)
+	_anim.play(nombre, 0.3, escala)

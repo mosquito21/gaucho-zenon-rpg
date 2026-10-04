@@ -1283,6 +1283,10 @@ func _process(delta: float):
 			var gt := get_internal_transform()
 			# Viewer position such that 1 unit == 1 pixel in the heightmap
 			var viewer_pos_heightmap_local := gt.affine_inverse() * _viewer_pos_world
+			# ZENON (tanda 4): en este mapa las alturas están guardadas x100 (map_scale.y = 0.01) y cada
+			# celda mide 4 m. Para elegir el detalle del piso, el alto se lleva a la misma medida que
+			# el ancho; si no, un cerro "queda lejísimos" y el piso cercano se dibuja sin detalle.
+			viewer_pos_heightmap_local.y *= _zenon_escala_vertical_lod()
 			#var time_before = OS.get_ticks_msec()
 			_lodder.update(viewer_pos_heightmap_local)
 			#var time_elapsed = OS.get_ticks_msec() - time_before
@@ -1491,7 +1495,12 @@ func _cb_get_vertical_bounds(cpos_x: int, cpos_y: int, lod: int):
 	# It should be good enough for most common cases, unless you have super-sharp cliffs.
 	return _data.get_point_aabb(
 		origin_in_cells_x + chunk_size / 2, 
-		origin_in_cells_y + chunk_size / 2)
+		origin_in_cells_y + chunk_size / 2) * _zenon_escala_vertical_lod()
+
+
+# ZENON (tanda 4): cuánto vale una unidad de altura del mapa medida en celdas (ver _process).
+func _zenon_escala_vertical_lod() -> float:
+	return map_scale.y / maxf(map_scale.x, 0.0001)
 #	var aabb = _data.get_region_aabb(
 #		origin_in_cells_x, origin_in_cells_y, chunk_size, chunk_size)
 #	return Vector2(aabb.position.y, aabb.end.y)

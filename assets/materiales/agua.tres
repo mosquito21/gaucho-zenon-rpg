@@ -18,6 +18,10 @@ code = "shader_type spatial;
 	uniform float fuerza = 0.4;
 	uniform float rugosidad : hint_range(0.0, 1.0) = 0.18;
 	uniform float especular : hint_range(0.0, 1.0) = 0.3;
+	// Espuma: una franja clara y movediza pegada a la orilla.
+	uniform vec3 color_espuma : source_color = vec3(0.78, 0.82, 0.8);
+	uniform float ancho_espuma = 0.45;
+	uniform float fuerza_espuma : hint_range(0.0, 1.0) = 0.55;
 	uniform sampler2D profundidad : hint_depth_texture, filter_linear_mipmap;
 	
 	varying vec3 pos_mundo;
@@ -47,12 +51,22 @@ code = "shader_type spatial;
 		float d = texture(profundidad, SCREEN_UV).r;
 		vec4 v = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, d, 1.0);
 		float suelo = -v.z / v.w;
-		float hondo = clamp((suelo + VERTEX.z) / hondura_color, 0.0, 1.0);
+		// metros de agua que atraviesa la mirada hasta tocar el fondo
+		float espesor = max(suelo + VERTEX.z, 0.0);
+		float hondo = clamp(espesor / hondura_color, 0.0, 1.0);
 		ALBEDO = mix(color_bajo, color_hondo, hondo);
 		ALPHA = mix(alfa_orilla, alfa_hondo, hondo);
 		// mirada de costado: el agua refleja mas y deja ver menos el fondo
 		float costado = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.0);
 		ALPHA = mix(ALPHA, 1.0, costado * 0.7);
+		// espuma en la orilla
+		float borde = 1.0 - smoothstep(0.0, ancho_espuma, espesor);
+		float burbujas = texture(ondas_b, uv * 5.0 + vec2(TIME * 0.02, TIME * 0.013)).r;
+		float espuma = borde * smoothstep(0.42, 0.62, burbujas + borde * 0.25) * fuerza_espuma;
+		ALBEDO = mix(ALBEDO, color_espuma, espuma);
+		ALPHA = max(ALPHA, espuma);
+		// la orilla se funde con el piso en vez de cortar en una linea
+		ALPHA *= smoothstep(0.0, 0.08, espesor);
 		ROUGHNESS = rugosidad;
 		SPECULAR = especular;
 	}
@@ -84,7 +98,7 @@ bump_strength = 3.0
 render_priority = 0
 shader = SubResource("Shader_52y8x")
 shader_parameter/color_hondo = Color(0.1, 0.21, 0.22, 1)
-shader_parameter/color_bajo = Color(0.3, 0.4, 0.37, 1)
+shader_parameter/color_bajo = Color(0.33, 0.45, 0.4, 1)
 shader_parameter/hondura_color = 2.2
 shader_parameter/alfa_orilla = 0.35
 shader_parameter/alfa_hondo = 0.95
@@ -92,6 +106,6 @@ shader_parameter/ondas_a = SubResource("NoiseTexture2D_82b5y")
 shader_parameter/ondas_b = SubResource("NoiseTexture2D_nxshp")
 shader_parameter/escala = 0.08
 shader_parameter/velocidad = 0.6
-shader_parameter/fuerza = 0.4
-shader_parameter/rugosidad = 0.55
-shader_parameter/especular = 0.12
+shader_parameter/fuerza = 0.55
+shader_parameter/rugosidad = 0.16
+shader_parameter/especular = 0.5

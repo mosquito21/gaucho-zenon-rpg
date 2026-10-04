@@ -1,0 +1,135 @@
+# Medidas de cada animal para armar_animal.py. Todo en metros, grados y segundos.
+# Los puntos van como (y, z) mirando al animal de costado: y negativo es hacia la cabeza, z es la altura.
+# Se leen de las vistas con grilla (ver LEEME.md). Las patas van a "x" metros del medio, a cada lado.
+#   espina: base de la cola, lomo, cruz, base del cuello          cuello: el final de cada hueso del cuello
+#   cabeza: la punta del hocico                                   cola: el principio y el final de cada hueso
+#   del / tras, "p": pivote de la pata (adentro del cuerpo), codo o rodilla, carpo o garron, nudo, punta del pie
+#   "flex": cuanto dobla cada una de las dos articulaciones del medio al encoger la pata
+#   cuernos: un hueso quieto adentro de cada cuerno (x, y, z), para que el cuerno siga entero a la cabeza
+#   walk / trot: T dura el ciclo, zancada es lo que el pie viaja apoyado, apoyo es la parte del ciclo que apoya,
+#                agache es cuanto baja el cuerpo para que las patas alcancen. Velocidad natural = zancada / (apoyo * T)
+#   graze: cuanto baja cada hueso del cuello y la cabeza (negativo: la cabeza se estira en vez de doblarse)
+
+RECETAS = {
+    'ceniza': dict(
+        espina=[(0.44, 1.30), (0.15, 1.15), (-0.30, 1.12), (-0.62, 1.22)],
+        cuello=[(-0.84, 1.42), (-1.05, 1.59), (-1.24, 1.72)],
+        cabeza=(-1.57, 1.42),
+        orejas=dict(x=0.075, base=(-1.27, 1.80), punta=(-1.31, 1.91)),
+        cola=[(0.47, 1.32), (0.61, 1.10), (0.69, 0.78), (0.73, 0.45), (0.75, 0.15)],
+        **{'del': dict(x=0.17, p=[(-0.60, 1.22), (-0.52, 0.86), (-0.615, 0.44), (-0.63, 0.14), (-0.745, 0.02)], flex=(1.0, 1.8))},
+        tras=dict(x=0.17, p=[(0.33, 1.17), (0.25, 0.85), (0.50, 0.51), (0.465, 0.135), (0.36, 0.02)], flex=(1.0, 1.0)),
+        rigido=[((0.285, 0.45, -0.55, -0.27, 0.68, 1.03), 'cuerpo')],          # los estribos no siguen a la pata
+        walk=dict(T=1.15, zancada=0.66, apoyo=0.62, alto_del=0.11, alto_tras=0.08, giro_del=45, giro_tras=30,
+                  agache=0.055, cabeceo=0.7, ladeo=2.0, quiebre=1.5, asiente=2.5),
+        trot=dict(T=0.72, zancada=0.68, apoyo=0.44, alto_del=0.20, alto_tras=0.14, giro_del=70, giro_tras=45,
+                  agache=0.088, bote=0.022, ladeo=1.0, quiebre=1.0, asiente=0.8, cola=1.3),
+        graze=dict(T=9.0, baja=1.6, cuello=[62, 32, 20], cabeza=-74, pecho=2, cuerpo=1, agache=0.01, ritmo=1.4),
+    ),
+    'caballo_zaino': 'ceniza', 'caballo_alazan': 'ceniza', 'caballo_moro': 'ceniza', 'caballo_bayo': 'ceniza',
+    'vaca': dict(
+        espina=[(0.70, 1.22), (0.30, 0.98), (-0.30, 0.95), (-0.62, 0.92)],
+        cuello=[(-0.85, 1.07), (-1.08, 1.22)],
+        cabeza=(-1.40, 0.98),
+        orejas=dict(x=0.10, x_punta=0.22, base=(-1.06, 1.25), punta=(-1.03, 1.22)),
+        cuernos=dict(base=(0.07, -1.12, 1.30), punta=(0.10, -1.16, 1.43)),
+        cola=[(0.72, 1.22), (0.80, 0.95), (0.80, 0.60), (0.80, 0.27)],
+        **{'del': dict(x=0.15, p=[(-0.58, 0.98), (-0.50, 0.66), (-0.58, 0.36), (-0.585, 0.10), (-0.67, 0.02)], flex=(1.0, 1.8))},
+        tras=dict(x=0.15, p=[(0.55, 1.00), (0.42, 0.70), (0.69, 0.50), (0.60, 0.11), (0.51, 0.02)], flex=(1.0, 1.0)),
+        estilo=dict(cola_vaiven=6, coletazo=26, mira=10),
+        walk=dict(T=1.25, zancada=0.52, apoyo=0.65, alto_del=0.07, alto_tras=0.06, giro_del=35, giro_tras=25,
+                  agache=0.04, cabeceo=0.6, ladeo=2.2, quiebre=1.5, asiente=2.0),
+        graze=dict(T=9.0, baja=1.7, cuello=[60, 42], cabeza=-54, pecho=2, cuerpo=1, agache=0.01, ritmo=1.1),
+    ),
+    'oveja': dict(
+        espina=[(0.36, 0.50), (0.15, 0.45), (-0.15, 0.45), (-0.26, 0.45)],
+        cuello=[(-0.34, 0.60), (-0.41, 0.74)],
+        cabeza=(-0.52, 0.67),
+        orejas=dict(x=0.06, x_punta=0.11, base=(-0.37, 0.76), punta=(-0.33, 0.77)),
+        cuernos=dict(base=(0.07, -0.38, 0.82), punta=(0.17, -0.32, 0.73)),
+        cola=[(0.40, 0.48), (0.44, 0.40)],
+        **{'del': dict(x=0.09, p=[(-0.20, 0.42), (-0.16, 0.28), (-0.19, 0.15), (-0.19, 0.045), (-0.245, 0.01)], flex=(1.0, 1.8))},
+        tras=dict(x=0.09, p=[(0.22, 0.42), (0.17, 0.30), (0.245, 0.17), (0.225, 0.045), (0.17, 0.01)], flex=(1.0, 1.0)),
+        estilo=dict(cola_vaiven=10, coletazo=30, mira=10),
+        walk=dict(T=0.75, zancada=0.22, apoyo=0.63, alto_del=0.035, alto_tras=0.03, giro_del=35, giro_tras=25,
+                  agache=0.015, cabeceo=0.8, ladeo=2.5, quiebre=2.0, asiente=3.0),
+        graze=dict(T=9.0, baja=1.5, cuello=[80, 50], cabeza=-85, pecho=5, cuerpo=3, agache=0.01, ritmo=1.8),
+    ),
+    'guanaco': dict(
+        espina=[(0.30, 0.98), (0.12, 0.88), (-0.22, 0.88), (-0.42, 0.92)],
+        cuello=[(-0.47, 1.07), (-0.505, 1.22), (-0.53, 1.37), (-0.55, 1.50)],
+        cabeza=(-0.74, 1.49),
+        orejas=dict(x=0.045, base=(-0.55, 1.60), punta=(-0.56, 1.74)),
+        cola=[(0.31, 0.99), (0.42, 1.00), (0.49, 0.87), (0.48, 0.70)],
+        **{'del': dict(x=0.09, p=[(-0.30, 0.92), (-0.24, 0.66), (-0.275, 0.36), (-0.27, 0.085), (-0.325, 0.015)], flex=(1.0, 1.8))},
+        tras=dict(x=0.10, p=[(0.24, 0.92), (0.20, 0.66), (0.40, 0.385), (0.275, 0.09), (0.20, 0.015)], flex=(1.0, 1.0)),
+        estilo=dict(cola_vaiven=5, coletazo=14, mira=18, oreja=28),
+        walk=dict(T=1.0, zancada=0.52, apoyo=0.62, alto_del=0.09, alto_tras=0.07, giro_del=45, giro_tras=30,
+                  agache=0.035, cabeceo=0.6, ladeo=1.8, quiebre=1.5, asiente=2.5),
+        trot=dict(T=0.62, zancada=0.56, apoyo=0.44, alto_del=0.15, alto_tras=0.11, giro_del=65, giro_tras=45,
+                  agache=0.062, bote=0.018, ladeo=1.0, quiebre=1.0, asiente=0.8, cola=1.3),
+        graze=dict(T=9.0, baja=1.8, cuello=[122, 18, 10, 5], cabeza=-79, pecho=2, cuerpo=1, agache=0.01, ritmo=1.5),
+    ),
+    'zorro': dict(
+        espina=[(0.20, 0.33), (0.10, 0.30), (-0.08, 0.30), (-0.19, 0.33)],
+        cuello=[(-0.235, 0.375), (-0.275, 0.42)],
+        cabeza=(-0.39, 0.40),
+        orejas=dict(x=0.035, base=(-0.30, 0.48), punta=(-0.32, 0.545)),
+        cola=[(0.20, 0.32), (0.30, 0.22), (0.40, 0.13), (0.50, 0.07)],
+        **{'del': dict(x=0.045, p=[(-0.15, 0.30), (-0.12, 0.21), (-0.15, 0.065), (-0.165, 0.02), (-0.20, 0.008)], flex=(1.0, 1.3))},
+        tras=dict(x=0.045, p=[(0.16, 0.30), (0.105, 0.21), (0.215, 0.125), (0.17, 0.02), (0.135, 0.008)], flex=(1.0, 1.0)),
+        estilo=dict(cola_vaiven=5, coletazo=10, mira=22, oreja=25),
+        walk=dict(T=0.55, zancada=0.16, apoyo=0.60, alto_del=0.03, alto_tras=0.025, giro_del=30, giro_tras=20,
+                  agache=0.012, cabeceo=0.5, ladeo=2.5, quiebre=3.0, asiente=1.5, cuello_baja=8),
+        trot=dict(T=0.36, zancada=0.19, apoyo=0.42, alto_del=0.045, alto_tras=0.035, giro_del=45, giro_tras=30,
+                  agache=0.023, bote=0.006, ladeo=1.5, quiebre=2.0, asiente=0.8, cuello_baja=10, cola=1.4),
+        graze=dict(T=6.0, baja=1.2, cuello=[65, 35], cabeza=-57, pecho=8, cuerpo=4, agache=0.01, ritmo=2.2, mordisco=3, barre=14),
+    ),
+    'perro': dict(
+        espina=[(0.33, 0.57), (0.18, 0.52), (-0.08, 0.52), (-0.21, 0.56)],
+        cuello=[(-0.26, 0.66), (-0.30, 0.76)],
+        cabeza=(-0.46, 0.72),
+        orejas=dict(x=0.05, base=(-0.30, 0.80), punta=(-0.28, 0.71)),
+        cola=[(0.34, 0.56), (0.385, 0.42), (0.40, 0.27), (0.46, 0.12)],
+        **{'del': dict(x=0.055, p=[(-0.16, 0.56), (-0.115, 0.40), (-0.135, 0.10), (-0.15, 0.03), (-0.195, 0.01)], flex=(1.0, 1.3))},
+        tras=dict(x=0.055, p=[(0.25, 0.55), (0.20, 0.38), (0.415, 0.17), (0.375, 0.035), (0.34, 0.01)], flex=(1.0, 1.0)),
+        estilo=dict(cola_vaiven=7, coletazo=18, mira=20, oreja=12),
+        walk=dict(T=0.80, zancada=0.36, apoyo=0.62, alto_del=0.05, alto_tras=0.04, giro_del=30, giro_tras=20,
+                  agache=0.02, cabeceo=0.6, ladeo=2.2, quiebre=2.5, asiente=1.5, cuello_baja=6),
+        trot=dict(T=0.50, zancada=0.40, apoyo=0.43, alto_del=0.08, alto_tras=0.06, giro_del=45, giro_tras=30,
+                  agache=0.045, bote=0.010, ladeo=1.2, quiebre=1.5, asiente=0.8, cuello_baja=8, cola=1.4),
+        graze=dict(T=6.0, baja=1.3, cuello=[95, 30], cabeza=-75, pecho=8, cuerpo=4, agache=0.015, ritmo=2.0, mordisco=3, barre=14),
+    ),
+    'choique': dict(
+        espina=[(0.33, 0.50), (0.12, 0.58), (-0.10, 0.58), (-0.24, 0.60)],
+        cuello=[(-0.28, 0.68), (-0.285, 0.76), (-0.275, 0.84), (-0.255, 0.92)],
+        cabeza=(-0.355, 0.93),
+        tras=dict(x=0.09, p=[(0.05, 0.56), (-0.01, 0.43), (0.07, 0.31), (0.065, 0.045), (-0.07, 0.012)], flex=(1.0, 1.6)),
+        estilo=dict(mira=25),
+        walk=dict(T=0.75, zancada=0.36, apoyo=0.60, alto_del=0.0, alto_tras=0.10, giro_del=0, giro_tras=50,
+                  agache=0.02, bote=-0.006, vaiven=0.012, ladeo=2.0, quiebre=3.0, asiente=3.0),
+        trot=dict(T=0.40, zancada=0.54, apoyo=0.36, alto_del=0.0, alto_tras=0.16, giro_del=0, giro_tras=70,
+                  agache=0.07, bote=0.012, vaiven=0.006, ladeo=1.5, quiebre=3.0, asiente=1.5, cuello_baja=18),
+        graze=dict(T=6.0, baja=1.1, cuello=[45, 40, 30, 20], cabeza=-94, pecho=0, cuerpo=45, agache=0.0, ritmo=1.2, mordisco=10, barre=10),
+    ),
+    # Huemul macho (Hippocamelus bisulcus), 0,90 m a la cruz. El modelo trae la cabeza girada unos 20 grados hacia su
+    # derecha, asi que las astas y las orejas no quedan parejas a los dos lados: los huesos van en el promedio.
+    'huemul': dict(
+        espina=[(0.57, 0.77), (0.22, 0.74), (-0.16, 0.74), (-0.33, 0.80)],
+        cuello=[(-0.36, 0.91), (-0.385, 1.01), (-0.40, 1.11)],
+        cabeza=(-0.66, 1.02),
+        orejas=dict(x=0.085, x_punta=0.19, base=(-0.42, 1.15), punta=(-0.45, 1.25)),
+        cuernos=dict(base=(0.03, -0.44, 1.20), punta=(0.10, -0.31, 1.37)),
+        cola=[(0.59, 0.78), (0.655, 0.66)],
+        **{'del': dict(x=0.08, p=[(-0.19, 0.72), (-0.14, 0.52), (-0.155, 0.30), (-0.165, 0.075), (-0.25, 0.015)], flex=(1.0, 1.8))},
+        tras=dict(x=0.085, p=[(0.42, 0.72), (0.365, 0.50), (0.575, 0.34), (0.478, 0.07), (0.415, 0.015)], flex=(1.0, 1.0)),
+        rigido=[((0.0, 0.17, -0.50, -0.20, 1.265, 1.45), 'cabeza')],           # las astas, por arriba de las orejas, siguen enteras a la cabeza
+        estilo=dict(cola_vaiven=6, coletazo=20, mira=16, oreja=26),
+        walk=dict(T=0.9, zancada=0.42, apoyo=0.62, alto_del=0.07, alto_tras=0.055, giro_del=45, giro_tras=30,
+                  agache=0.03, cabeceo=0.6, ladeo=2.0, quiebre=1.5, asiente=2.5),
+        trot=dict(T=0.57, zancada=0.46, apoyo=0.44, alto_del=0.12, alto_tras=0.09, giro_del=65, giro_tras=45,
+                  agache=0.05, bote=0.015, ladeo=1.0, quiebre=1.0, asiente=0.8, cola=1.3),
+        graze=dict(T=9.0, baja=1.6, cuello=[55, 30, 15], cabeza=-60, pecho=4, cuerpo=2, agache=0.02, ritmo=1.5),
+    ),
+}
+RECETAS['oveja_hembra'] = dict(RECETAS['oveja'], cuernos=None, molde='oveja')

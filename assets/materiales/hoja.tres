@@ -1,0 +1,48 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dbd6yvjrn5364"]
+
+[sub_resource type="Shader" id="Shader_hoja"]
+code = "shader_type spatial;
+render_mode cull_disabled, world_vertex_coords;
+
+// Hojas de arboles y arbustos (las copas con hojas de tools/modelado/hojas.py).
+// Se ven de los dos lados, reciben la misma luz de frente y de atras, y se mueven con el viento
+// del oeste: las rafagas pasan como olas, igual que en las matas de la estepa.
+uniform float viento : hint_range(0.0, 0.3) = 0.05;
+uniform float temblor : hint_range(0.0, 0.1) = 0.012;
+
+// La bruma de lejos es la misma del piso (no la del ambiente): asi un arbol parado en un cerro
+// no se borra antes que la ladera que pisa.
+#include \"res://assets/materiales/bruma.gdshaderinc\"
+
+void vertex() {
+	float rafaga = sin(TIME * 1.3 - VERTEX.x * 0.11 + VERTEX.z * 0.05) * 0.5 + 0.5;
+	float vibra = sin(TIME * 5.3 + VERTEX.x * 3.1 + VERTEX.y * 2.3 + VERTEX.z * 2.7);
+	VERTEX.x += viento * (0.3 + 0.7 * rafaga) + temblor * vibra * rafaga;
+	VERTEX.y += temblor * 0.6 * vibra * rafaga;
+	VERTEX.z += viento * 0.3 * sin(TIME * 0.9 + VERTEX.x * 0.2) * rafaga;
+}
+
+void fragment() {
+	if (!FRONT_FACING) {
+		NORMAL = -NORMAL;
+	}
+	ALBEDO = max(COLOR.rgb, vec3(0.0));
+	ROUGHNESS = 1.0;
+	SPECULAR = 0.1;
+	FOG = bruma_del_mundo(VERTEX, (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).y, INV_VIEW_MATRIX);
+}
+"
+
+[resource]
+resource_name = "Hoja"
+render_priority = 0
+shader = SubResource("Shader_hoja")
+shader_parameter/viento = 0.05
+shader_parameter/temblor = 0.012
+shader_parameter/u_bruma_color = Color(0.67, 0.75, 0.75, 1)
+shader_parameter/u_bruma_resplandor = Color(1, 0.6, 0.3, 0)
+shader_parameter/u_bruma_sol = Vector3(0, 1, 0)
+shader_parameter/u_bruma = Vector4(90, 1100, 0.85, 1)
+shader_parameter/u_bruma_cumbres = 0.3
+shader_parameter/u_bruma_baja = 10.0
+shader_parameter/u_bruma_alta = 70.0

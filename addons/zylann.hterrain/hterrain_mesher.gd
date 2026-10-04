@@ -118,7 +118,11 @@ static func make_indices(chunk_size_x: int, chunk_size_y: int, seams: int) -> Pa
 
 			# This flips the pattern to make the geometry orientation-free.
 			# Not sure if it helps in any way though
-			var flip = ((x + reg_origin_x) + (y + reg_origin_y) % 2) % 2 != 0
+			# ZENON (tanda 4): el plugin alternaba la diagonal de cada cuadrado como un damero; el choque
+			# del terreno parte TODOS los cuadrados por la diagonal 10-01. Donde el suelo es desparejo,
+			# el piso dibujado quedaba hasta 26 cm más alto o más bajo que el que se pisa (los pies de
+			# Zenón se hundían). Ahora el dibujo usa siempre la misma diagonal que el choque.
+			var flip = true
 
 			if flip:
 				output_indices.push_back( i00 )

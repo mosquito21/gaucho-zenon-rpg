@@ -1,10 +1,42 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" format=3]
+
+[sub_resource type="Shader" id="Shader_llama"]
+code = "shader_type spatial;
+render_mode cull_disabled;
+
+// Llamas del fogon: se mecen, se estiran y cambian de brillo, cada fogon con su propio ritmo.
+// El color sale de la malla, igual que antes; lo que se mueve es la punta (la base queda quieta).
+uniform vec3 emision : source_color = vec3(1.0, 0.55, 0.18);
+uniform float energia = 4.5;
+// Altura (en el modelo) donde nace la llama y cuanto mide
+uniform float base = 0.06;
+uniform float alto = 0.57;
+uniform float vaiven = 0.035;
+uniform float estirada = 0.10;
+
+varying float tiembla;
+
+void vertex() {
+	float h = clamp((VERTEX.y - base) / alto, 0.0, 1.0);
+	vec3 lugar = MODEL_MATRIX[3].xyz;
+	float fase = lugar.x * 1.7 + lugar.z * 2.3;
+	float a = sin(TIME * 7.3 + fase + VERTEX.y * 9.0) + 0.6 * sin(TIME * 13.1 + fase * 1.7 + VERTEX.x * 31.0);
+	float b = sin(TIME * 6.1 + fase * 0.6 + VERTEX.y * 11.0) + 0.6 * sin(TIME * 11.7 + fase + VERTEX.z * 29.0);
+	float c = 0.5 + 0.5 * sin(TIME * 9.0 + fase * 2.0 + VERTEX.x * 23.0);
+	VERTEX.x += a * vaiven * h * h;
+	VERTEX.z += b * vaiven * h * h;
+	VERTEX.y += c * estirada * h;
+	tiembla = 0.8 + 0.2 * sin(TIME * 15.0 + fase) * sin(TIME * 8.3 + fase * 0.7);
+}
+
+void fragment() {
+	ALBEDO = COLOR.rgb;
+	EMISSION = emision * energia * tiembla;
+	ROUGHNESS = 1.0;
+	SPECULAR = 0.0;
+}
+"
 
 [resource]
 resource_name = "Llama"
-vertex_color_use_as_albedo = true
-metallic_specular = 0.0
-roughness = 1.0
-emission_enabled = true
-emission = Color(1, 0.55, 0.18, 1)
-emission_energy_multiplier = 4.5
+shader = SubResource("Shader_llama")
