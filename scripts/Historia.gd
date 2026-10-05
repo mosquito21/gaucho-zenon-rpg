@@ -8,9 +8,16 @@ extends Node
 ## La lógica no necesita el mundo: tools/pruebas/probar_historia.gd la recorre sin abrirlo.
 
 const RUTA_DATOS := "res://datos/historia.json"
+## Los rebaños que Zenón arrea: la sección de datos/historia.json (su variable se llama igual) y la
+## clave con que la partida guarda dónde quedó cada animal. "vacas" es la de la tanda 6 y no cambia,
+## para que las partidas viejas carguen.
+const REBANOS := {"arreo": "vacas", "caballada": "caballos"}
 ## Dónde se guarda la partida. Las pruebas que corren el juego solas lo arrancan con
-## "-- --partida-de-prueba" y guardan en otro archivo, para no pisar la partida de quien juega.
+## "-- --partida-de-prueba" y guardan en otros archivos (ver _ruta), para no pisar los de quien juega.
 var ruta_partida := "user://partida.json"
+var _sufijo := ""
+## Las pruebas sin mundo pueden decir qué contesta la condición "cerca" (null: no dicen nada).
+var cerca_forzada = null
 
 var datos: Dictionary = {}
 
@@ -48,14 +55,35 @@ var _terreno: Node3D
 var _saliendo := {}
 var _fila: Array[Node3D] = []
 var _fila_esperando := false
-var _arreo: Node
+## Los rebaños que hay en el mundo: sección de datos → nodo (scripts/arreo.gd).
+var _rebanos := {}
+## La jornada de trabajo que empieza al cerrar el diálogo (efecto "jornada").
+var _jornada: Dictionary = {}
+## Cómo estaba en la escena cada cosa que "mundo" prende, apaga o mueve, para dejarla igual después.
+var _de_escena := {}
 
 
 func _init() -> void:
 	if OS.get_cmdline_user_args().has("--partida-de-prueba"):
-		ruta_partida = "user://partida_prueba.json"
+		_sufijo = "_prueba"
+	ruta_partida = _ruta("partida")
 	_cargar_datos()
 	nueva()
+
+
+## El archivo de ese nombre en la carpeta de partidas: "partida", "abril" (la copia al llegar la
+## línea) o "partida_terminada" (la que se aparta al empezar de nuevo).
+func _ruta(nombre: String) -> String:
+	return "user://%s%s.json" % [nombre, _sufijo]
+
+
+## Al cerrar la ventana se guarda dónde quedó todo (antes solo se guardaba al cerrar un diálogo).
+## Con un diálogo abierto no: lo que ese diálogo ya cambió todavía no terminó de aplicarse (el cierre
+## es el que amanece, pasa de capítulo y guarda la copia de abril), así que se vuelve al último guardado.
+## Con un final elegido tampoco: la gente que sigue a Zenón no se guarda, y al volver quedaría atrás.
+func _notification(que: int) -> void:
+	if que == NOTIFICATION_WM_CLOSE_REQUEST and not terminado and final_elegido == "" and _nodo.is_empty():
+		guardar()
 
 
 func _ready() -> void:
@@ -93,6 +121,7 @@ func nueva() -> void:
 	_nodo = {}
 	_partida = {}
 	_sucio = false
+	_jornada = {}
 
 
 func v(nombre: String) -> int:
@@ -104,16 +133,27 @@ func poner(nombre: String, valor: int) -> void:
 		return
 	vars[nombre] = valor
 	_sucio = true
-	# Los trabajos viejos (recado y seña) dejan su nota para el fogón desde acá.
+	# Lo que pone el mundo (el recado, el mojón, un rebaño encerrado) deja su nota para el fogón desde acá.
 	var nota: String = str(datos.get("notas_de_trabajos", {}).get("%s=%d" % [nombre, valor], ""))
 	if nota != "":
 		notas.append(nota)
+	# Fuera de un diálogo (el recado, el mojón, un rebaño) no hay un cierre que acomode el mundo y
+	# guarde: se hace al terminar el cuadro. Adentro de un diálogo, de eso se ocupa _cerrar().
+	if _nodo.is_empty() and not ocupado and _jugador != null:
+		_asentar.call_deferred()
+
+
+## Acomoda el mundo a lo que cambió y lo deja escrito, sin tocar lo que _cerrar() tiene pendiente.
+func _asentar() -> void:
+	_acomodar_mundo()
+	_escribir(ruta_partida)
 
 
 ## ¿Se cumple la condición? Es un diccionario; tienen que cumplirse todas sus claves.
 ## momento: 2 o [2, 3] · var: {"sena": 2} o {"sena": [2, 3]} · si / no: ["bandera"]
 ## min: {"ejercito": 3} (contra los mínimos de config si el valor es "minimo") · o: [cond, cond]
 ## menos: {"ejercito": "minimo"} (la confianza NO llega a ese valor) · final: "chile" (el final elegido)
+## deuda_hasta: 40 (la cuenta es de 40 o menos) · cerca: "ceniza" (la tiene a mano; ver config.cerca)
 func cumple(cond: Dictionary) -> bool:
 	for clave in cond:
 		var valor = cond[clave]
@@ -150,6 +190,18 @@ func cumple(cond: Dictionary) -> bool:
 			"final":
 				if final_elegido != str(valor):
 					return false
+			"deuda_hasta":
+				if deuda > int(valor):
+					return false
+			"cerca":
+				if not _cerca(str(valor)):
+					return false
+			"periodo":
+				# "Noche" o ["Crepúsculo", "Noche"]: los períodos de scripts/CicloDiaNoche.gd. Sin mundo es de día.
+				var ciclo := _ciclo()
+				var ahora := str(ciclo.call("obtener_periodo_dia")) if ciclo != null else "Día"
+				if not (valor if valor is Array else [valor]).has(ahora):
+					return false
 			"o":
 				var alguna := false
 				for otra in valor:
@@ -173,9 +225,24 @@ func _esta(numero: int, valor) -> bool:
 	return int(valor) == numero
 
 
+## ¿Zenón tiene eso a mano? En datos/historia.json, config.cerca dice qué nodo es y a cuántos metros
+## ("ceniza": montado está encima, así que también vale). Sin mundo (las pruebas) cuenta como cerca.
+func _cerca(de_que: String) -> bool:
+	if cerca_forzada != null:
+		return bool(cerca_forzada)
+	if _jugador == null or not is_instance_valid(_jugador) or _mundo == null or not is_instance_valid(_mundo):
+		return true
+	var c: Dictionary = datos.get("config", {}).get("cerca", {}).get(de_que, {})
+	var nodo := _mundo.get_node_or_null(str(c.get("nodo", ""))) as Node3D
+	if nodo == null:
+		return true
+	var lejos := Vector2(nodo.global_position.x - _jugador.global_position.x, nodo.global_position.z - _jugador.global_position.z).length()
+	return lejos <= float(c.get("metros", 12.0))
+
+
 ## Aplica lo que cambia una opción o un nodo.
 ## var: {"sena": 1} · flag: ["x"] · confianza: {"ejercito": 1} · deuda: -20 · nota: "..."
-## momento: 3 · final: "sargento"
+## momento: 3 · final: "sargento" · jornada: {"horas": 4, "texto": ["..."]} (ver _hacer_jornada)
 func aplicar(efectos: Dictionary) -> void:
 	if efectos.is_empty():
 		return
@@ -205,6 +272,8 @@ func aplicar(efectos: Dictionary) -> void:
 				final_elegido = str(valor)
 				momento = 4
 				_pendiente_mundo = true
+			"jornada":
+				_jornada = valor
 			_:
 				push_warning("historia.json: efecto desconocido '%s'" % clave)
 
@@ -215,9 +284,24 @@ func _texto(crudo: String) -> String:
 
 # ------------------------------------------------------------------ diálogos
 
-## Abre la charla de un personaje. Devuelve falso si no tiene nada que decir.
+## La ficha de una persona ("personajes") o de un lugar de trabajo ("changas").
+func _ficha(id: String) -> Dictionary:
+	return datos.get("personajes", {}).get(id, datos.get("changas", {}).get(id, {}))
+
+
+## El cartel de "Presioná E" que la historia le pone a una persona o a un lugar de trabajo, si le
+## pone uno ("mira": {"si": {...}, "texto": "..."} o una lista de esos); si no, "".
+func mira_de(id: String) -> String:
+	var mira = _ficha(id).get("mira", [])
+	for caso in (mira if mira is Array else [mira]):
+		if cumple(caso.get("si", {})):
+			return str(caso.get("texto", ""))
+	return ""
+
+
+## Abre la charla de un personaje o de un lugar de trabajo. Devuelve falso si no tiene nada que decir.
 func hablar(id: String) -> bool:
-	var persona: Dictionary = datos.get("personajes", {}).get(id, {})
+	var persona := _ficha(id)
 	if persona.is_empty() or ocupado:
 		return false
 	hablando_con = id
@@ -316,8 +400,35 @@ func _cerrar() -> void:
 		if aviso != _ultimo_aviso:
 			_avisar(aviso)
 	if _sucio:
-		_acomodar_arreo()
+		_acomodar_mundo()
 		guardar()
+	_hacer_jornada()
+
+
+## Una jornada de trabajo (efecto "jornada"): la pantalla se oscurece, se lee lo que hizo Zenón y el
+## reloj avanza esas horas, sin pasar de la oración (config.jornada_hasta). De noche el reloj no se mueve.
+func _hacer_jornada() -> void:
+	if _jornada.is_empty():
+		return
+	var j := _jornada
+	_jornada = {}
+	var pasar := func() -> void:
+		var ciclo := _ciclo()
+		if ciclo != null:
+			var hora := float(ciclo.get("hora_del_dia"))
+			var tope := float(datos.get("config", {}).get("jornada_hasta", 21.0))
+			if hora < tope:
+				ciclo.establecer_hora(minf(hora + float(j.get("horas", 1.0)), tope))
+		guardar()
+	var texto = j.get("texto", [])
+	if _cuadro == null or ocupado:
+		pasar.call()
+		return
+	ocupado = true
+	var al_terminar := func() -> void:
+		ocupado = false
+		_avisar(_aviso_del_momento())
+	_cuadro.fundido(texto if texto is Array else [texto], al_terminar, pasar)
 
 
 # ------------------------------------------------------------------ fogón
@@ -379,9 +490,11 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	_jugador = jugador
 	_mundo = jugador.get_parent()
 	_personas = []
+	_de_escena = {}
+	_rebanos = {}
 	if _partida.is_empty() and momento == 1 and flags.is_empty() and FileAccess.file_exists(ruta_partida):
 		# World.tscn se abrió sin pasar por el menú: sigue la partida que haya.
-		# Si esa partida ya llegó a un final, empieza una nueva.
+		# Si esa partida ya llegó a un final, la aparta (no la borra) y empieza una nueva.
 		cargar()
 		if terminado:
 			borrar_partida()
@@ -392,6 +505,14 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 			push_warning("historia.json: el personaje '%s' no encuentra su nodo '%s'" % [id, persona.get("nodo", "")])
 			continue
 		_personas.append(_sumar_interactuable(nodo, Interactable.Rol.PERSONA, id, str(persona.get("nombre", "")), float(persona.get("alcance", 3.2))))
+	# Los lugares de trabajo de los conchabos (el jarillal): se usan como se le habla a una persona.
+	for id in datos.get("changas", {}):
+		var changa: Dictionary = datos["changas"][id]
+		var lugar := _mundo.get_node_or_null(str(changa.get("nodo", "")))
+		if lugar == null:
+			push_warning("historia.json: el lugar de trabajo '%s' no encuentra su nodo '%s'" % [id, changa.get("nodo", "")])
+			continue
+		_personas.append(_sumar_interactuable(lugar, Interactable.Rol.CHANGA, id, str(changa.get("nombre", "")), float(changa.get("alcance", 6.0))))
 	var fogon := _mundo.get_node_or_null(str(datos.get("fogon", {}).get("nodo", "")))
 	if fogon != null:
 		_personas.append(_sumar_interactuable(fogon, Interactable.Rol.FOGON, "", "", 3.0))
@@ -424,6 +545,16 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 		return
 	if final_elegido != "":
 		_mover_gente_del_final()
+	if momento == 1 and not flags.has("_arranque"):
+		# Partida nueva: el cartel de dónde y cuándo, con las teclas (avisos.cartel_momento_1).
+		flags["_arranque"] = true
+		_al_cambiar_de_momento()
+		return
+	if _partida.has("hora"):
+		# La hora guardada se pone recién a los 0,2 s (arriba): el recordatorio espera a eso, para
+		# que la línea del sol salga con la hora de la partida y no con la del arranque.
+		get_tree().create_timer(0.3).timeout.connect(recordar)
+		return
 	recordar()
 
 
@@ -476,46 +607,136 @@ func _acomodar_mundo() -> void:
 		lugar.visible = prendido
 		# Apagado, el nodo deja de procesar y sus cuerpos de choque salen de la física.
 		lugar.process_mode = Node.PROCESS_MODE_INHERIT if prendido else Node.PROCESS_MODE_DISABLED
-	_acomodar_arreo()
+	_acomodar_segun_la_historia()
+	_acomodar_rebanos()
+	# El sol anda más al norte (más bajo al mediodía) a medida que avanza el año: config.sol_al_norte
+	# trae los grados para cada momento.
+	var norte: Array = datos.get("config", {}).get("sol_al_norte", [])
+	var ciclo := _ciclo()
+	if ciclo != null and not norte.is_empty():
+		ciclo.set("sol_al_norte", float(norte[clampi(momento, 1, norte.size()) - 1]))
 
 
-## El arreo (la changa del capataz): mientras dura, la punta anda suelta en el campo; cuando ya se
-## hizo alguno, queda encerrada en el corral grande. Los números están en datos/historia.json
-## ("arreo") y las vacas las mueve scripts/arreo.gd.
-func _acomodar_arreo() -> void:
-	var d: Dictionary = datos.get("arreo", {})
-	if d.is_empty() or _mundo == null or not is_instance_valid(_mundo) or _jugador == null:
+## La sección "mundo" de datos/historia.json: una lista de {"si", "mostrar", "ocultar", "mover"}.
+## Mientras se cumple su "si", cada entrada prende sus "mostrar", apaga sus "ocultar" y lleva a otro
+## lugar a los de "mover" ({"nodo", "a": [x, z], "mira": [x, z], "clips": [...]}); cuando deja de
+## cumplirse, todo vuelve a estar como en la escena. Así se ven la carga en Ceniza, el rastro de la
+## caballada o la yerra.
+func _acomodar_segun_la_historia() -> void:
+	var visto := {}
+	var movido := {}
+	var rutas := {}
+	for entrada: Dictionary in datos.get("mundo", []):
+		var vale := cumple(entrada.get("si", {}))
+		for ruta: String in entrada.get("mostrar", []):
+			rutas[ruta] = true
+			if vale:
+				visto[ruta] = true
+		for ruta: String in entrada.get("ocultar", []):
+			rutas[ruta] = true
+			if vale:
+				visto[ruta] = false
+		for mov: Dictionary in entrada.get("mover", []):
+			rutas[str(mov.get("nodo", ""))] = true
+			if vale:
+				movido[str(mov.get("nodo", ""))] = mov
+	for ruta: String in rutas:
+		var nodo := _mundo.get_node_or_null(ruta) as Node3D
+		if nodo == null:
+			continue
+		if not _de_escena.has(ruta):
+			_de_escena[ruta] = {"visible": nodo.visible, "modo": nodo.process_mode, "lugar": nodo.global_transform,
+				"clips": nodo.get("clips"), "movido": false}
+		var antes: Dictionary = _de_escena[ruta]
+		var ver: bool = visto.get(ruta, antes.visible)
+		nodo.visible = ver
+		# Apagado, deja de procesar y sus cuerpos de choque salen de la física (visible no alcanza).
+		nodo.process_mode = antes.modo if ver else Node.PROCESS_MODE_DISABLED
+		if movido.has(ruta) != antes.movido:
+			antes.movido = movido.has(ruta)
+			var ronda = nodo.get("ronda")
+			if antes.movido:
+				_llevar(nodo, movido[ruta])
+			elif ronda is PackedVector2Array and not ronda.is_empty() and nodo.has_method("quedarse"):
+				# El que tenía una ronda la retoma desde donde está: vuelve caminando.
+				nodo.call("quedarse")
+			else:
+				nodo.global_transform = antes.lugar
+				if antes.clips != null and nodo.has_method("poner_clips"):
+					nodo.call("poner_clips", antes.clips)
+
+
+## Lleva un nodo a otro punto del mapa, apoyado en el suelo, mirando hacia donde se le diga.
+## Con "andando": true, si es alguien que camina y Zenón lo tiene a la vista (a menos de 60 m), va
+## caminando en vez de aparecer ahí. El que hacía una ronda la deja y se queda en ese punto.
+func _llevar(nodo: Node3D, mov: Dictionary) -> void:
+	var a: Array = mov.get("a", [0, 0])
+	var meta := Vector3(a[0], altura_suelo(a[0], a[1]), a[1])
+	var camina := nodo.has_method("andar_por")
+	var a_la_vista := _jugador != null and is_instance_valid(_jugador) and _jugador.global_position.distance_to(nodo.global_position) < 60.0
+	if camina and a_la_vista and mov.get("andando", false):
+		nodo.call("andar_por", PackedVector3Array([meta]), float(mov.get("velocidad", 1.2)))
 		return
-	var suelta := momento == 2 and v("arreo") == 1
-	var hay := _arreo != null and is_instance_valid(_arreo)
-	if not suelta and v("arreos") == 0:
-		if hay:
-			_arreo.queue_free()
-			_arreo = null
+	nodo.global_position = meta
+	if mov.has("mira"):
+		var m: Array = mov["mira"]
+		nodo.look_at(Vector3(m[0], nodo.global_position.y, m[1]), Vector3.UP, true)
+	if mov.has("clips") and nodo.has_method("poner_clips"):
+		nodo.call("poner_clips", mov["clips"])
+	if camina:
+		nodo.call("andar_por", PackedVector3Array([meta]))
+
+
+## Los rebaños (la punta de vacas del capataz, la caballada del fortín): cada sección de datos trae
+## "suelta" (la condición con la que anda por el campo y hay que arrearla) y "encerrada" (con la que
+## se la ve ya en su corral). Los números están en datos/historia.json y los animales los mueve
+## scripts/arreo.gd.
+func _acomodar_rebanos() -> void:
+	if _mundo == null or not is_instance_valid(_mundo) or _jugador == null:
 		return
-	if not hay:
-		_arreo = (load("res://scripts/arreo.gd") as GDScript).new()
-		_arreo.name = "Arreo"
-		_arreo.set("datos", d)
-		_arreo.set("jinete", _jugador)
-		_arreo.connect("cumplido", _arreo_cumplido)
-		_arreo.connect("quedo_atras", func() -> void: _avisar(str(d.get("aviso_rezagada", ""))))
-		_mundo.add_child(_arreo)
-		# Si la partida se guardó a medio arreo, cada vaca vuelve adonde había quedado.
-		_arreo.call("poner", suelta, _partida.get("vacas", []) if suelta else [])
-		_partida.erase("vacas")
-	elif _arreo.get("suelta") != suelta and (suelta or _arreo.get("_pagado") != true):
-		_arreo.call("poner", suelta)
+	for seccion: String in REBANOS:
+		var d: Dictionary = datos.get(seccion, {})
+		if d.is_empty():
+			continue
+		var suelta: bool = d.has("suelta") and cumple(d["suelta"])
+		var nodo: Node = _rebanos.get(seccion)
+		var hay := nodo != null and is_instance_valid(nodo)
+		if not suelta and not (d.has("encerrada") and cumple(d["encerrada"])):
+			if hay:
+				nodo.queue_free()
+			_rebanos.erase(seccion)
+			continue
+		if not hay:
+			nodo = (load("res://scripts/arreo.gd") as GDScript).new()
+			# "Arreo" o "Caballada": por ese nombre lo busca la prueba (tools/pruebas/recorrida.gd).
+			nodo.name = seccion.capitalize()
+			nodo.set("datos", d)
+			nodo.set("jinete", _jugador)
+			nodo.connect("cumplido", _rebano_cumplido.bind(seccion))
+			nodo.connect("quedo_atras", func() -> void: _avisar(str(d.get("aviso_rezagada", ""))))
+			_mundo.add_child(nodo)
+			_rebanos[seccion] = nodo
+			# Si la partida se guardó a medio arreo, cada animal vuelve adonde había quedado.
+			nodo.call("poner", suelta, _partida.get(REBANOS[seccion], []) if suelta else [])
+			_partida.erase(REBANOS[seccion])
+		elif nodo.get("suelta") != suelta and (suelta or nodo.get("_pagado") != true):
+			nodo.call("poner", suelta)
 
 
-## La última vaca pasó la tranquera: se cobra. No mueve la confianza de nadie ni toca los finales.
-func _arreo_cumplido() -> void:
-	var d: Dictionary = datos.get("arreo", {})
-	var hechos := v("arreos") + 1
-	# Hasta el otro día no hay otra punta (2); después de tantas veces, ninguna más (3).
-	aplicar({"deuda": -int(d.get("paga", 0)), "nota": str(d.get("nota", "")),
-		"var": {"arreos": hechos, "arreo": 3 if hechos >= int(d.get("veces", 1)) else 2}})
+## El último animal pasó la tranquera. Ningún rebaño mueve la confianza de nadie ni toca los finales.
+func _rebano_cumplido(seccion: String) -> void:
+	var d: Dictionary = datos.get(seccion, {})
+	if d.has("al_cumplir"):
+		# La caballada: queda hecha y se cobra después, en lo de Ceferino.
+		aplicar(d["al_cumplir"])
+	else:
+		# El arreo del capataz se cobra solo. Hasta el otro día no hay otra punta (2); después de
+		# tantas veces, ninguna más (3).
+		var hechos := v("arreos") + 1
+		aplicar({"deuda": -int(d.get("paga", 0)), "nota": str(d.get("nota", "")),
+			"var": {"arreos": hechos, "arreo": 3 if hechos >= int(d.get("veces", 1)) else 2}})
 	_avisar(str(d.get("aviso_hecho", "")))
+	_acomodar_mundo()
 	guardar()
 
 
@@ -524,6 +745,10 @@ func _al_cambiar_de_momento() -> void:
 	if final_elegido != "":
 		_empezar_final()
 		return
+	if momento == 3:
+		# Una copia de cómo llegó Zenón a abril, para volver a elegir sin rejugar ("Volver a abril de
+		# 1881" en el menú). No toca la partida en curso.
+		_escribir(_ruta("abril"))
 	var paso: Dictionary = datos.get("avisos", {})
 	var cartel: Array = paso.get("cartel_momento_%d" % momento, [])
 	if not cartel.is_empty() and _cuadro != null:
@@ -531,28 +756,45 @@ func _al_cambiar_de_momento() -> void:
 		var al_terminar := func() -> void:
 			ocupado = false
 			_avisar(_aviso_del_momento())
-		_cuadro.fundido(cartel, al_terminar)
+		# El cartel del arranque sale con la pantalla ya tapada; los demás la van oscureciendo.
+		_cuadro.fundido(cartel, al_terminar, Callable(), momento == 1)
 	else:
 		_avisar(_aviso_del_momento())
 
 
-## Vuelve a mostrar adónde hay que ir (tecla Tab): sirve al retomar una partida.
+## Vuelve a mostrar adónde hay que ir (tecla Tab): sirve al retomar una partida. Debajo dice por
+## dónde anda el sol a esta hora (avisos.sol), que es la brújula de Zenón.
 func recordar() -> void:
 	if terminado or ocupado:
 		return
+	var linea := _aviso_del_momento()
 	if final_elegido != "":
-		_avisar(str(datos.get("finales", {}).get(final_elegido, {}).get("aviso", "")))
-		return
-	_avisar(_aviso_del_momento())
+		linea = str(datos.get("finales", {}).get(final_elegido, {}).get("aviso", ""))
+	var ciclo := _ciclo()
+	if ciclo != null:
+		var hora := float(ciclo.get("hora_del_dia"))
+		for caso: Dictionary in datos.get("avisos", {}).get("sol", []):
+			if hora >= float(caso.get("desde", 0.0)) and hora < float(caso.get("hasta", 24.0)):
+				linea += "\n" + str(caso.get("texto", ""))
+				break
+	_avisar(linea)
+	# El aviso de Tab con el sol no es "el aviso del momento": que al cerrar un diálogo vuelva a compararse bien.
+	_ultimo_aviso = _aviso_del_momento()
 
 
 ## El cartel de adónde ir: el primer caso de avisos.segun que se cumpla o, si ninguno, el del momento.
+## Debajo, una línea por cada conchabo a medias (avisos.conchabos).
 func _aviso_del_momento() -> String:
 	var avisos: Dictionary = datos.get("avisos", {})
+	var linea := str(avisos.get("momento_%d" % momento, ""))
 	for caso in avisos.get("segun", []):
 		if cumple(caso.get("si", {})):
-			return str(caso.get("texto", ""))
-	return str(avisos.get("momento_%d" % momento, ""))
+			linea = str(caso.get("texto", ""))
+			break
+	for caso in avisos.get("conchabos", []):
+		if cumple(caso.get("si", {})):
+			linea += "\n" + str(caso.get("texto", ""))
+	return linea
 
 
 func _avisar(linea: String) -> void:
@@ -600,13 +842,8 @@ func _mover_gente_del_final() -> void:
 	var final: Dictionary = datos.get("finales", {}).get(final_elegido, {})
 	for mov in final.get("mover", []):
 		var nodo := _mundo.get_node_or_null(str(mov.get("nodo", ""))) as Node3D
-		if nodo == null:
-			continue
-		var a: Array = mov.get("a", [0, 0])
-		nodo.global_position = Vector3(a[0], altura_suelo(a[0], a[1]), a[1])
-		if mov.has("mira"):
-			var m: Array = mov["mira"]
-			nodo.look_at(Vector3(m[0], nodo.global_position.y, m[1]), Vector3.UP, true)
+		if nodo != null:
+			_llevar(nodo, mov)
 	for ruta in final.get("mostrar", []):
 		var cosa := _mundo.get_node_or_null(str(ruta)) as Node3D
 		if cosa != null:
@@ -643,6 +880,7 @@ func _process(delta: float) -> void:
 		return
 	_llegada_revisar = 0.25
 	_salir_al_encuentro()
+	_pensar_al_pasar()
 	if final_elegido == "":
 		return
 	var final: Dictionary = datos.get("finales", {}).get(final_elegido, {})
@@ -697,6 +935,30 @@ func _salir_al_encuentro() -> void:
 		elif _saliendo.has(id):
 			_saliendo.erase(id)
 			nodo.call("quedarse")
+
+
+## Lo que se le hace notar a Zenón al pasar por un lugar (avisos.al_pasar en datos/historia.json):
+## {"si": {...}, "en": [x, z] o "rebano": "caballada" (el animal suelto más cercano), "radio": metros,
+## "texto": "...", "una_vez": "bandera"}. Sale como un aviso común, una sola vez.
+func _pensar_al_pasar() -> void:
+	if not _jugador.has_method("mostrar_aviso"):
+		return
+	var aqui := Vector2(_jugador.global_position.x, _jugador.global_position.z)
+	for caso: Dictionary in datos.get("avisos", {}).get("al_pasar", []):
+		var bandera := str(caso.get("una_vez", ""))
+		if flags.has(bandera) or not cumple(caso.get("si", {})):
+			continue
+		var lugares := PackedVector2Array()
+		if caso.has("en"):
+			lugares.append(Vector2(caso["en"][0], caso["en"][1]))
+		var rebano: Node = _rebanos.get(str(caso.get("rebano", "")))
+		if rebano != null and is_instance_valid(rebano) and rebano.get("suelta") == true:
+			lugares.append_array(rebano.call("faltan"))
+		for lugar in lugares:
+			if aqui.distance_to(lugar) <= float(caso.get("radio", 20.0)):
+				flags[bandera] = true
+				_jugador.call("mostrar_aviso", _texto(str(caso.get("texto", ""))))
+				return
 
 
 ## Cierra la historia con el final elegido y muestra el epílogo.
@@ -769,6 +1031,16 @@ func partida_terminada() -> bool:
 	return json is Dictionary and bool(json.get("terminado", false))
 
 
+## En qué época quedó la partida guardada ("abril de 1881"), para el botón "Continuar" del menú.
+## Los nombres, uno por momento, están en config.epocas.
+func epoca_guardada() -> String:
+	var json = JSON.parse_string(FileAccess.get_file_as_string(ruta_partida))
+	var epocas: Array = datos.get("config", {}).get("epocas", [])
+	if not (json is Dictionary) or epocas.is_empty():
+		return ""
+	return str(epocas[clampi(int(json.get("momento", 1)), 1, epocas.size()) - 1])
+
+
 func estado() -> Dictionary:
 	return {"version": 1, "momento": momento, "vars": vars, "flags": flags.keys(), "confianza": confianza,
 		"deuda": deuda, "notas": notas, "final": final_elegido, "terminado": terminado}
@@ -791,25 +1063,33 @@ func poner_estado(e: Dictionary) -> void:
 
 func guardar() -> void:
 	_sucio = false
-	var e := estado()
-	if _jugador != null and is_instance_valid(_jugador):
-		var p := _jugador.global_position
-		e["pos"] = [p.x, p.y, p.z]
-		e["yaw"] = _jugador.get("yaw")
-		var ciclo := _ciclo()
-		if ciclo != null:
-			e["hora"] = ciclo.get("hora_del_dia")
-		# Dónde quedó Ceniza y si Zenón va montado.
-		if _jugador.has_method("estado_del_caballo"):
-			e.merge(_jugador.call("estado_del_caballo"))
-		# Un arreo a medias: dónde quedó cada vaca.
-		if v("arreo") == 1 and _arreo != null and is_instance_valid(_arreo):
-			e["vacas"] = _arreo.call("guardar")
-	else:
+	_escribir(ruta_partida)
+
+
+## Escribe en ese archivo la historia y dónde está cada cosa del mundo.
+func _escribir(ruta: String) -> void:
+	if _jugador == null or not is_instance_valid(_jugador):
 		return  # Sin mundo (pruebas) no se escribe nada en el disco.
-	var archivo := FileAccess.open(ruta_partida, FileAccess.WRITE)
+	if datos.is_empty():
+		return  # Con datos/historia.json mal escrito no hay historia que guardar (la cuenta saldría en 0).
+	var e := estado()
+	var p := _jugador.global_position
+	e["pos"] = [p.x, p.y, p.z]
+	e["yaw"] = _jugador.get("yaw")
+	var ciclo := _ciclo()
+	if ciclo != null:
+		e["hora"] = ciclo.get("hora_del_dia")
+	# Dónde quedó Ceniza y si Zenón va montado.
+	if _jugador.has_method("estado_del_caballo"):
+		e.merge(_jugador.call("estado_del_caballo"))
+	# Un rebaño a medio arrear: dónde quedó cada animal.
+	for seccion: String in _rebanos:
+		var d: Dictionary = datos.get(seccion, {})
+		if is_instance_valid(_rebanos[seccion]) and d.has("suelta") and cumple(d["suelta"]):
+			e[REBANOS[seccion]] = _rebanos[seccion].call("guardar")
+	var archivo := FileAccess.open(ruta, FileAccess.WRITE)
 	if archivo == null:
-		push_warning("No se pudo guardar la partida en %s" % ruta_partida)
+		push_warning("No se pudo guardar la partida en %s" % ruta)
 		return
 	archivo.store_string(JSON.stringify(e, "\t"))
 
@@ -823,7 +1103,29 @@ func cargar() -> bool:
 	return true
 
 
-func borrar_partida() -> void:
+## Empieza de cero. La partida que había no se pierde: queda apartada en "partida_terminada" (una
+## sola, la última), en la misma carpeta. Devuelve falso si había una partida y no se pudo apartar
+## (por ejemplo, porque otro programa tiene abierto el archivo apartado de antes).
+func borrar_partida() -> bool:
+	var apartada := true
 	if FileAccess.file_exists(ruta_partida):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_partida))
+		var carpeta := DirAccess.open("user://")
+		apartada = carpeta != null and carpeta.rename(ruta_partida, _ruta("partida_terminada")) == OK
 	nueva()
+	return apartada
+
+
+## ¿Hay una copia de cómo llegó Zenón a abril de 1881? (La escribe _al_cambiar_de_momento.)
+func hay_abril() -> bool:
+	return FileAccess.file_exists(_ruta("abril"))
+
+
+## Vuelve a esa copia: la partida que había queda apartada, como al empezar de nuevo.
+func volver_a_abril() -> bool:
+	var carpeta := DirAccess.open("user://")
+	if carpeta == null or not hay_abril():
+		return false
+	if not borrar_partida():
+		return false  # No se pudo apartar la partida en curso: no se la pisa.
+	carpeta.copy(_ruta("abril"), ruta_partida)
+	return cargar()

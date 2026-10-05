@@ -9,12 +9,14 @@ extends Node
 ## Pasos del plan (una lista de listas):
 ##   ["ir", "nombre", x, z, radio]            va hasta ese punto del mapa
 ##   ["acercar", "ruta del nodo", metros]     va hacia ese nodo (aunque se mueva) hasta quedar a esa distancia
-##   ["hablar", "id", ["trozo de opción"]]    se acerca a esa persona, aprieta E y elige en orden
+##   ["hablar", "id", ["trozo de opción"]]    se acerca a esa persona (o a ese lugar de trabajo, como
+##                                            "jarillal"), aprieta E y elige en orden
 ##   ["usar", "Lugares/PostaDelCoiron"]       se acerca a un lugar, lo mira y aprieta E
-##   ["fogon"]                                se sienta al fogón y pasa las páginas
+##   ["fogon", ["trozo de opción"]]           se sienta al fogón, pasa las páginas y elige si pregunta
 ##   ["montar"] / ["desmontar"] / ["silbar"]  las teclas del caballo
 ##   ["marcha", 3]                            montado: 1 paso, 2 trote, 3 galope
-##   ["arrear"]                               montado y con el arreo tomado: lleva la punta hasta el corral
+##   ["arrear"] o ["arrear", "caballada"]     montado y con el trabajo tomado: lleva el rebaño de esa
+##                                            sección de datos (sin nada, el arreo) hasta su corral
 ##   ["poner", x, z]                          aparece en ese punto del mapa (montado, con Ceniza y todo)
 ##   ["empujar", x, z, segundos]              va derecho hacia ese punto ese tiempo, sin rodear nada: para
 ##                                            comprobar que una pared, un cerco o el agua honda lo frenan
@@ -89,6 +91,8 @@ func _physics_process(delta: float) -> void:
 	if _mundo == null or _mundo.get_node_or_null("Player") == null:
 		return
 	_p = _mundo.get_node("Player")
+	if _i < 0:
+		_revisar_rutas()
 	if _soltar_salto:
 		Input.action_release("jump")
 		_soltar_salto = false
@@ -120,6 +124,28 @@ func _physics_process(delta: float) -> void:
 	if _p.global_position.y < Historia.altura_suelo(_p.global_position.x, _p.global_position.z) - 3.0:
 		_falla("atravesó el piso en %s (paso %d)" % [_p.global_position, _i])
 		_terminar()
+
+
+## Todo nodo que datos/historia.json nombra en "mundo" y en "changas" tiene que estar en la escena:
+## si se renombra o se borra, la historia lo saltea sin avisar.
+func _revisar_rutas() -> void:
+	var rutas: Array = []
+	for entrada: Dictionary in Historia.datos.get("mundo", []):
+		rutas.append_array(entrada.get("mostrar", []))
+		rutas.append_array(entrada.get("ocultar", []))
+		for mov: Dictionary in entrada.get("mover", []):
+			rutas.append(mov.get("nodo", ""))
+	for id: String in Historia.datos.get("changas", {}):
+		rutas.append(Historia.datos["changas"][id].get("nodo", ""))
+	for ruta: String in rutas:
+		if _mundo.get_node_or_null(ruta) == null:
+			_falla("datos/historia.json nombra '%s' y no está en la escena" % ruta)
+	# Lo que Ceniza lleva en el anca no puede traer cuerpos de choque: montado, este mismo cuerpo
+	# chocaría contra su carga y el caballo no avanzaría (le pasó al tercio de yerba en la tanda 7).
+	var carga := _mundo.get_node_or_null("Ceniza/Carga")
+	if carga != null:
+		for cuerpo in carga.find_children("*", "CollisionObject3D", true, false):
+			_falla("la carga de Ceniza trae un cuerpo de choque: %s" % carga.get_path_to(cuerpo))
 
 
 func _terminar() -> void:
@@ -220,14 +246,16 @@ func _hacer(delta: float) -> bool:
 ## Lleva la punta del arreo al corral, montado y al trote, como lo haría un jinete: si está
 ## desparramada va a buscar a la vaca que quedó más lejos del resto; si va junta, se le pone
 ## detrás y la empuja hacia la entrada. Falla si en quince minutos de juego no entró.
+## Con ["arrear", "caballada"] hace lo mismo con el rebaño de esa sección de datos.
 func _arrear(delta: float) -> bool:
-	var arreo := _mundo.get_node_or_null("Arreo")
+	var seccion := str(_paso[1]) if _paso.size() > 1 else "arreo"
+	var arreo := _mundo.get_node_or_null(seccion.capitalize())
 	if _fase == 0:
-		if arreo == null or Historia.v("arreo") != 1:
-			_falla("no hay arreo en marcha")
+		if arreo == null or Historia.v(seccion) != 1:
+			_falla("no hay %s en marcha" % seccion)
 			return true
 		_fase = 1
-	if Historia.v("arreo") != 1:
+	if Historia.v(seccion) != 1:
 		return true
 	var vacas: PackedVector2Array = arreo.faltan()
 	if _t > 900.0:
@@ -376,7 +404,8 @@ func _charla(delta: float) -> bool:
 
 func _hablar(delta: float) -> bool:
 	var id := str(_paso[1])
-	var persona: Dictionary = Historia.datos.get("personajes", {}).get(id, {})
+	# Una persona ("personajes") o un lugar de trabajo ("changas"): se usan igual.
+	var persona: Dictionary = Historia._ficha(id)
 	var nodo := _mundo.get_node_or_null(str(persona.get("nodo", ""))) as Node3D
 	if nodo == null:
 		_falla("no está en el mundo: " + id)
@@ -475,6 +504,7 @@ func _fogon(delta: float) -> bool:
 			if _espera > 0.0:
 				return false
 			_tecla_e()
+			_pend = (_paso[1] as Array).duplicate() if _paso.size() > 1 else []
 			_fase = 2
 			_espera = 0.4
 			return false

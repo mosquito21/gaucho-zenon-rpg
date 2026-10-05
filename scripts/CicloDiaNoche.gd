@@ -16,6 +16,10 @@ class_name CicloDiaNoche
 # Configuración del ciclo
 @export var duracion_ciclo_minutos: float = 10.0  # Duración del ciclo completo en minutos reales
 @export var hora_inicial: float = 6.0  # Hora de inicio (6:00 AM)
+## Cuántos grados se aparta el sol del cenit, hacia el norte, al mediodía: en la Patagonia el sol anda
+## por el norte y la sombra del mediodía apunta al sur. 0 lo deja pasando justo por arriba, como antes.
+## La historia lo cambia según el momento del año (config.sol_al_norte en datos/historia.json).
+@export_range(0.0, 60.0, 1.0) var sol_al_norte: float = 25.0
 
 # Variables del sistema
 var tiempo_actual: float = 0.0  # Tiempo en segundos dentro del ciclo
@@ -158,7 +162,9 @@ func actualizar_rotacion_sol():
 	# Pitch negativo baja la luz: 0° en el horizonte (6:00), -90° en el cenit (12:00), -180° al ponerse (18:00).
 	# El yaw en 90° hace que recorra este-oeste. De noche sigue bajo el horizonte.
 	var angulo_sol = -((hora_del_dia - 6.0) / 24.0) * 360.0
-	sol.rotation_degrees = Vector3(angulo_sol, 90.0, 0.0)
+	# Ese arco se vuelca hacia el norte (-Z) girándolo sobre la línea este-oeste: sale y se pone por
+	# donde siempre, pero al mediodía queda `sol_al_norte` grados más bajo, del lado norte.
+	sol.basis = Basis(Vector3.RIGHT, deg_to_rad(-sol_al_norte)) * Basis.from_euler(Vector3(deg_to_rad(angulo_sol), deg_to_rad(90.0), 0.0))
 
 func crear_luna() -> void:
 	var raiz := get_tree().current_scene
@@ -360,7 +366,9 @@ func actualizar_iluminacion():
 		# alto que `altura_sol_relieve` y corrido hacia el norte (-Z), que es por donde anda el sol en la
 		# Patagonia, así al mediodía las laderas no quedan todas iguales. La sombra toma el color del
 		# cielo. De noche, la luna según su fase; el material cuida que la roca no pase al cielo.
-		var relieve := Vector3(direccion_sol.x, minf(direccion_sol.y, altura_sol_relieve), direccion_sol.z - norte_sol_relieve)
+		# Se calcula sobre el sol sin volcar al norte (tanda 7), para que la cordillera quede como estaba.
+		var sin_volcar := Basis(Vector3.RIGHT, deg_to_rad(sol_al_norte)) * direccion_sol
+		var relieve := Vector3(sin_volcar.x, minf(sin_volcar.y, altura_sol_relieve), sin_volcar.z - norte_sol_relieve)
 		material_cordillera.set_shader_parameter("direccion_relieve", relieve.normalized())
 		material_cordillera.set_shader_parameter("direccion_sol", direccion_sol)
 		material_cordillera.set_shader_parameter("color_sol", k.sol)

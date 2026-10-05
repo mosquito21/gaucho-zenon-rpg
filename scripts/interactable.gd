@@ -4,7 +4,7 @@ class_name Interactable
 ## Cosa de la estepa con la que Zenón puede hablar o dejar un recado.
 ## El estado del trabajo vive en el jugador, así no se pierde al caminar.
 
-enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON, CABALLO }
+enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON, CABALLO, CHANGA }
 
 @export var rol: Rol = Rol.PIEDRA
 @export var interact_text := "Presioná E para inspeccionar la piedra"
@@ -12,7 +12,9 @@ enum Rol { PIEDRA, POSTA, HITO, FORTIN, MOJON, PERSONA, FOGON, CABALLO }
 ## Si queda vacío, sigue la frase de la piedra.
 @export_multiline var texto_al_usar := ""
 ## Rol PERSONA: quién es (la clave de "personajes" en datos/historia.json) y cómo se llama.
-## A la gente y al fogón los suma scripts/Historia.gd al arrancar; no hace falta ponerlos a mano.
+## Rol CHANGA: un lugar de trabajo de un conchabo (la clave de "changas"); se usa como se habla.
+## A la gente, al fogón y a esos lugares los suma scripts/Historia.gd al arrancar; no hace falta
+## ponerlos a mano.
 @export var personaje := ""
 @export var nombre := ""
 ## Rol PERSONA, FOGON y CABALLO: hasta cuántos metros se puede hablar (o montar).
@@ -56,8 +58,12 @@ func texto_mira(jugador: Node) -> String:
 			if exploracion >= 2:
 				return "El mojón ya está marcado. Volvé al fortín si falta."
 			return "Es un mojón del cerro. El fortín todavía no te mandó."
-		Rol.PERSONA:
-			return "Presioná E para hablar con %s" % nombre
+		Rol.PERSONA, Rol.CHANGA:
+			# La historia puede ponerle su propio cartel ("mira" en datos/historia.json).
+			var propio := Historia.mira_de(personaje)
+			if propio != "":
+				return propio
+			return ("Presioná E para hablar con %s" if rol == Rol.PERSONA else "Presioná E para mirar %s") % nombre
 		Rol.FOGON:
 			if jugador.get("montado") == true:
 				return "Para sentarte al fogón, bajate de Ceniza (Q)"
@@ -80,7 +86,7 @@ func al_interactuar(jugador: Node) -> String:
 			return ""
 		Rol.MOJON:
 			return str(jugador.call("marcar_mojon"))
-		Rol.PERSONA:
+		Rol.PERSONA, Rol.CHANGA:
 			Historia.hablar(personaje)
 			return ""
 		Rol.FOGON:

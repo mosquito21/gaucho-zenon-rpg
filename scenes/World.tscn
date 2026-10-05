@@ -127,6 +127,7 @@
 [ext_resource type="PackedScene" uid="uid://dvj10vioh8q44" path="res://assets/personajes/npc/villegas_animado.glb" id="96_yyqwr"]
 [ext_resource type="ArrayMesh" uid="uid://rvcffyce1wmx" path="res://assets/terreno/agua_rio_limay.res" id="106_jamvv"]
 [ext_resource type="ArrayMesh" uid="uid://omx4sbwl63kg" path="res://assets/terreno/agua_lago_nahuel_huapi.res" id="107_aq3xx"]
+[ext_resource type="PackedScene" uid="uid://cx4vreyurjevo" path="res://assets/flora/alpataco.glb" id="108_7ecsv"]
 [ext_resource type="PackedScene" uid="uid://4qixec4xown6" path="res://assets/flora/lenga_c.glb" id="112_5fh8j"]
 [ext_resource type="PackedScene" uid="uid://xkxjsgj43myo" path="res://assets/flora/lenga_d.glb" id="113_5sqb2"]
 [ext_resource type="PackedScene" uid="uid://bcahemmhlbppa" path="res://assets/flora/nire_c.glb" id="114_7tfmv"]
@@ -138,7 +139,11 @@
 [ext_resource type="PackedScene" uid="uid://py42858orwii" path="res://assets/props/cruz_camino.glb" id="130_37rif"]
 [ext_resource type="PackedScene" uid="uid://crytnb4u43rl3" path="res://assets/props/osamenta.glb" id="131_2vron"]
 [ext_resource type="PackedScene" uid="uid://12nb03omnd02" path="res://assets/animales/ceniza_animado.glb" id="131_6ym5l"]
+[ext_resource type="PackedScene" uid="uid://b03hs32t2sfu4" path="res://assets/props/ponchos_doblados.glb" id="134_e2ppr"]
+[ext_resource type="PackedScene" uid="uid://buwa7soegx2ry" path="res://assets/props/atado_lenia.glb" id="135_7ecsv"]
+[ext_resource type="PackedScene" uid="uid://phh0f0kt5r8y" path="res://assets/props/tercio_al_anca.glb" id="137_8b5ep"]
 [ext_resource type="Texture2D" uid="uid://ppyfqfwtu8tc" path="res://assets/terreno/huellas_hacienda.png" id="138_rv5cv"]
+[ext_resource type="Texture2D" uid="uid://c8qjkosc88b4x" path="res://assets/terreno/huellas_caballada.png" id="139_6ym5l"]
 [ext_resource type="ArrayMesh" uid="uid://sc8pqjty0nwa" path="res://assets/terreno/agua_aguada_del_cerro.res" id="142_6ym5l"]
 [ext_resource type="PackedScene" uid="uid://40cfuoop8by4" path="res://assets/props/carga_cueros.glb" id="t6_carga"]
 [ext_resource type="PackedScene" uid="uid://bie77e52yoope" path="res://assets/props/montura_mantas.glb" id="t6_mantas"]
@@ -775,6 +780,10 @@ mezcla = 0.6
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.2)
 shape = SubResource("BoxShape3D_4u6ah")
 
+[node name="LeniaDelVeterano" type="Node3D" parent="Lugares/FortinDelSalitral/Cuerpo/Fortin" unique_id=1271454335 instance=ExtResource("57_yyqwr")]
+transform = Transform3D(0.19017823, 0, -0.4078385, 0, 0.45, 0, 0.4078385, 0, 0.19017823, 4.600006, -0.22886166, -1.8999939)
+visible = false
+
 [node name="MojonDelCerro" type="Node3D" parent="Lugares" unique_id=666662722]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 8.24, 320)
 
@@ -1000,8 +1009,12 @@ al_costado = 0.6
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0.05)
 shape = SubResource("BoxShape3D_37rif")
 
-[node name="Lenia" parent="Lugares/PulperiaDonCeferino" unique_id=1271454335 instance=ExtResource("57_yyqwr")]
+[node name="Lenia" parent="Lugares/PulperiaDonCeferino" unique_id=478485383 instance=ExtResource("57_yyqwr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1, -0.02307872, -6)
+
+[node name="PonchosDeLaTejedora" type="Node3D" parent="Lugares/PulperiaDonCeferino" unique_id=1982673812 instance=ExtResource("134_e2ppr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.495163, 1.09, 0.47903442)
+visible = false
 
 [node name="EstanciaDonRufino" type="Node3D" parent="Lugares" unique_id=2036318537]
 transform = Transform3D(0.551937, 0, 0.83388585, 0, 1, 0, -0.83388585, 0, 0.551937, -170, -0.3215686, -250)
@@ -1125,6 +1138,17 @@ mirar_cada = 9.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.47, 0.3)
 shape = SubResource("BoxShape3D_2vron")
 
+[node name="Lazo" type="BoneAttachment3D" parent="Lugares/EstanciaDonRufino/Gaucho2" unique_id=422879138]
+transform = Transform3D(-0.00059376284, -0.010164186, 0.00025779312, -0.0045172893, 3.2370008e-05, -0.009128122, 0.009108849, -0.00064649945, -0.0045100464, -0.63842773, 1.3513254, -0.10223389)
+visible = false
+bone_name = "mixamorig_RightHand"
+bone_idx = 22
+use_external_skeleton = true
+external_skeleton = NodePath("../Modelo/Gaucho2/Skeleton3D")
+
+[node name="Lazo" parent="Lugares/EstanciaDonRufino/Gaucho2/Lazo" unique_id=537505661 instance=ExtResource("18_x70b3")]
+transform = Transform3D(98.18361, 0, 0, 0, 98.18361, 0, 0, 0, 98.18361, 0, 0, 0)
+
 [node name="Lenia" parent="Lugares/EstanciaDonRufino" unique_id=1353140243 instance=ExtResource("57_yyqwr")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 3, 0.18407686, -4.600006)
 
@@ -1139,6 +1163,29 @@ amount = 14
 lifetime = 3.6
 visibility_aabb = AABB(-3, -1, -3, 12, 9, 6)
 process_material = SubResource("ParticleProcessMaterial_1bdwf")
+draw_pass_1 = SubResource("QuadMesh_1w2qq")
+
+[node name="Yerra" type="Node3D" parent="Lugares/EstanciaDonRufino" unique_id=1759360102]
+transform = Transform3D(0.551937, 0, -0.83388585, 0, 1, 0, 0.83388585, 0, 0.551937, 34.621643, 0.10000001, 14.259796)
+visible = false
+
+[node name="Fogon" parent="Lugares/EstanciaDonRufino/Yerra" unique_id=470752796 instance=ExtResource("16_2pad8")]
+
+[node name="LuzFogon" type="OmniLight3D" parent="Lugares/EstanciaDonRufino/Yerra" unique_id=622300946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.90000004, 0)
+light_color = Color(1, 0.6, 0.3, 1)
+light_energy = 2.4
+omni_range = 14.0
+script = ExtResource("20_2vron")
+
+[node name="HumoFogon" type="GPUParticles3D" parent="Lugares/EstanciaDonRufino/Yerra" unique_id=1719376530]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = ExtResource("21_c7ra1")
+cast_shadow = 0
+amount = 34
+lifetime = 6.5
+visibility_aabb = AABB(-6, -2, -8, 34, 30, 16)
+process_material = SubResource("ParticleProcessMaterial_uwefm")
 draw_pass_1 = SubResource("QuadMesh_1w2qq")
 
 [node name="TolderiaPainefil" type="Node3D" parent="Lugares" unique_id=1854058248]
@@ -1204,7 +1251,7 @@ shape = SubResource("CapsuleShape3D_m4l42")
 [node name="ToldoLonko" parent="Lugares/TolderiaPainefil/Cuerpo" unique_id=1726802590 instance=ExtResource("59_4t18r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.049999997, 0)
 
-[node name="FogonCentral" parent="Lugares/TolderiaPainefil" unique_id=470752796 instance=ExtResource("16_2pad8")]
+[node name="FogonCentral" parent="Lugares/TolderiaPainefil" unique_id=1442681496 instance=ExtResource("16_2pad8")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.29803935, 9)
 
 [node name="OllaCentral" parent="Lugares/TolderiaPainefil" unique_id=208170528 instance=ExtResource("17_e4yt5")]
@@ -1405,6 +1452,10 @@ lifetime = 3.4
 visibility_aabb = AABB(-3, -1, -3, 12, 9, 6)
 process_material = SubResource("ParticleProcessMaterial_1bdwf")
 draw_pass_1 = SubResource("QuadMesh_1w2qq")
+
+[node name="TercioDeYerba" type="Node3D" parent="Lugares/TolderiaPainefil" unique_id=1061857196 instance=ExtResource("91_0telq")]
+transform = Transform3D(0.6427875, 0, -0.76604444, 0, 1, 0, 0.76604444, 0, 0.6427875, -13.100002, 0.19460759, 5.5)
+visible = false
 
 [node name="CampamentoDeLaTropa" type="Node3D" parent="Lugares" unique_id=6949308]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1030, 0.010898075, 320)
@@ -1996,6 +2047,99 @@ texto_al_usar = "La aguada del cerro. Agua buena, vega alrededor y el barro llen
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 shape = SubResource("CylinderShape3D_1uwxj")
 
+[node name="JarillalDelNaciente" type="Node3D" parent="Lugares" unique_id=666725968]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 520, -0.47843134, -125)
+
+[node name="Cartel" type="Label3D" parent="Lugares/JarillalDelNaciente" unique_id=565245651]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, 0)
+pixel_size = 0.015
+billboard = 1
+modulate = Color(0.96, 0.9, 0.72, 1)
+outline_modulate = Color(0.05, 0.03, 0.02, 1)
+text = "JARILLAL DEL NACIENTE"
+font_size = 72
+outline_size = 16
+
+[node name="Matas" type="Node3D" parent="Lugares/JarillalDelNaciente" unique_id=1375357104]
+
+[node name="Jarilla_01" parent="Lugares/JarillalDelNaciente/Matas" unique_id=750441835 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(1.0033424, 0, -0.47416702, 0, 1.1097434, 0, 0.47416702, 0, 1.0033424, 3.1863823, 0.076009184, -2.7711678)
+
+[node name="Jarilla_02" parent="Lugares/JarillalDelNaciente/Matas" unique_id=791717893 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.34247938, 0, 1.1110095, 0, 1.162598, 0, -1.1110095, 0, -0.34247938, 6.961466, 0.3006993, 5.6327133)
+
+[node name="Jarilla_03" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1517607525 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(0.31608024, 0, 0.87313145, 0, 0.9285824, 0, -0.87313145, 0, 0.31608024, 10.78714, 0.13671917, -2.8874679)
+
+[node name="Jarilla_04" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1577182913 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.0574275, 0, -1.1400847, 0, 1.1415302, 0, 1.1400847, 0, -0.0574275, 9.225468, 0.19436935, -6.8742375)
+
+[node name="Jarilla_05" parent="Lugares/JarillalDelNaciente/Matas" unique_id=729776150 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(1.1247983, 0, 0.4580836, 0, 1.2145007, 0, -0.4580836, 0, 1.1247983, 4.1137943, 0.048465908, -5.7861414)
+
+[node name="Jarilla_06" parent="Lugares/JarillalDelNaciente/Matas" unique_id=420999524 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(0.9463852, 0, 0.10365339, 0, 0.9520446, 0, -0.10365339, 0, 0.9463852, -0.337286, 0.02299115, -3.9662766)
+
+[node name="Jarilla_07" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1523281902 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.7830554, 0, -0.5381011, 0, 0.9501203, 0, 0.5381011, 0, -0.7830554, -12.636353, 0.09374794, -1.3149099)
+
+[node name="Jarilla_08" parent="Lugares/JarillalDelNaciente/Matas" unique_id=931508830 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-1.2016569, 0, -0.21137978, 0, 1.2201068, 0, 0.21137978, 0, -1.2016569, -6.3421507, 0.2795257, 6.7291965)
+
+[node name="Jarilla_09" parent="Lugares/JarillalDelNaciente/Matas" unique_id=733516476 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-1.2865992, 0, 0.34555325, 0, 1.3321954, 0, -0.34555325, 0, -1.2865992, -5.6070194, 0.16360092, -5.8011703)
+
+[node name="Jarilla_10" parent="Lugares/JarillalDelNaciente/Matas" unique_id=2079107856 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(0.59798664, 0, 0.9914752, 0, 1.1578476, 0, -0.9914752, 0, 0.59798664, 1.5084629, 0.11016089, -8.08714)
+
+[node name="Jarilla_11" parent="Lugares/JarillalDelNaciente/Matas" unique_id=172213954 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.57983387, 0, 0.9270139, 0, 1.0934176, 0, -0.9270139, 0, -0.57983387, 9.745394, 0.122832, 2.1278868)
+
+[node name="Jarilla_12" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1337364605 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.011228909, 0, 1.1078199, 0, 1.1078768, 0, -1.1078199, 0, -0.011228909, -6.717677, 0.2987466, 2.1618023)
+
+[node name="Jarilla_13" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1697826136 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.5439029, 0, 0.77285874, 0, 0.9450613, 0, -0.77285874, 0, -0.5439029, -8.835939, 0.359664, 4.2515173)
+
+[node name="Jarilla_14" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1028885597 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.5751865, 0, -0.932788, 0, 1.0958709, 0, 0.932788, 0, -0.5751865, 7.2251816, 0.2467694, -4.4775786)
+
+[node name="Jarilla_15" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1311809011 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-1.1203917, 0, 0.70846254, 0, 1.325593, 0, -0.70846254, 0, -1.1203917, 6.260332, 0.24569377, 9.387594)
+
+[node name="Jarilla_16" parent="Lugares/JarillalDelNaciente/Matas" unique_id=400540174 instance=ExtResource("57_o1gg4")]
+transform = Transform3D(-0.91861826, 0, 0.8628003, 0, 1.2602713, 0, -0.8628003, 0, -0.91861826, 9.680807, 0.2537023, 5.537369)
+
+[node name="Alpataco_01" parent="Lugares/JarillalDelNaciente/Matas" unique_id=897570497 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-0.9359816, 0, 0.16422658, 0, 0.9502799, 0, -0.16422658, 0, -0.9359816, -12.88327, 0.09701446, -5.3470917)
+
+[node name="Alpataco_b_01" parent="Lugares/JarillalDelNaciente/Matas" unique_id=304566231 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-1.0486517, 0, 0.03383784, 0, 1.0491976, 0, -0.03383784, 0, -1.0486517, -12.641846, 0.19742316, 2.0284195)
+
+[node name="Alpataco_02" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1616652315 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-0.69621307, 0, 1.1409849, 0, 1.3366224, 0, -1.1409849, 0, -0.69621307, 1.119812, 0.059731722, 9.043732)
+
+[node name="Alpataco_b_02" parent="Lugares/JarillalDelNaciente/Matas" unique_id=267859877 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-1.2167097, 0, -0.07889171, 0, 1.2192647, 0, 0.07889171, 0, -1.2167097, 14.141663, 0.06717247, 0.07022858)
+
+[node name="Alpataco_03" parent="Lugares/JarillalDelNaciente/Matas" unique_id=24385889 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(0.6784235, 0, 1.0089068, 0, 1.2157925, 0, -1.0089068, 0, 0.6784235, -2.310669, 0.077577114, 7.203964)
+
+[node name="Alpataco_b_03" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1830377972 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(0.9150689, 0, 0.5466276, 0, 1.0659047, 0, -0.5466276, 0, 0.9150689, -3.7005005, -0.066192865, -3.8406677)
+
+[node name="Alpataco_04" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1817857540 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-0.028757868, 0, 1.0497035, 0, 1.0500973, 0, -1.0497035, 0, -0.028757868, -2.3739014, 0.18145517, 3.4371948)
+
+[node name="Alpataco_b_04" parent="Lugares/JarillalDelNaciente/Matas" unique_id=542167925 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-0.3369896, 0, -0.86539924, 0, 0.9286968, 0, 0.86539924, 0, -0.3369896, -2.0585938, 0.19989455, -10.194885)
+
+[node name="Alpataco_05" parent="Lugares/JarillalDelNaciente/Matas" unique_id=1854595482 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(-0.36230028, 0, 1.3003294, 0, 1.3498585, 0, -1.3003294, 0, -0.36230028, 6.715332, 0.18193558, 1.3399124)
+
+[node name="Alpataco_b_05" parent="Lugares/JarillalDelNaciente/Matas" unique_id=602438972 instance=ExtResource("108_7ecsv")]
+transform = Transform3D(0.37519303, 0, 0.966289, 0, 1.0365733, 0, -0.966289, 0, 0.37519303, 13.095215, 0.11560252, 4.7850647)
+
 [node name="Vegetacion" type="Node3D" parent="." unique_id=1016019637]
 
 [node name="ArbolesDelHito" type="Node3D" parent="Vegetacion" unique_id=1780250115]
@@ -2536,7 +2680,7 @@ transform = Transform3D(0.6395586, 0, 0.5685402, 0, 0.8557296, 0, -0.5685402, 0,
 [node name="CalafateB1" parent="Vegetacion/BosqueDelLago" unique_id=231931445 instance=ExtResource("41_6fpx2")]
 transform = Transform3D(1.0900604, 0, 0.15832497, 0, 1.1014982, 0, -0.15832497, 0, 1.0900604, -1104.103, -1.9624846, 265.61157)
 
-[node name="MatorralBardaA1" parent="Vegetacion/BosqueDelLago" unique_id=1665531559 instance=ExtResource("116_jxgiq")]
+[node name="MatorralBardaA1" parent="Vegetacion/BosqueDelLago" unique_id=943976939 instance=ExtResource("116_jxgiq")]
 transform = Transform3D(1.002255, 0, 0.2541366, 0, 1.0339731, 0, -0.2541366, 0, 1.002255, -1082.9899, -1.2048845, 274.04276)
 
 [node name="LengaC4" parent="Vegetacion/BosqueDelLago" unique_id=774009849 instance=ExtResource("112_5fh8j")]
@@ -2846,7 +2990,7 @@ transform = Transform3D(0.7164216, 0, -0.5110187, 0, 0.88, 0, 0.5110187, 0, 0.71
 [node name="RocaC_2" parent="Vegetacion/PasoAChile" unique_id=1141280333 instance=ExtResource("62_pxjxx")]
 transform = Transform3D(-0.71824616, 0, -0.050224613, 0, 0.72, 0, 0.050224613, 0, -0.71824616, -1266.82, 46.591587, 749.39)
 
-[node name="MatorralBardaB_1" parent="Vegetacion/PasoAChile" unique_id=329310904 instance=ExtResource("117_4i8j7")]
+[node name="MatorralBardaB_1" parent="Vegetacion/PasoAChile" unique_id=1454590201 instance=ExtResource("117_4i8j7")]
 transform = Transform3D(0.54014254, 0, 0.6301952, 0, 0.83, 0, -0.6301952, 0, 0.54014254, -1541.63, 118.65118, 937.99)
 
 [node name="LengaA_5" parent="Vegetacion/PasoAChile" unique_id=1618392197 instance=ExtResource("36_cgwb4")]
@@ -3624,6 +3768,20 @@ marchas = {
 [node name="Forma" type="CollisionShape3D" parent="Ceniza/Choque" unique_id=369347125]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 shape = SubResource("BoxShape3D_6fpx2")
+
+[node name="Carga" type="Node3D" parent="Ceniza" unique_id=663751892]
+
+[node name="Ponchos" type="Node3D" parent="Ceniza/Carga" unique_id=1906975038 instance=ExtResource("134_e2ppr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, -0.44)
+visible = false
+
+[node name="Lenia" parent="Ceniza/Carga" unique_id=200007047 instance=ExtResource("135_7ecsv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, -0.45)
+visible = false
+
+[node name="Tercio" type="Node3D" parent="Ceniza/Carga" unique_id=1206662653 instance=ExtResource("137_8b5ep")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, -0.44)
+visible = false
 
 [node name="Caminos" type="Node3D" parent="." unique_id=522793903]
 
@@ -4500,6 +4658,284 @@ distance_fade_enabled = true
 distance_fade_begin = 120.0
 distance_fade_length = 40.0
 
+[node name="RastroDeLaCaballada" type="Node3D" parent="Caminos" unique_id=789292198]
+visible = false
+
+[node name="Rastro00" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=882716873]
+transform = Transform3D(0.9116829, 0, -0.4108945, 0, 1, 0, 0.4108945, 0, 0.9116829, 221.93396, 0.074640244, 163.95467)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro01" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=860461698]
+transform = Transform3D(0.99845487, 0, -0.055568513, 0, 1, 0, 0.055568513, 0, 0.99845487, 219.38573, -0.07023191, 171.24219)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro02" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=528424413]
+transform = Transform3D(0.99514514, 0, -0.09841824, 0, 1, 0, 0.09841824, 0, 0.99514514, 218.94144, -0.058659438, 179.1415)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro03" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1456465616]
+transform = Transform3D(0.994813, 0, -0.101720355, 0, 1, 0, 0.101720355, 0, 0.994813, 217.07405, -0.127318, 186.99123)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro04" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=739417731]
+transform = Transform3D(0.98434144, 0, -0.17627223, 0, 1, 0, 0.17627223, 0, 0.98434144, 216.07253, 0.034437556, 195.09358)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro05" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=398481225]
+transform = Transform3D(0.9828345, 0, -0.18448937, 0, 1, 0, 0.18448937, 0, 0.9828345, 215.48396, -0.000670408, 203.39536)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro06" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=901246897]
+transform = Transform3D(0.99274087, 0, -0.12027277, 0, 1, 0, 0.12027277, 0, 0.99274087, 214.26692, 0.05874568, 211.73282)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro07" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1310894674]
+transform = Transform3D(0.99493533, 0, -0.10051698, 0, 1, 0, 0.10051698, 0, 0.99493533, 213.31189, 0.008306096, 220.2619)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro08" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1223107194]
+transform = Transform3D(0.99316764, 0, -0.11669654, 0, 1, 0, 0.11669654, 0, 0.99316764, 211.99908, 0.06408737, 228.89507)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro09" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1826891601]
+transform = Transform3D(0.9904736, 0, -0.13770244, 0, 1, 0, 0.13770244, 0, 0.9904736, 210.34137, -0.04231401, 237.63625)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro10" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1299335059]
+transform = Transform3D(0.97911936, 0, -0.20328608, 0, 1, 0, 0.20328608, 0, 0.97911936, 209.97815, 0.03001676, 246.69485)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro11" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1140868072]
+transform = Transform3D(0.9783956, 0, -0.2067415, 0, 1, 0, 0.2067415, 0, 0.9783956, 207.67165, -0.119891204, 255.62144)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro12" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1214439804]
+transform = Transform3D(0.9931458, 0, -0.11688201, 0, 1, 0, 0.11688201, 0, 0.9931458, 206.54408, 0.022778468, 264.89005)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro13" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1618098439]
+transform = Transform3D(0.9879567, 0, -0.1547306, 0, 1, 0, 0.1547306, 0, 0.9879567, 205.19666, 0.0068963645, 274.28348)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro14" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=881174889]
+transform = Transform3D(0.9928253, 0, -0.11957387, 0, 1, 0, 0.11957387, 0, 0.9928253, 202.89409, -0.23292711, 283.67017)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro15" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=2059075789]
+transform = Transform3D(0.97342324, 0, -0.22901352, 0, 1, 0, 0.22901352, 0, 0.97342324, 201.35802, 0.16406925, 293.36533)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro16" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1792811709]
+transform = Transform3D(0.9671236, 0, -0.25430673, 0, 1, 0, 0.25430673, 0, 0.9671236, 199.4305, 0.00026195764, 303.1549)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro17" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1321342959]
+transform = Transform3D(0.99136496, 0, -0.13113168, 0, 1, 0, 0.13113168, 0, 0.99136496, 198.19708, 0.058403704, 313.25635)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.95
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro18" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1902955861]
+transform = Transform3D(0.9904115, 0, -0.1381484, 0, 1, 0, 0.1381484, 0, 0.9904115, 195.58588, -0.014885847, 323.2496)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.9227838
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro19" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1924051963]
+transform = Transform3D(0.9728522, 0, -0.23142743, 0, 1, 0, 0.23142743, 0, 0.9728522, 192.92645, 0.029900799, 333.36008)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.87005097
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro20" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1346065799]
+transform = Transform3D(0.9904038, 0, -0.13820425, 0, 1, 0, 0.13820425, 0, 0.9904038, 191.69038, 0.06703727, 344.0936)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.8157199
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro21" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=471214828]
+transform = Transform3D(0.9806855, 0, -0.1955914, 0, 1, 0, 0.1955914, 0, 0.9806855, 188.40947, -0.00787351, 355.06833)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.75809705
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro22" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=909043893]
+transform = Transform3D(0.98090273, 0, -0.19449905, 0, 1, 0, 0.19449905, 0, 0.98090273, 186.2736, 0.21283054, 367.35025)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.6951584
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro23" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=1521083108]
+transform = Transform3D(0.96781886, 0, -0.25164783, 0, 1, 0, 0.25164783, 0, 0.96781886, 184.34807, 0.14032054, 381.28)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.6242677
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
+[node name="Rastro24" type="Decal" parent="Caminos/RastroDeLaCaballada" unique_id=2059681852]
+transform = Transform3D(0.9742074, 0, -0.2256545, 0, 1, 0, 0.2256545, 0, 0.9742074, 180.57559, -0.051093254, 397.19083)
+size = Vector3(2.8, 1.4, 7.4)
+texture_albedo = ExtResource("139_6ym5l")
+albedo_mix = 0.5417369
+upper_fade = 0.4
+lower_fade = 0.4
+distance_fade_enabled = true
+distance_fade_begin = 120.0
+distance_fade_length = 40.0
+
 [node name="FogonDeZenon" type="Node3D" parent="." unique_id=933116594]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 0.046588447, -1)
 
@@ -4524,6 +4960,16 @@ light_color = Color(1, 0.6, 0.3, 1)
 light_energy = 2.4
 omni_range = 14.0
 script = ExtResource("20_2vron")
+
+[node name="HumoFogon" type="GPUParticles3D" parent="FogonDeZenon" unique_id=275169156]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = ExtResource("21_c7ra1")
+cast_shadow = 0
+amount = 90
+lifetime = 9.0
+visibility_aabb = AABB(-6, -2, -8, 34, 30, 16)
+process_material = SubResource("ParticleProcessMaterial_uwefm")
+draw_pass_1 = SubResource("QuadMesh_1w2qq")
 
 [node name="Agua" type="Node3D" parent="." unique_id=1611766195]
 

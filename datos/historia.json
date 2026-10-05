@@ -4,29 +4,70 @@
 	"config": {
 		"deuda_inicial": 180,
 		"minimos": { "ejercito": 3, "estancieros": 3, "tolderia": 3 },
-		"ocultos_hasta_la_linea": [ "Lugares/CampamentoDeLaTropa", "Lugares/FortinNuevo" ]
+		"ocultos_hasta_la_linea": [ "Lugares/CampamentoDeLaTropa", "Lugares/FortinNuevo" ],
+		"_cerca": "La condición 'cerca': qué nodo es y a cuántos metros de Zenón cuenta como a mano.",
+		"cerca": { "ceniza": { "nodo": "Ceniza", "metros": 14 } },
+		"_jornada_hasta": "Un trabajo de 'jornada' adelanta el reloj, pero nunca más allá de esta hora.",
+		"jornada_hasta": 21.0,
+		"_sol_al_norte": "Cuántos grados se aparta el sol del cenit, hacia el norte, al mediodía, en cada momento (1 a 4): en enero pasa alto; en abril, bajo. La sombra del mediodía apunta al sur.",
+		"sol_al_norte": [ 25, 25, 40, 40 ],
+		"_epocas": "Cómo se llama cada momento (1 a 4) en el botón 'Continuar' del menú.",
+		"epocas": [ "enero de 1881", "verano de 1881", "abril de 1881", "abril de 1881" ]
 	},
 
 	"avisos": {
 		"momento_1": "La cuenta en la pulpería de Don Ceferino no espera. La pulpería queda al sudeste, pegada al fortín; la cordillera, al oeste. (Con Tab volvés a ver adónde ir.)",
-		"momento_2": "Hay trabajo en la estancia de Don Rufino, en el fortín y en la huella de la toldería. Si no sabés qué falta, sentate a tu fogón.",
+		"momento_2": "Hay trabajo en la estancia de Don Rufino (al oeste de la posta), en el fortín (pegado a la pulpería) y en la huella que va a la toldería (al oeste). Si no sabés qué falta, sentate a tu fogón.",
+		"cartel_momento_1": [
+			"Enero de 1881.\n\nNorte de la Patagonia, sobre el Limay.",
+			"WASD andar · Shift correr · E usar y hablar\nQ bajarse o silbar · Tab acordarte"
+		],
 		"segun": [
 			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "El arreo: la punta de Don Rufino anda al este de la Posta del Coirón, campo afuera. Montado, llevala hasta el corral grande de la estancia; la tranquera da a la casa." },
 			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": [0, 1] } }, "texto": "El recado: de la Posta del Coirón (al norte de tu fogón) al Hito del Humo (donde sale el humo). Después, a la pulpería." },
 			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 2 } }, "texto": "El recado llegó. Volvé a la pulpería: Don Ceferino te descuenta." },
-			{ "si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "texto": "No queda encargo pendiente. Volvé a tu fogón, donde quedó Ceniza, y sentate." }
+			{ "si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "texto": "No queda encargo pendiente. Volvé a tu fogón y sentate. El humo se ve de lejos." }
+		],
+		"_conchabos": "Una línea con rumbo por cada conchabo a medias. Salen debajo del aviso de la historia (Tab).",
+		"conchabos": [
+			{ "si": { "momento": [2, 3], "var": { "caballada": 1 } }, "texto": "La caballada: al sur, pasando el mojón. El rastro sale del portón del fortín." },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 1 } }, "texto": "La leña: el Jarillal del Naciente, al nordeste del fortín. Llevá a Ceniza." },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 2 } }, "texto": "La leña va en Ceniza: llevásela al veterano del fortín." },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 1 } }, "texto": "Los ponchos van en Ceniza: traela hasta la pulpería." },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 2 } }, "texto": "La yerba y el añil van en Ceniza: llevalos a la tejedora, en la toldería." },
+			{ "si": { "momento": 3, "var": { "chasque": 1 } }, "texto": "El parte: al campamento, al poniente. Por la huella de la toldería y después el río." },
+			{ "si": { "momento": 3, "var": { "chasque": 2 } }, "texto": "La respuesta del campamento: al sargento Lucero, en mano." },
+			{ "si": { "momento": [2, 3], "o": [ { "var": { "caballada": 2 } }, { "var": { "lenia": 3 } }, { "var": { "ponchos": 3 } }, { "var": { "chasque": 3 } }, { "var": { "yerra": 1 } } ] }, "texto": "Hay trabajo hecho sin cobrar: pasá por lo de Don Ceferino." }
+		],
+		"_sol": "Pase libre de la tanda 7: con Tab, debajo del aviso, una línea que dice por dónde anda el sol a esa hora (la brújula de Zenón). Para sacarla, borrar esta lista.",
+		"sol": [
+			{ "desde": 5.0, "hasta": 8.0, "texto": "Amanece: el sol sale por el naciente." },
+			{ "desde": 8.0, "hasta": 11.0, "texto": "Media mañana: el sol anda al naciente, tirando al norte." },
+			{ "desde": 11.0, "hasta": 13.5, "texto": "Mediodía: el sol está al norte y la sombra apunta al sur." },
+			{ "desde": 13.5, "hasta": 17.0, "texto": "Media tarde: el sol anda al poniente, tirando al norte." },
+			{ "desde": 17.0, "hasta": 19.5, "texto": "Atardece: el sol se pone por el poniente, del lado de la cordillera." },
+			{ "desde": 19.5, "hasta": 24.0, "texto": "Es de noche: de lejos se ve la lumbre de los fogones." },
+			{ "desde": 0.0, "hasta": 5.0, "texto": "Es de noche: de lejos se ve la lumbre de los fogones." }
+		],
+		"_al_pasar": "Pase libre de la tanda 7: lo que se le hace notar a Zenón al pasar por un lugar ('en': [x, z]) o al tener cerca un rebaño suelto ('rebano'), una sola vez. Para sacar uno, borrar su renglón.",
+		"al_pasar": [
+			{ "si": { "momento": [2, 3], "var": { "caballada": 1 }, "no": ["_tropilla_vista"] }, "en": [177, 415], "radio": 28, "una_vez": "_rastro_perdido", "texto": "Acá se pierde el rastro. Los vasos iban derecho al sur, a la carrera." },
+			{ "si": { "momento": [2, 3], "var": { "caballada": 1 } }, "rebano": "caballada", "radio": 110, "una_vez": "_tropilla_vista", "texto": "Ahí está la tropilla, pastando. Rodeala despacio y traela por delante, hacia el fortín." },
+			{ "si": { "momento": 3, "var": { "chasque": 1 } }, "en": [-985, 338], "radio": 45, "una_vez": "_campamento_visto", "texto": "El campamento de la tropa. El centinela está al fondo de la calle, del lado del lago." },
+			{ "si": { "momento": 3, "var": { "yerra": 0 } }, "en": [-150, -255], "radio": 55, "una_vez": "_yerra_vista", "texto": "En el corral grande hay humo y hacienda encerrada: están de yerra." }
 		],
 		"momento_3": "La línea llegó al lago. En el fortín, en la estancia y en la toldería tienen algo que decirte. O saldás la cuenta y te vas.",
 		"cartel_momento_3": [
 			"Pasaron las semanas. El fiado creció, como crece siempre.",
-			"Abril de 1881.\n\nEl general Villegas llegó al lago Nahuel Huapi con mil setecientos hombres."
+			"Abril de 1881.\n\nEl general Villegas llegó al lago Nahuel Huapi."
 		]
 	},
 
 	"notas_de_trabajos": {
 		"recado=1": "Tomé el recado en la posta. Papel doblado, lacre rojo.",
 		"recado=2": "Dejé el recado en el Hito del Humo. No sé qué decía.",
-		"sena=2": "Marqué el mojón. Desde arriba se ve la aguada, y más allá los toldos."
+		"sena=2": "Marqué el mojón. Desde arriba se ve la aguada, y más allá los toldos.",
+		"caballada=2": "Encerré la caballada del fortín. Venían asustados; ninguno manco."
 	},
 
 	"fogon": {
@@ -51,6 +92,16 @@
 			{ "si": { "momento": 2, "var": { "favor": 1 } }, "texto": "Painefil espera que le cuente algo. O que le diga que no." },
 			{ "si": { "momento": 2, "si": ["sellado_leido"], "var": { "sena": [2, 3], "favor": [1, 2, 3] }, "no": ["aguada_pensada"] }, "una_vez": "aguada_pensada", "texto": "El estanciero, el sargento y el cacique. Había sido la misma agua para los tres. Y yo ando en el medio, llevando y trayendo." },
 			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "Me falta arrimar la punta de Don Rufino al corral grande." },
+			{ "si": { "momento": [2, 3], "var": { "caballada": 1 } }, "texto": "Me falta la caballada del sargento. Anda al sur, pasando el mojón." },
+			{ "si": { "momento": [2, 3], "var": { "lenia": [1, 2] } }, "texto": "Me falta cumplir con la leña del veterano." },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": [1, 2] } }, "texto": "Tengo a medias lo de la tejedora. Lo suyo anda en el anca de Ceniza." },
+			{ "si": { "momento": 3, "var": { "chasque": [1, 2] } }, "texto": "Llevo papel del ejército encima, de un campamento a otro. No sé qué dice, como siempre." },
+			{ "si": { "momento": [2, 3], "o": [ { "var": { "caballada": 2 } }, { "var": { "lenia": 3 } }, { "var": { "ponchos": 3 } }, { "var": { "chasque": 3 } }, { "var": { "yerra": 1 } } ] }, "texto": "Tengo trabajo hecho sin cobrar. Mañana paso por lo de Ceferino." },
+			{ "si": { "momento": [2, 3], "deuda_hasta": 99, "no": ["cuenta_liviana"] }, "una_vez": "cuenta_liviana", "texto": "La cuenta ya no me pesa como en enero." },
+			{ "si": { "no": ["sombra_pensada"] }, "una_vez": "sombra_pensada", "texto": "A mediodía la sombra me apunta al sur." },
+			{ "si": { "momento": 2, "min": { "ejercito": 2 }, "menos": { "ejercito": "minimo" }, "no": ["cerca_ejercito"] }, "una_vez": "cerca_ejercito", "texto": "El sargento me mide. Todavía no decidió si le sirvo." },
+			{ "si": { "momento": 2, "min": { "estancieros": 2 }, "menos": { "estancieros": "minimo" }, "no": ["cerca_estancieros"] }, "una_vez": "cerca_estancieros", "texto": "Don Rufino me tiene por cumplidor. Por hombre suyo, todavía no." },
+			{ "si": { "momento": 2, "min": { "tolderia": 2 }, "menos": { "tolderia": "minimo" }, "no": ["cerca_tolderia"] }, "una_vez": "cerca_tolderia", "texto": "Painefil todavía no sabe si fiarse de mí." },
 			{ "si": { "momento": [2, 3], "min": { "ejercito": "minimo" }, "no": ["lucero_rechazado"] }, "texto": "El sargento ya me habla como a uno de los suyos." },
 			{ "si": { "momento": [2, 3], "min": { "estancieros": "minimo" }, "no": ["rufino_rechazado"] }, "texto": "Don Rufino me mira como a hombre de confianza. Confianza de patrón." },
 			{ "si": { "momento": [2, 3], "min": { "tolderia": "minimo" }, "no": ["millaray_rechazada"] }, "texto": "En la toldería me miran de frente. No sé si lo merezco." },
@@ -60,12 +111,15 @@
 		],
 		"cierre": {
 			"si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] },
-			"ir": "cierre_capitulo"
+			"ir": "fogon_pregunta"
 		}
 	},
 
 	"arreo": {
 		"_leeme": "La changa del capataz (tanda 6): traer la punta de vacas al corral grande. Acá van los números y los lugares; cómo se portan las vacas, en scripts/arreo.gd. Se explica en docs/agente/ESTADO.md, 'Para Willy', Tanda 6.",
+		"_suelta": "Con qué condición la punta anda por el campo, y con cuál se la ve ya encerrada (desde la tanda 7 también en abril, por la yerra).",
+		"suelta": { "momento": 2, "var": { "arreo": 1 } },
+		"encerrada": { "o": [ { "momento": [3, 4] }, { "var": { "arreos": [1, 2, 3] } } ] },
 		"vacas": 7,
 		"paga": 15,
 		"veces": 3,
@@ -85,9 +139,65 @@
 		"aviso_rezagada": "Una vaca quedó atrás, pastando. Hay que volver a buscarla."
 	},
 
+	"caballada": {
+		"_leeme": "El conchabo del sargento (tanda 7): campear la caballada del fortín, que se espantó, y arrimarla a su corral. Usa el mismo programa que el arreo (scripts/arreo.gd) con otros animales. No paga al entrar: queda hecha (caballada = 2) y se cobra en lo de Ceferino. Se explica en docs/agente/ESTADO.md, 'Para Willy', Tanda 7.",
+		"suelta": { "momento": [2, 3], "var": { "caballada": 1 } },
+		"encerrada": { "var": { "caballada": [2, 3] } },
+		"al_cumplir": { "var": { "caballada": 2 } },
+		"nombre": "CaballoDeLaTropilla",
+		"modelos": [ "res://assets/animales/caballo_zaino_animado.glb", "res://assets/animales/caballo_moro_animado.glb", "res://assets/animales/caballo_bayo_animado.glb", "res://assets/animales/caballo_alazan_animado.glb" ],
+		"marchas": { "walk": 0.94, "trot": 2.11 },
+		"clips": [ "graze", "idle", "graze" ],
+		"talla": [ 0.96, 0.03 ],
+		"animales": 4,
+		"donde": [150, 650],
+		"alcance_montado": 20,
+		"alcance_a_pie": 7,
+		"paso": 0.94,
+		"trote": 3.5,
+		"junta": 9,
+		"rezago": 40,
+		"entrada": { "cerca": 14, "llegar": 0.5, "camino": [ [221, 160], [229.3, 160], [237.6, 160.3], [238.3, 161.3], [236.9, 163.5] ] },
+		"lugares_en_el_corral": [ [235.2, 166.6], [233.2, 165.6], [233.6, 168.2], [235.5, 164.9] ],
+		"corral": [240, 160, 16.5],
+		"obstaculos": [ [225.6, 165.4, 2.4], [202, 156, 8.5], [206.3, 147.3, 4.6], [232.8, 161.2, 0.5] ],
+		"aviso_hecho": "La tropilla entró al fortín. Un soldado cierra la tranquera. El sargento deja dicho en lo de Ceferino.",
+		"aviso_rezagada": "Un caballo quedó atrás, pastando. Hay que volver a buscarlo."
+	},
+
+	"_changas": "Los lugares de trabajo de los conchabos (tanda 7). Cada uno es un nodo de World.tscn que se usa con la E, de cerca, como se le habla a una persona: 'charla' es el nodo de diálogo que abre y 'mira', el cartel de 'Presioná E' según lo que falte. (Acá adentro, igual que en 'personajes', no van notas sueltas: solo fichas.)",
+	"changas": {
+		"jarillal": { "nombre": "el Jarillal del Naciente", "nodo": "Lugares/JarillalDelNaciente", "alcance": 12.0, "charla": "jarillal",
+			"mira": [
+				{ "si": { "momento": [2, 3], "var": { "lenia": 1 }, "cerca": "ceniza" }, "texto": "Presioná E para cortar leña" },
+				{ "si": { "momento": [2, 3], "var": { "lenia": 1 } }, "texto": "Para cargar leña hace falta Ceniza: con la Q la silbás" },
+				{ "texto": "Presioná E para mirar el jarillal" }
+			] }
+	},
+
+	"_mundo": "Lo que se ve, se esconde o cambia de lugar según la historia. Mientras se cumple 'si', se prenden los nodos de 'mostrar', se apagan los de 'ocultar' y los de 'mover' van a otro lugar; cuando deja de cumplirse, todo vuelve a estar como en World.tscn.",
+	"mundo": [
+		{ "si": { "momento": [2, 3], "var": { "ponchos": 1 } }, "mostrar": [ "Ceniza/Carga/Ponchos" ] },
+		{ "si": { "momento": [2, 3], "var": { "ponchos": 2 } }, "mostrar": [ "Ceniza/Carga/Tercio" ] },
+		{ "si": { "momento": [2, 3], "var": { "lenia": 2 } }, "mostrar": [ "Ceniza/Carga/Lenia" ] },
+		{ "si": { "momento": [2, 3], "var": { "caballada": 1 } }, "mostrar": [ "Caminos/RastroDeLaCaballada" ] },
+		{ "si": { "o": [ { "momento": [2, 3], "var": { "caballada": 1 } }, { "var": { "caballada": [2, 3] } } ] },
+			"ocultar": [ "Lugares/FortinDelSalitral/Cuerpo/Fortin/CaballoZaino", "Lugares/FortinDelSalitral/Cuerpo/Fortin/CaballoMoro" ] },
+		{ "_": "Mientras la caballada anda suelta, y hasta que Ceferino la cobra, el veterano deja su ronda y espera junto a la tranquera del corral (pase libre). Para sacarlo, borrar la entrada entera: estos tres renglones, de su llave que abre a su llave que cierra.",
+			"si": { "momento": [2, 3], "var": { "caballada": [1, 2] } },
+			"mover": [ { "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado3", "a": [238.7, 164.4], "mira": [236.9, 163.5], "andando": true } ] },
+		{ "_": "Lo entregado se ve (pase libre): la leña junto al fogón del fortín, los ponchos en el mostrador de Ceferino, el tercio de yerba junto al telar. Para sacarlo no alcanza con borrar estas entradas: la leña y el tercio traen caja de choque y quedarían ocultos pero chocando. Hay que borrar también los tres nodos de World.tscn.",
+			"si": { "var": { "lenia": [3, 4] } }, "mostrar": [ "Lugares/FortinDelSalitral/Cuerpo/Fortin/LeniaDelVeterano" ] },
+		{ "si": { "var": { "ponchos": [2, 3, 4] } }, "mostrar": [ "Lugares/PulperiaDonCeferino/PonchosDeLaTejedora" ] },
+		{ "si": { "var": { "ponchos": [3, 4] } }, "mostrar": [ "Lugares/TolderiaPainefil/TercioDeYerba" ] },
+		{ "si": { "momento": [3, 4] }, "mostrar": [ "Lugares/EstanciaDonRufino/Yerra", "Lugares/EstanciaDonRufino/Gaucho2/Lazo" ],
+			"mover": [ { "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "a": [-140.8, -269.6], "mira": [-139.0, -271.0], "clips": ["idle"] } ] }
+	],
+
 	"personajes": {
 		"ceferino": { "nombre": "Don Ceferino", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "alcance": 4.0, "charla": "ceferino" },
-		"rosario": { "nombre": "Doña Rosario", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario", "charla": "rosario" },
+		"rosario": { "nombre": "Doña Rosario", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario", "charla": "rosario",
+			"mira": { "si": { "var": { "sellado": 1 }, "no": ["sellado_leido"] }, "texto": "«¿Qué llevás con el lacre de Don Rufino?» Presioná E para hablar con Doña Rosario" } },
 		"lucero": { "nombre": "el sargento Lucero", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "charla": "lucero" },
 		"rufino": { "nombre": "Don Rufino", "nodo": "Lugares/EstanciaDonRufino/Cuerpo/DonRufino", "charla": "rufino" },
 		"nicasio": { "nombre": "Nicasio, el lenguaraz", "nodo": "Caminos/ParadaDeNicasio/Nicasio", "charla": "nicasio",
@@ -119,10 +229,37 @@
 			"texto": "Ya no queda recado por llevar. Lo que hice, hecho está.",
 			"hace": { "momento": 3, "deuda": 15 }
 		},
+		"fogon_pregunta": { "segun": [
+			{ "si": { "var": { "arreo": 1 } }, "ir": "fogon_pregunta_arreo" },
+			{ "ir": "fogon_pregunta_limpia" }
+		] },
+		"fogon_pregunta_limpia": {
+			"texto": "Ya no queda encargo por cumplir. Lo que hice con cada uno, hecho queda. ¿Dejo que pasen las semanas?",
+			"opciones": [
+				{ "texto": "Dejar que pasen las semanas.", "ir": "cierre_capitulo" },
+				{ "texto": "Todavía no." }
+			]
+		},
+		"fogon_pregunta_arreo": {
+			"texto": [
+				"Ya no queda encargo por cumplir. Lo que hice con cada uno, hecho queda.",
+				"La punta de Don Rufino sigue campo afuera: si pasan las semanas, otro la ha de traer. ¿Las dejo pasar?"
+			],
+			"opciones": [
+				{ "texto": "Dejar que pasen las semanas.", "hace": { "var": { "arreo": 3 } }, "ir": "cierre_capitulo" },
+				{ "texto": "Todavía no." }
+			]
+		},
 
 		"ceferino": { "segun": [
 			{ "si": { "final": "solitario" }, "ir": "ceferino_adios" },
 			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "var": { "ponchos": 1 }, "cerca": "ceniza" }, "ir": "ceferino_ponchos" },
+			{ "si": { "var": { "caballada": 2 } }, "ir": "ceferino_cobra_caballada" },
+			{ "si": { "var": { "lenia": 3 } }, "ir": "ceferino_cobra_lenia" },
+			{ "si": { "var": { "ponchos": 3 } }, "ir": "ceferino_cobra_ponchos" },
+			{ "si": { "var": { "chasque": 3 } }, "ir": "ceferino_cobra_chasque" },
+			{ "si": { "var": { "yerra": 1 } }, "ir": "ceferino_cobra_yerra" },
 			{ "si": { "momento": 3 }, "ir": "ceferino_linea" },
 			{ "si": { "momento": 2 }, "ir": "ceferino_cuenta2" },
 			{ "si": { "no": ["cuenta_vista"] }, "ir": "ceferino_cuenta" },
@@ -173,9 +310,93 @@
 			"texto": "La cuenta anda en {deuda} patacones, Zenón.",
 			"opciones": [
 				{ "texto": "¿Qué se dice?", "ir": "ceferino_noticia" },
+				{ "texto": "¿Hay algún conchabo?", "ir": "ceferino_conchabo" },
 				{ "texto": "Nada más." }
 			]
 		},
+
+		"_cobros": "Las ramas de paso de los conchabos (tanda 7): Ceferino dice lo suyo, descuenta, y sigue con lo de siempre ('ir' vuelve a su 'segun'), así varios cobros se encadenan y la oferta de final aparece igual. El número va en letras en el texto y en cifras en 'hace': si cambiás uno, cambiá el otro.",
+		"ceferino_ponchos": {
+			"hace": { "var": { "ponchos": 2 }, "nota": "Ceferino pagó los ponchos al precio de la tejedora. Vuelvo con yerba y añil." },
+			"texto": [
+				"Los ponchos de la tejedora. A ver… Buen tejido, como siempre.",
+				"Pide lo que pide y no baja. Esa mujer sabe lo que vale lo suyo.",
+				"Ahí va el tercio de yerba, y el añil adentro. Llevaselo, que yo no cruzo la huella por dos ponchos."
+			],
+			"ir": "ceferino"
+		},
+		"ceferino_cobra_caballada": {
+			"hace": { "deuda": -12, "var": { "caballada": 3 }, "nota": "Ceferino me descontó doce por la caballada del fortín." },
+			"texto": "El sargento dejó dicho lo de la caballada. Doce menos: quedan {deuda} patacones.",
+			"ir": "ceferino"
+		},
+		"ceferino_cobra_lenia": {
+			"hace": { "deuda": -5, "var": { "lenia": 4 }, "nota": "Ceferino me tomó el vale del veterano: cinco menos." },
+			"texto": "El vale del veterano, con su cruz al pie. Cinco menos: quedan {deuda} patacones.",
+			"ir": "ceferino"
+		},
+		"ceferino_cobra_ponchos": {
+			"hace": { "deuda": -6, "var": { "ponchos": 4 }, "nota": "Ceferino me descontó seis por el viaje de los ponchos." },
+			"texto": "La tejedora dejó dicho que el viaje corre por cuenta mía. Seis menos: quedan {deuda} patacones.",
+			"ir": "ceferino"
+		},
+		"ceferino_cobra_chasque": {
+			"hace": { "deuda": -5, "var": { "chasque": 4 }, "nota": "Ceferino me descontó cinco por el parte que llevé al campamento." },
+			"texto": "Me dejaron dicho lo del parte. Cinco menos: quedan {deuda} patacones.",
+			"ir": "ceferino"
+		},
+		"ceferino_cobra_yerra": {
+			"hace": { "deuda": -12, "var": { "yerra": 2 }, "nota": "Ceferino me descontó doce por la yerra de Don Rufino." },
+			"texto": "Llegó papel de Don Rufino por la yerra. Doce menos: quedan {deuda} patacones.",
+			"ir": "ceferino"
+		},
+
+		"_bolsa_de_trabajo": "Ceferino nombra, uno detrás de otro, los conchabos que hoy se pueden tomar, quién los da y hacia dónde. Cada rama copia la condición con la que su dueño lo ofrece, para no mandar a Zenón con alguien que todavía no lo va a ofrecer.",
+		"ceferino_conchabo": { "segun": [
+			{ "si": { "o": [
+				{ "momento": 2, "var": { "caballada": 0 }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] },
+				{ "momento": 3, "var": { "caballada": 0 } },
+				{ "momento": [2, 3], "var": { "lenia": 0 } },
+				{ "momento": [2, 3], "var": { "ponchos": 0 } },
+				{ "momento": 3, "var": { "chasque": 0 } },
+				{ "momento": 3, "var": { "yerra": 0 } },
+				{ "momento": 2, "var": { "arreo": 0 } }
+			] }, "ir": "ceferino_conchabo_1" },
+			{ "ir": "ceferino_dice_nada" }
+		] },
+		"ceferino_conchabo_1": { "segun": [
+			{ "si": { "momento": 2, "var": { "caballada": 0 }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "ir": "ceferino_dice_caballada" },
+			{ "si": { "momento": 3, "var": { "caballada": 0 } }, "ir": "ceferino_dice_caballada" },
+			{ "ir": "ceferino_conchabo_2" }
+		] },
+		"ceferino_dice_caballada": { "texto": "El sargento anda buscando quien le campee la caballada. Está acá al lado.", "ir": "ceferino_conchabo_2" },
+		"ceferino_conchabo_2": { "segun": [
+			{ "si": { "momento": [2, 3], "var": { "lenia": 0 } }, "ir": "ceferino_dice_lenia" },
+			{ "ir": "ceferino_conchabo_3" }
+		] },
+		"ceferino_dice_lenia": { "texto": "El veterano del fortín paga un vale por un atado de leña. El vale me lo traés a mí.", "ir": "ceferino_conchabo_3" },
+		"ceferino_conchabo_3": { "segun": [
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 0 } }, "ir": "ceferino_dice_ponchos" },
+			{ "ir": "ceferino_conchabo_4" }
+		] },
+		"ceferino_dice_ponchos": { "texto": "La tejedora de los toldos tiene ponchos para mí y no tiene quien me los arrime. La toldería queda al oeste, por la huella.", "ir": "ceferino_conchabo_4" },
+		"ceferino_conchabo_4": { "segun": [
+			{ "si": { "momento": 3, "var": { "chasque": 0 } }, "ir": "ceferino_dice_chasque" },
+			{ "ir": "ceferino_conchabo_5" }
+		] },
+		"ceferino_dice_chasque": { "texto": "El sargento tiene un parte para el campamento del lago y ningún chasque a mano.", "ir": "ceferino_conchabo_5" },
+		"ceferino_conchabo_5": { "segun": [
+			{ "si": { "momento": 3, "var": { "yerra": 0 } }, "ir": "ceferino_dice_yerra" },
+			{ "ir": "ceferino_conchabo_6" }
+		] },
+		"ceferino_dice_yerra": { "texto": "En lo de Don Rufino están de yerra y faltan brazos. Preguntale al peón, en el corral grande.", "ir": "ceferino_conchabo_6" },
+		"ceferino_conchabo_6": { "segun": [
+			{ "si": { "momento": 2, "var": { "arreo": 0 } }, "ir": "ceferino_dice_arreo" },
+			{ "ir": "ceferino_dice_fin" }
+		] },
+		"ceferino_dice_arreo": { "texto": "Y el capataz de Don Rufino busca quien le arrime una punta de vacas. Anda ahí afuera, con el perro.", "ir": "ceferino_dice_fin" },
+		"ceferino_dice_fin": { "texto": "Es lo que hay. Lo que traigas hecho, se descuenta." },
+		"ceferino_dice_nada": { "texto": "Por ahora, nada." },
 		"ceferino_noticia": {
 			"texto": [
 				"Dicen que Roca quiere paz y administración. Acá la administración es este libro.",
@@ -189,10 +410,28 @@
 			],
 			"opciones": [
 				{ "texto": "Vengo a arreglarla toda. Me voy para el sur.", "ir": "ceferino_salda" },
+				{ "texto": "¿Hay algún conchabo?", "ir": "ceferino_conchabo" },
 				{ "texto": "Todavía no." }
 			]
 		},
-		"ceferino_salda": {
+		"_ceferino_salda": "Lo trabajado se nota (tanda 7): con la cuenta en 40 o menos, Ceferino le deja las boleadoras (la bandera 'boleadoras_quedan' la mira scenes/player/player.gd). El final se elige igual con cualquier monto.",
+		"ceferino_salda": { "segun": [
+			{ "si": { "deuda_hasta": 0 }, "ir": "ceferino_salda_nada" },
+			{ "si": { "deuda_hasta": 40 }, "ir": "ceferino_salda_poco" },
+			{ "ir": "ceferino_salda_todo" }
+		] },
+		"ceferino_salda_nada": {
+			"hace": { "saldar": true, "final": "solitario", "flag": ["boleadoras_quedan"] },
+			"texto": "No me debés nada. Andá."
+		},
+		"ceferino_salda_poco": {
+			"hace": { "saldar": true, "final": "solitario", "flag": ["boleadoras_quedan"] },
+			"texto": [
+				"¿Toda? A ver… Con lo que trabajaste, alcanza. Las boleadoras quedátelas; el lazo me lo dejás.",
+				"Cierro el libro, Zenón. No me debés nada. Es raro decirlo."
+			]
+		},
+		"ceferino_salda_todo": {
 			"hace": { "saldar": true, "final": "solitario" },
 			"texto": [
 				"¿Toda? A ver… Las boleadoras, el lazo trenzado y lo que juntaste. Alcanza. Raspando, pero alcanza.",
@@ -247,6 +486,7 @@
 
 		"lucero": { "segun": [
 			{ "si": { "momento": 4 }, "ir": "despedida" },
+			{ "si": { "var": { "chasque": 2 } }, "ir": "lucero_chasque_vuelve" },
 			{ "si": { "momento": 1 }, "ir": "lucero_antes" },
 			{ "si": { "momento": 3, "si": ["lucero_rechazado"] }, "ir": "lucero_despues" },
 			{ "si": { "momento": 3, "min": { "ejercito": "minimo" } }, "ir": "lucero_oferta" },
@@ -258,13 +498,17 @@
 			{ "si": { "var": { "sena": 0 }, "no": ["sena_rechazada"] }, "ir": "lucero_pide" },
 			{ "si": { "var": { "sena": 1 } }, "ir": "lucero_espera" },
 			{ "si": { "var": { "sena": 2 } }, "ir": "lucero_informe" },
+			{ "si": { "var": { "caballada": 0 } }, "ir": "lucero_caballada" },
+			{ "si": { "var": { "caballada": 1 } }, "ir": "lucero_caballada_espera" },
+			{ "si": { "var": { "caballada": [2, 3] }, "no": ["caballada_dicha"] }, "ir": "lucero_caballada_hecha" },
 			{ "ir": "lucero_hecho" }
 		] },
 		"lucero_antes": { "texto": "Zenón. Arreglá primero lo tuyo con el pulpero. Después hablamos." },
 		"lucero_hub": {
 			"texto": "¿Qué traés, baqueano?",
 			"opciones": [
-				{ "texto": "Un papel de Don Rufino, sargento.", "ir": "lucero_recibe" },
+				{ "texto": "Un papel de Don Rufino, sargento. (Sin abrir.)", "si": { "no": ["sellado_leido"] }, "ir": "lucero_recibe" },
+				{ "texto": "Un papel de Don Rufino, sargento.", "si": { "si": ["sellado_leido"] }, "ir": "lucero_recibe" },
 				{ "texto": "Otra cosa.", "ir": "lucero_resto" }
 			]
 		},
@@ -284,7 +528,8 @@
 			],
 			"opciones": [
 				{ "texto": "Voy, sargento.", "hace": { "var": { "sena": 1 }, "confianza": { "ejercito": 1 }, "nota": "Lucero me mandó al mojón del cerro. Quiere saber quién toma agua en la aguada." } },
-				{ "texto": "Ya miré bastante para el ejército. Gracias, pero me voy.", "hace": { "flag": ["sena_rechazada"], "confianza": { "ejercito": -1 }, "nota": "Le dije que no a Lucero. Ya miré bastante para el ejército." }, "ir": "lucero_rechazo" }
+				{ "texto": "Ya miré bastante para el ejército. Gracias, pero me voy.", "hace": { "flag": ["sena_rechazada"], "confianza": { "ejercito": -1 }, "nota": "Le dije que no a Lucero. Ya miré bastante para el ejército." }, "ir": "lucero_rechazo" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
 		"lucero_rechazo": { "texto": "Como quieras. Yo tampoco elegí estar acá." },
@@ -307,17 +552,82 @@
 		},
 		"lucero_oferta": {
 			"texto": [
-				"Llegó el general al Nahuel Huapi. Mil setecientos hombres, y ninguno conoce los pasos como vos.",
+				"Llegó el general al Nahuel Huapi. Mucha gente, y ninguno conoce los pasos como vos.",
 				"Hay plaza para un baqueano. Ración, sueldo y la papeleta en regla: a nadie lo llevan de leva si ya es de los nuestros.",
 				"Con el tiempo, las jinetas. Yo respondo por vos. Y la cuenta del pulpero se arregla cuando venga el comisario con la paga."
 			],
 			"opciones": [
 				{ "texto": "Voy con usted, sargento.", "hace": { "saldar": true, "final": "sargento" } },
-				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["lucero_rechazado"] }, "ir": "lucero_despues" }
+				{ "_": "Sin condición, a propósito: si esta opción desapareciera al tomar los dos conchabos, el 2 pasaría a ser 'Gracias, pero me voy.', que cierra este final. Sin nada que ofrecer, Lucero contesta 'Por ahora, nada.'",
+					"texto": "¿Precisa algo más, sargento?", "ir": "lucero_conchabo" },
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["lucero_rechazado"] }, "ir": "lucero_despues" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
-		"lucero_despues": { "texto": "Como quieras. Cuidate de andar sin papeleta: ahora van a pedirla en todos lados." },
-		"lucero_frio": { "texto": "El general ya tiene sus baqueanos, Zenón. Gente que no anda preguntando para qué." },
+		"lucero_despues": {
+			"texto": "Como quieras. Cuidate de andar sin papeleta: ahora van a pedirla en todos lados.",
+			"opciones": [
+				{ "texto": "Nada más." },
+				{ "texto": "¿Precisa algo más, sargento?", "si": { "o": [ { "var": { "caballada": 0 } }, { "var": { "chasque": 0 } } ] }, "ir": "lucero_conchabo" }
+			]
+		},
+		"lucero_frio": {
+			"texto": "El general ya tiene sus baqueanos, Zenón. Gente que no anda preguntando para qué.",
+			"opciones": [
+				{ "texto": "Nada más." },
+				{ "texto": "¿Precisa algo más, sargento?", "si": { "o": [ { "var": { "caballada": 0 } }, { "var": { "chasque": 0 } } ] }, "ir": "lucero_conchabo" }
+			]
+		},
+
+		"lucero_conchabo": { "segun": [
+			{ "si": { "var": { "caballada": 0, "chasque": 0 } }, "ir": "lucero_dos_cosas" },
+			{ "si": { "var": { "caballada": 0 } }, "ir": "lucero_caballada" },
+			{ "si": { "var": { "chasque": 0 } }, "ir": "lucero_chasque" },
+			{ "ir": "lucero_nada" }
+		] },
+		"lucero_dos_cosas": {
+			"texto": "Dos cosas tengo, y ninguna es de lucirse: la caballada, que se me espantó, y un parte pa'l campamento del lago.",
+			"opciones": [
+				{ "texto": "La caballada.", "ir": "lucero_caballada" },
+				{ "texto": "El parte.", "ir": "lucero_chasque" },
+				{ "texto": "Nada, sargento." }
+			]
+		},
+		"lucero_nada": { "texto": "Por ahora, nada." },
+		"lucero_caballada": {
+			"texto": [
+				"Anoche tronó seco y se espantó la caballada, ensillada como estaba pa la descubierta. Vos que sos baqueano, campeala.",
+				"Al sur, pasando el mojón. A mediodía el sol anda al norte: la sombra te apunta pa donde tenés que ir.",
+				"El rastro sale del portón. Arrimala hasta acá, que el corral está adentro. Dejo dicho en lo de Ceferino."
+			],
+			"opciones": [
+				{ "texto": "Se la campeo, sargento.", "hace": { "var": { "caballada": 1 }, "nota": "Lucero me mandó a campear la caballada del fortín, al sur del mojón." } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"lucero_caballada_espera": { "texto": "La caballada sigue campo afuera, al sur, pasando el mojón. El rastro sale del portón." },
+		"lucero_caballada_hecha": {
+			"hace": { "flag": ["caballada_dicha"] },
+			"texto": "La tropilla volvió entera. Bien campeada, baqueano."
+		},
+		"lucero_chasque": {
+			"texto": [
+				"Llevale este parte al campamento, al poniente. Por la huella de la toldería y después el río.",
+				"Se lo das al centinela y esperás la respuesta. Dejo dicho en lo de Ceferino."
+			],
+			"opciones": [
+				{ "texto": "Lo llevo, sargento.", "hace": { "var": { "chasque": 1 }, "nota": "Lucero me dio un parte para el campamento del lago. Otro papel que no sé leer." } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"lucero_chasque_vuelve": {
+			"hace": { "var": { "chasque": 3 }, "nota": "Le di a Lucero la respuesta del campamento. No sé qué decía." },
+			"texto": "¿La respuesta? Dame. Viene sin abrir, espero.",
+			"opciones": [
+				{ "texto": "Yo no leo, sargento.", "ir": "lucero_mejor" }
+			]
+		},
+		"lucero_mejor": { "texto": [ "Mejor.", "Dejo dicho en lo de Ceferino." ], "ir": "lucero" },
 
 		"rufino": { "segun": [
 			{ "si": { "final": "encargado" }, "ir": "rufino_encargado" },
@@ -341,14 +651,16 @@
 			"opciones": [
 				{ "texto": "Lo llevo.", "hace": { "var": { "sellado": 1 }, "confianza": { "estancieros": 1 }, "nota": "Don Rufino me dio un papel lacrado para Lucero. No sé qué dice." } },
 				{ "texto": "¿Qué dice el papel?", "ir": "rufino_que_dice" },
-				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" }
+				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
 		"rufino_que_dice": {
 			"texto": "Lo que dicen los papeles: lo que le conviene al que los escribe. ¿Lo llevás o no?",
 			"opciones": [
 				{ "texto": "Lo llevo.", "hace": { "var": { "sellado": 1 }, "confianza": { "estancieros": 1 }, "nota": "Don Rufino me dio un papel lacrado para Lucero. No quiso decirme qué dice." } },
-				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" }
+				{ "texto": "Gracias, pero me voy.", "hace": { "var": { "sellado": 3 }, "confianza": { "estancieros": -1 }, "nota": "No quise llevar el papel de Don Rufino." }, "ir": "rufino_seco" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
 		"rufino_espera": {
@@ -363,7 +675,7 @@
 		"rufino_gracias": {
 			"texto": [
 				"Llegó el papel. Cumplís, Zenón. Eso acá vale.",
-				"El gobierno vende la tierra por leguas, y el que no la alambra, la pierde. Yo no la he de perder."
+				"El gobierno vende la tierra por leguas, y el que no la cierra, la pierde. Yo no la he de perder."
 			]
 		},
 		"rufino_seco": { "texto": "Entonces no tengo nada para vos." },
@@ -375,7 +687,8 @@
 			],
 			"opciones": [
 				{ "texto": "Acepto, Don Rufino.", "hace": { "saldar": true, "final": "encargado" } },
-				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["rufino_rechazado"] }, "ir": "rufino_despues" }
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["rufino_rechazado"] }, "ir": "rufino_despues" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
 		"rufino_encargado": { "texto": "La tranquera, Zenón. Andá a ver lo que ahora cuidás." },
@@ -505,28 +818,65 @@
 			],
 			"opciones": [
 				{ "texto": "Voy adelante.", "hace": { "final": "chile" } },
-				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["millaray_rechazada"] }, "ir": "millaray_despues" }
+				{ "texto": "Gracias, pero me voy.", "hace": { "flag": ["millaray_rechazada"] }, "ir": "millaray_despues" },
+				{ "texto": "Déjeme pensarlo." }
 			]
 		},
 		"millaray_despues": { "texto": "Entonces andá bien. Nos vamos de todos modos." },
 		"millaray_linea_no": { "texto": "Ya llegaron. Vos los trajiste una vez. No sé si los trajiste dos." },
 
-		"soldado1": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado1_b" }, { "ir": "soldado1_a" } ] },
+		"_de_noche": "Pase libre de la tanda 7: de noche, la gente suelta dice otra cosa (condición 'periodo'). Para sacarlo, borrar de cada 'segun' la rama que tiene 'periodo' (es la primera en todos menos en 'gaucho2', donde es la cuarta) y los nodos '_noche'.",
+		"soldado1": { "segun": [ { "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "soldado1_noche" }, { "si": { "momento": [3, 4] }, "ir": "soldado1_b" }, { "ir": "soldado1_a" } ] },
+		"soldado1_noche": { "texto": "De noche, lo único que llega puntual es el frío. La paga, ya sabe." },
 		"soldado1_a": { "texto": "Cuatro años de frontera y no he cobrado ni el primero." },
 		"soldado1_b": { "texto": "Dicen que en el lago hay carpas hasta donde da la vista. A nosotros nos dejan acá, cuidando la polvareda al ñudo." },
-		"soldado2": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado2_b" }, { "ir": "soldado2_a" } ] },
+		"soldado2": { "segun": [ { "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "soldado2_noche" }, { "si": { "momento": [3, 4] }, "ir": "soldado2_b" }, { "ir": "soldado2_a" } ] },
+		"soldado2_noche": { "texto": "De noche me acuerdo del Azul. De día no me dan tiempo." },
 		"soldado2_a": { "texto": "A mí me agarraron sin papeleta en el Azul y me echaron a la línea. Tres años, dijeron. Van dos." },
 		"soldado2_b": { "texto": "¿Usté vio el lago? Dicen que es como un mar." },
-		"soldado3": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "soldado3_b" }, { "ir": "soldado3_a" } ] },
+		"soldado3": { "segun": [
+			{ "si": { "momento": [2, 3], "var": { "lenia": 2 }, "cerca": "ceniza" }, "ir": "soldado3_lenia_recibe" },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 2 } }, "ir": "soldado3_lenia_sin_montado" },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 1 } }, "ir": "soldado3_lenia_espera" },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 0 } }, "ir": "soldado3_lenia" },
+			{ "si": { "var": { "lenia": [3, 4] }, "no": ["lenia_dicha"] }, "ir": "soldado3_lenia_hecha" },
+			{ "si": { "momento": [3, 4] }, "ir": "soldado3_b" },
+			{ "ir": "soldado3_a" }
+		] },
+		"soldado3_lenia": {
+			"texto": [
+				"El sargento no da leña ni pa'l mate. Si me trae un atado, le paso un vale de mi sueldo pa lo de Ceferino.",
+				"Al nordeste, a tres cuadras largas, hay un jarillal. Jarilla y alpataco: leña que arde sola."
+			],
+			"opciones": [
+				{ "texto": "Se lo traigo.", "hace": { "var": { "lenia": 1 }, "nota": "El veterano del fortín pide un atado de leña. Hay un jarillal al nordeste." } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"soldado3_lenia_espera": { "texto": "El jarillal queda al nordeste, a tres cuadras largas. Con un atado me arreglo." },
+		"soldado3_lenia_sin_montado": { "texto": "Traiga el montado, amigo, que la leña va en el recado." },
+		"soldado3_lenia_recibe": {
+			"hace": { "var": { "lenia": 3 }, "nota": "Le dejé la leña al veterano. Me dio un vale de su sueldo, con una cruz por firma." },
+			"texto": [
+				"Güena leña. Con esto hay mate pa una semana.",
+				"Tome el vale. Ceferino lo conoce: no es el primero que le firmo."
+			]
+		},
+		"soldado3_lenia_hecha": {
+			"hace": { "flag": ["lenia_dicha"] },
+			"texto": "Ya me trajo la leña, amigo. Lo que es por mí, estamos a mano."
+		},
 		"soldado3_a": { "texto": "El sargento es hombre güeno. No se lo diga, amigo." },
 		"soldado3_b": { "texto": "Llega el general y los partes dicen que fue fácil. Los partes siempre dicen lo mesmo." },
 
-		"gaucho1": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "gaucho1_b" }, { "ir": "gaucho1_a" } ] },
+		"gaucho1": { "segun": [ { "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "gaucho1_noche" }, { "si": { "momento": [3, 4] }, "ir": "gaucho1_b" }, { "ir": "gaucho1_a" } ] },
+		"gaucho1_noche": { "texto": "A esta hora, antes, no se oía a naides. Ahora se oye la guardia." },
 		"gaucho1_a": { "texto": "Yo crucé esto cuando no había ni fortín ni pulpería. Tampoco había cuenta: naides debía nada." },
 		"gaucho1_b": { "texto": "Ahora todo tiene dueño. Hasta el agua." },
 		"gaucho3": { "segun": [
 			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "ir": "gaucho3_arreo_espera" },
 			{ "si": { "momento": 2, "var": { "arreo": 0 } }, "ir": "gaucho3_arreo" },
+			{ "si": { "momento": [3, 4], "var": { "arreo": 3, "arreos": [0, 1, 2] }, "no": ["punta_dicha"] }, "ir": "gaucho3_punta_perdida" },
 			{ "si": { "momento": [3, 4] }, "ir": "gaucho3_b" },
 			{ "ir": "gaucho3_a" }
 		] },
@@ -543,9 +893,36 @@
 				{ "texto": "Otro día." }
 			]
 		},
+		"gaucho3_punta_perdida": {
+			"hace": { "flag": ["punta_dicha"] },
+			"texto": "La punta que quedó campo afuera la trajo otro. El patrón no pregunta quién; pregunta cuántas."
+		},
 		"gaucho3_arreo_espera": { "texto": "La punta sigue campo afuera, al este de la posta. La tranquera del corral grande da a la casa." },
-		"gaucho2": { "segun": [ { "si": { "final": "encargado" }, "ir": "gaucho2_c" }, { "si": { "momento": [3, 4] }, "ir": "gaucho2_b" }, { "ir": "gaucho2_a" } ] },
-		"gaucho2_a": { "texto": "El patrón dice que va a alambrar todo el campo. No sé con qué gente." },
+		"gaucho2": { "segun": [
+			{ "si": { "final": "encargado" }, "ir": "gaucho2_c" },
+			{ "si": { "momento": 3, "var": { "yerra": 0 } }, "ir": "gaucho2_yerra" },
+			{ "si": { "momento": 3, "var": { "yerra": [1, 2] }, "no": ["yerra_dicha"] }, "ir": "gaucho2_yerra_hecha" },
+			{ "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "gaucho2_noche" },
+			{ "si": { "momento": [3, 4] }, "ir": "gaucho2_b" },
+			{ "ir": "gaucho2_a" }
+		] },
+		"gaucho2_yerra": {
+			"texto": [
+				"Estamos de yerra, amigo, y faltan brazos pa'l pial.",
+				"Dé una mano en la yerra. El patrón paga con papel pa lo de Ceferino."
+			],
+			"opciones": [
+				{ "texto": "Doy una mano.", "hace": { "var": { "yerra": 1 }, "nota": "Di una mano en la yerra de Don Rufino. Pialé terneros hasta la tarde.",
+					"jornada": { "horas": 4, "texto": [ "Pialé terneros hasta que se me durmieron los brazos. Olía a pelo quemado." ] } } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"gaucho2_yerra_hecha": {
+			"hace": { "flag": ["yerra_dicha"] },
+			"texto": "Güena mano pa'l lazo, amigo. El papel del patrón ya ha de estar en lo de Ceferino."
+		},
+		"gaucho2_noche": { "texto": "De noche el patrón cuenta la hacienda de memoria. Yo la cuento de día y nunca me da lo mesmo." },
+		"gaucho2_a": { "texto": "El patrón dice que va a cerrar todo el campo. No sé con qué gente." },
 		"gaucho2_b": { "texto": "Dicen que busca encargao. A mí no me ha de tocar." },
 		"gaucho2_c": { "texto": "Así que el encargao es usted. Mande nomás." },
 
@@ -558,7 +935,46 @@
 		},
 		"anciana_b": { "texto": "Que hablen. Yo vi irse a muchos que venían a quedarse." },
 		"anciana_paso": { "texto": "No quise tratos con ninguno. Por eso me voy." },
-		"tejedora": { "segun": [ { "si": { "momento": [3, 4] }, "ir": "tejedora_b" }, { "ir": "tejedora_a" } ] },
+		"tejedora": { "segun": [
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 2 }, "cerca": "ceniza" }, "ir": "tejedora_recibe" },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 2 } }, "ir": "tejedora_sin_caballo" },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 1 } }, "ir": "tejedora_espera" },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 0 } }, "ir": "tejedora_ofrece" },
+			{ "si": { "var": { "ponchos": [3, 4] }, "no": ["ponchos_dichos"] }, "ir": "tejedora_hecho" },
+			{ "si": { "momento": [3, 4] }, "ir": "tejedora_b" },
+			{ "ir": "tejedora_a" }
+		] },
+		"tejedora_ofrece": {
+			"texto": [
+				"Este poncho ya tiene comprador en la pulpería. Con paz, vendo. Con pelea no vende nadie.",
+				"Vos andás de un lado a otro, a caballo. Llevale estos ponchos a Ceferino. El precio lo pongo yo, y él ya lo sabe.",
+				"De vuelta me traés yerba y añil. Por el viaje te descuenta él, de tu cuenta: eso también lo dejé dicho."
+			],
+			"opciones": [
+				{ "texto": "Los llevo.", "hace": { "var": { "ponchos": 1 }, "nota": "La tejedora me dio ponchos para Ceferino. El precio lo puso ella." } },
+				{ "texto": "Otro día." }
+			]
+		},
+		"tejedora_espera": { "texto": "Los ponchos son para Ceferino. El precio ya lo sabe: que no te lo discuta a vos." },
+		"tejedora_sin_caballo": { "texto": "La yerba y el añil vienen en tu caballo. Traelo hasta los toldos." },
+		"tejedora_recibe": {
+			"hace": { "var": { "ponchos": 3 }, "nota": "Le llevé a la tejedora su yerba y su añil. Ceferino pagó lo que ella pedía." },
+			"texto": [
+				"La yerba está bien. El añil es poco, pero es bueno: con esto tiño hasta el invierno.",
+				"Ceferino pagó lo que pedí. Entonces todavía se puede tratar con él.",
+				"Pasá por la pulpería: lo tuyo ya está dicho."
+			],
+			"ir": "tejedora_cierra"
+		},
+		"tejedora_cierra": { "segun": [
+			{ "si": { "momento": 2, "menos": { "tolderia": "minimo" }, "var": { "favor": [0, 1] } }, "ir": "tejedora_pista" },
+			{ "ir": "despedida_tolderia" }
+		] },
+		"tejedora_pista": { "texto": "A Painefil no le traigas ponchos. Traele lo que se dice en el fortín y en lo de Rufino." },
+		"tejedora_hecho": {
+			"hace": { "flag": ["ponchos_dichos"] },
+			"texto": "Con vos ya traté, y traté bien. Cuando haya otros ponchos, te busco."
+		},
 		"tejedora_a": { "texto": "Este poncho ya tiene comprador en la pulpería. Con paz, vendo. Con pelea no vende nadie." },
 		"tejedora_b": { "texto": "Los soldados también compran ponchos. Eso no lo dice nadie, pero compran." },
 		"muchacho": { "segun": [ { "si": { "final": "chile" }, "ir": "muchacho_paso" }, { "si": { "momento": [3, 4] }, "ir": "muchacho_b" }, { "ir": "muchacho_a" } ] },
@@ -566,10 +982,44 @@
 		"muchacho_b": { "texto": "Unos dicen hablar. Otros dicen irse. A mí nadie me pregunta." },
 		"muchacho_paso": { "texto": "A mí nadie me preguntó. Vine de todos modos, con los caballos." },
 
-		"centinela": { "texto": "Alto. Ah, el baqueano. Pase nomás." },
-		"soldado_fogon": { "texto": "Mil setecientos milicos y un solo fogón que tira bien. Este." },
+		"centinela": { "segun": [
+			{ "si": { "momento": 3, "var": { "chasque": 1 } }, "ir": "centinela_parte" },
+			{ "si": { "var": { "chasque": [2, 3, 4] } }, "ir": "centinela_conocido" },
+			{ "ir": "centinela_alto" }
+		] },
+		"centinela_alto": { "texto": "Alto. Ah, el baqueano. Pase nomás." },
+		"centinela_parte": {
+			"hace": { "var": { "chasque": 2 }, "nota": "Dejé el parte de Lucero en el campamento y me dieron la respuesta." },
+			"texto": [
+				"Alto. ¿Parte del Salitral? Espere acá.",
+				"Tome. Pa'l sargento, en mano."
+			]
+		},
+		"centinela_conocido": { "texto": "Pase nomás, baqueano. Acá ya lo conocen por el parte." },
+		"soldado_fogon": { "segun": [ { "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "soldado_fogon_noche" }, { "ir": "soldado_fogon_dia" } ] },
+		"soldado_fogon_dia": { "texto": "Tanta tropa y un solo fogón que tira bien. Este." },
+		"soldado_fogon_noche": { "texto": "De noche el lago hace un ruido como de mar. A los caballos no los deja dormir, y a mí tampoco." },
+
+		"jarillal": { "segun": [
+			{ "si": { "momento": [2, 3], "var": { "lenia": 1 }, "cerca": "ceniza" }, "ir": "jarillal_corta" },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 1 } }, "ir": "jarillal_sin_ceniza" },
+			{ "ir": "jarillal_mira" }
+		] },
+		"jarillal_corta": {
+			"quien": "Zenón",
+			"texto": "Jarilla seca y alpataco. Leña hay de sobra; lo que lleva tiempo es cortarla.",
+			"opciones": [
+				{ "texto": "Cortar un atado.", "hace": { "var": { "lenia": 2 }, "nota": "Corté leña en el jarillal y la cargué en Ceniza.",
+					"jornada": { "horas": 1, "texto": [ "Corté jarilla y alpataco, y armé un atado con los tientos." ] } } },
+				{ "texto": "Después." }
+			]
+		},
+		"jarillal_sin_ceniza": { "quien": "Zenón", "texto": "Sin Ceniza cerca no hay cómo cargar la leña." },
+		"jarillal_mira": { "texto": "Jarilla y alpataco, mata contra mata. Leña buena, que arde sola." },
 		"soldado_carga": { "texto": "Cajones y más cajones: yerba y tabaco. Los vicios llegan; la paga, no." },
-		"soldado_fortin_nuevo": { "texto": "Este fortín todavía huele a palo verde. Dicen que el general quiere una fila de estos al pie de la cordillera." }
+		"soldado_fortin_nuevo": { "segun": [ { "si": { "periodo": ["Crepúsculo", "Noche"] }, "ir": "soldado_fortin_nuevo_noche" }, { "ir": "soldado_fortin_nuevo_dia" } ] },
+		"soldado_fortin_nuevo_dia": { "texto": "Este fortín todavía huele a palo verde. Dicen que el general quiere una fila de estos al pie de la cordillera." },
+		"soldado_fortin_nuevo_noche": { "texto": "De noche este fortín cruje como barco. Es el palo verde, que se va secando." }
 	},
 
 	"finales": {

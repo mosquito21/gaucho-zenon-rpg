@@ -151,9 +151,13 @@ func _pintar_pagina() -> void:
 		boton.queue_free()
 	var ultima := _pagina >= _paginas.size() - 1
 	var con_opciones := ultima and not _textos_opciones.is_empty()
-	_seguir.visible = not con_opciones
+	_seguir.text = "E para seguir"
 	if not con_opciones:
 		return
+	var numeros := PackedStringArray()
+	for i in _textos_opciones.size():
+		numeros.append(str(i + 1))
+	_seguir.text = "%s o el mouse para elegir" % ", ".join(numeros)
 	for i in _textos_opciones.size():
 		var boton := Button.new()
 		boton.text = "%d.  %s" % [i + 1, _textos_opciones[i]]
@@ -168,9 +172,9 @@ func _pintar_pagina() -> void:
 		boton.add_theme_color_override("font_hover_color", CLARO)
 		boton.add_theme_color_override("font_focus_color", CLARO)
 		boton.pressed.connect(_elegir.bind(i))
+		# Ninguna opción arranca enfocada: si no, el Enter de pasar páginas (o el Espacio) elegía la
+		# primera sin querer. La primera flecha enfoca (ver _input).
 		_opciones.add_child(boton)
-		if i == 0:
-			boton.grab_focus.call_deferred()
 
 
 func _elegir(indice: int) -> void:
@@ -190,8 +194,11 @@ func cerrar() -> void:
 
 ## Oscurece la pantalla, muestra unas líneas ("Pasaron las semanas…") y vuelve al juego.
 ## al_medio se llama con la pantalla ya tapada (para mover cosas sin que se vea).
-func fundido(lineas: Array, al_terminar: Callable, al_medio := Callable()) -> void:
+## Con ya_tapada, la pantalla arranca oscura en vez de oscurecerse (el cartel del arranque).
+func fundido(lineas: Array, al_terminar: Callable, al_medio := Callable(), ya_tapada := false) -> void:
 	_abrir_telon("", lineas, Color(0.04, 0.035, 0.03), al_terminar, al_medio)
+	if ya_tapada:
+		_telon.modulate.a = 1.0
 
 
 ## El cierre de la historia: título, páginas de texto y vuelta al menú.
@@ -261,11 +268,21 @@ func _input(event: InputEvent) -> void:
 		return
 	var eligiendo := _opciones.get_child_count() > 0
 	if eligiendo:
+		# Espacio es la tecla de saltar: con opciones a la vista no elige nada (antes apretaba la
+		# opción enfocada, que en lo de Ceferino es saldar e irse).
+		if event.is_action("jump"):
+			get_viewport().set_input_as_handled()
+			return
 		if event is InputEventKey and event.pressed and not event.echo:
-			var numero: int = event.keycode - KEY_1
+			# Los números de arriba y los del teclado numérico.
+			var numero: int = event.keycode - (KEY_KP_1 if event.keycode >= KEY_KP_1 and event.keycode <= KEY_KP_9 else KEY_1)
 			if numero >= 0 and numero < _textos_opciones.size():
 				get_viewport().set_input_as_handled()
 				_elegir(numero)
+			elif get_viewport().gui_get_focus_owner() == null and (event.is_action("ui_down") or event.is_action("ui_up")):
+				# La primera flecha enfoca una opción; de ahí en más, flechas y Enter como siempre.
+				get_viewport().set_input_as_handled()
+				(_opciones.get_child(0 if event.is_action("ui_down") else -1) as Control).grab_focus()
 		return
 	if seguir:
 		get_viewport().set_input_as_handled()

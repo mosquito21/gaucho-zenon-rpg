@@ -177,6 +177,21 @@ func gesto_de_hablar() -> void:
 		_anim.play("talking", -1.0, ritmo)
 
 
+## Cambia la lista de clips: la historia mueve a alguien y lo pone a hacer otra cosa (el peón, de
+## sentado junto al palenque a parado en la yerra). Los clips que el modelo no trae se saltean.
+func poner_clips(lista: Array) -> void:
+	var validos: Array[String] = []
+	for clip in lista:
+		if _anim != null and _anim.has_animation(str(clip)):
+			validos.append(str(clip))
+	if validos.is_empty():
+		return
+	clips = validos
+	_turno = 0
+	if _andando == "":
+		_tocar()
+
+
 ## Cada vez que empieza un clip va un poquito más rápido o más lento, para que no se repita igual.
 func _tocar() -> void:
 	_anim.play(clips[_turno], -1.0, ritmo * randf_range(0.93, 1.07))

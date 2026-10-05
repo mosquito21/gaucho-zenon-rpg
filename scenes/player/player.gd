@@ -176,6 +176,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# Con el mouse suelto, un clic lo vuelve a capturar y no hace otra cosa.
+	var clic: bool = event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]
+	if clic and Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		get_viewport().set_input_as_handled()
+		return
 
 	# mirar con el mouse
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -225,9 +231,10 @@ func _process(delta: float) -> void:
 	camera_pivot.rotation.y = wrapf(yaw - _rumbo, -PI, PI) if montado else 0.0
 	camera_pivot.rotation.x = pitch
 	_acomodar_camara(delta)
-	# En el final en que salda la cuenta, las boleadoras quedaron en lo de Ceferino.
+	# En el final en que salda la cuenta, las boleadoras quedaron en lo de Ceferino, salvo que la
+	# cuenta estuviera baja y Ceferino se las haya dejado (bandera "boleadoras_quedan").
 	if _boleadoras != null:
-		_boleadoras.visible = Historia.final_elegido != "solitario"
+		_boleadoras.visible = Historia.final_elegido != "solitario" or Historia.flags.has("boleadoras_quedan")
 	if montado or _subiendo > 0.0:
 		_acomodar_jinete(delta)
 	else:
@@ -260,7 +267,7 @@ func _check_interaction() -> void:
 
 	current_interactable = _buscar_interactable(ray_interact.get_collider())
 	# A la gente y al fogón se les habla de cerca: eso lo decide Historia.persona_cerca con su alcance.
-	if current_interactable != null and current_interactable.rol in [Interactable.Rol.PERSONA, Interactable.Rol.FOGON]:
+	if current_interactable != null and current_interactable.rol in [Interactable.Rol.PERSONA, Interactable.Rol.FOGON, Interactable.Rol.CHANGA]:
 		current_interactable = null
 
 
@@ -608,6 +615,8 @@ func _armar_aviso() -> void:
 		_aviso.name = "AvisoLabel"
 		capa.add_child(_aviso)
 	_aviso.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	# Un aviso de varios renglones (el de Tab con conchabos a medias) crece hacia arriba, no fuera de la pantalla.
+	_aviso.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_aviso.offset_left = -460.0
 	_aviso.offset_right = 460.0
 	_aviso.offset_top = -150.0

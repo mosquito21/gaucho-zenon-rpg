@@ -7,6 +7,10 @@ extends Node3D
 ## por fuera) son círculos. Lo crea scripts/Historia.gd cuando Zenón toma el trabajo del capataz.
 ## Los números y los lugares están en datos/historia.json ("arreo") y se explican en
 ## docs/agente/ESTADO.md, "Para Willy", Tanda 6.
+##
+## Desde la tanda 7 sirve para cualquier rebaño: la caballada del fortín es otra sección de datos
+## ("caballada") con sus "modelos", "marchas", "clips" y "nombre". Lo que no trae la sección sale de
+## la vaca, así que el arreo quedó igual.
 
 ## La última vaca pasó la tranquera.
 signal cumplido
@@ -50,7 +54,7 @@ func poner(en_el_campo: bool, guardadas: Array = []) -> void:
 	_camino = []
 	for punto: Array in datos.get("entrada", {}).get("camino", []):
 		_camino.append(_v2(punto))
-	while _vacas.size() < int(datos.get("vacas", 7)):
+	while _vacas.size() < int(datos.get("animales", datos.get("vacas", 7))):
 		_vacas.append(_nueva_vaca(_vacas.size()))
 	var centro := _v2(datos.get("donde", [0, 0]))
 	for i in _vacas.size():
@@ -100,12 +104,20 @@ func entrada() -> Vector2:
 func _nueva_vaca(i: int) -> Dictionary:
 	var nodo := Node3D.new()
 	nodo.set_script(NPC)
-	nodo.name = "VacaDelArreo%d" % (i + 1)
-	var talla := 0.9 + 0.05 * (i % 4)
-	var lista: Array[String] = ["graze", "graze", "idle"]
+	nodo.name = "%s%d" % [str(datos.get("nombre", "VacaDelArreo")), i + 1]
+	# "talla": [la del más chico, cuánto más grande cada uno de los tres que siguen].
+	var tallas: Array = datos.get("talla", [0.9, 0.05])
+	var talla := float(tallas[0]) + float(tallas[1]) * (i % 4)
+	var lista: Array[String] = []
+	lista.assign(datos.get("clips", ["graze", "graze", "idle"]))
 	nodo.set("clips", lista)
-	nodo.set("marchas", {"walk": MARCHAS.walk * talla, "trot": MARCHAS.trot * talla})
-	var modelo := (load(VACA_GLB) as PackedScene).instantiate() as Node3D
+	var marchas := {}
+	var de_datos: Dictionary = datos.get("marchas", MARCHAS)
+	for clip: String in de_datos:
+		marchas[clip] = float(de_datos[clip]) * talla
+	nodo.set("marchas", marchas)
+	var modelos: Array = datos.get("modelos", [VACA_GLB])
+	var modelo := (load(str(modelos[i % modelos.size()])) as PackedScene).instantiate() as Node3D
 	modelo.scale = Vector3.ONE * talla
 	nodo.add_child(modelo)
 	add_child(nodo)
@@ -216,7 +228,9 @@ func _entrar(vaca: Dictionary, delta: float) -> void:
 	var tramo := int(vaca.tramo)
 	var meta: Vector2 = _camino[tramo] if tramo < _camino.size() else vaca.lugar
 	var falta: Vector2 = meta - vaca.pos
-	if falta.length() < 1.5:
+	# Por los puntos del camino pasa de largo a metro y medio; a su lugar se arrima lo que diga
+	# "llegar" (en un corral chico, como el del fortín, tiene que quedar bien adentro).
+	if falta.length() < (1.5 if tramo < _camino.size() else float(datos.get("entrada", {}).get("llegar", 1.5))):
 		vaca.tramo = tramo + 1
 		if tramo >= _camino.size():
 			vaca.estado = CORRAL
