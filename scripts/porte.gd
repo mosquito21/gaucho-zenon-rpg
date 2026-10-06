@@ -17,6 +17,9 @@ var hombros := 0.0
 var mirar := 0.0
 ## Cada cuántos segundos, más o menos, mira hacia un lado.
 var mirar_cada := 7.0
+## A quién sigue con la mirada, en grados desde su frente (positivo, hacia su izquierda). Lo pone
+## npc_animado.gd mientras Zenón le pasa cerca; con NAN no sigue a nadie y mira por su cuenta.
+var seguir := NAN
 ## Grados de vaivén lento del tronco.
 var mecer := 0.0
 ## Grados que se abren los brazos hacia afuera, para que las manos no se metan en el cuerpo.
@@ -38,6 +41,7 @@ var _t := 0.0
 var _mira := 0.0
 var _mira_meta := 0.0
 var _mira_falta := 0.0
+var _seguia := false
 var _huesos := {}
 # Los ejes del cuerpo dentro del esqueleto: hacia su izquierda, hacia arriba y hacia el frente.
 # No se dan por sabidos, se miden en _ready: según cómo se exportó el modelo, "arriba" es Y o es -Z
@@ -70,7 +74,15 @@ func _process_modification_with_delta(delta: float) -> void:
 		return
 	_t += delta
 	# Mirar alrededor: cada tanto elige un lado, gira despacio, se queda un momento y vuelve al frente.
-	if mirar > 0.0:
+	# Si está siguiendo a alguien con la mirada, eso manda; al soltarlo vuelve al frente y sigue con lo suyo.
+	if not is_nan(seguir):
+		_mira_meta = seguir
+		_mira_falta = mirar_cada * 0.5
+		_seguia = true
+	elif _seguia:
+		_seguia = false
+		_mira_meta = 0.0
+	elif mirar > 0.0:
 		_mira_falta -= delta
 		if _mira_falta <= 0.0:
 			if absf(_mira_meta) > 1.0:
@@ -81,7 +93,7 @@ func _process_modification_with_delta(delta: float) -> void:
 				_mira_falta = mirar_cada * randf_range(0.2, 0.45)
 	else:
 		_mira_meta = 0.0
-	_mira = lerpf(_mira, _mira_meta, clampf(delta * 2.2, 0.0, 1.0))
+	_mira = lerpf(_mira, _mira_meta, clampf(delta * (4.0 if _seguia else 2.2), 0.0, 1.0))
 	var vaiven := sin(_t * 0.55) * mecer
 	# Los brazos cuelgan (o gesticulan) como dice el clip: se anota hacia dónde apuntan antes de
 	# tocar la espalda y los hombros, y al final se los vuelve a dejar así. Si no, al encorvar la

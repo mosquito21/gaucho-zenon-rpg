@@ -62,6 +62,19 @@ const PLANES := {
 	"caballo": [["graze", 2.0], ["walk", 9.0], ["idle", 1.0], ["graze", 1.0], ["walk", 6.0], ["idle", 1.0]],
 }
 
+# Pase libre de la tanda 8: los ariscos se espantan cuando Zenón se arrima. Por especie: a cuántos
+# metros, cuántos segundos dispara, cuántos se queda tranquilo después aunque Zenón siga ahí, y a
+# qué velocidad dispara (metros por segundo: más que un hombre a la carrera, menos que un caballo).
+# Los mansos (vacas, ovejas, perros, caballos) no figuran. Para sacarlo, dejar esta tabla vacía: {}.
+const SE_ESPANTA := {"gallina": [3.2, 2.2, 6.0, 1.9], "guanaco": [38.0, 6.0, 5.0, 6.0], "choique": [30.0, 6.0, 5.0, 7.0],
+	"zorro": [22.0, 5.0, 8.0, 4.5], "huemul": [26.0, 5.0, 8.0, 4.5]}
+
+# Cuánto pasto se dibuja (1 es todo). Lo baja scripts/Ajustes.gd con la imagen liviana.
+var _matas := 1.0
+var _pisado: ImageTexture
+var _zenon: Node3D
+# El susto de la tropilla de guanacos, que es uno solo para todos: disparan juntos y para el mismo lado.
+var _susto_tropilla := {}
 var _pajaros: Array[Node3D] = []
 # Una ficha por bicho: su nodo, su vuelta (centro, radio, ángulo) y en qué paso de su plan está.
 var _bichos: Array[Dictionary] = []
@@ -78,10 +91,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_reloj += delta
 	# Las matas necesitan saber dónde pisa Zenón para apartarse.
-	var jugador := get_node_or_null("../Player") as Node3D
-	if jugador != null:
+	_zenon = get_node_or_null("../Player") as Node3D
+	if _zenon != null:
 		for material in _materiales_matas:
-			material.set_shader_parameter("u_zenon", jugador.global_position)
+			material.set_shader_parameter("u_zenon", _zenon.global_position)
 	_mover_pajaros(delta)
 	_mover_bichos(delta)
 
@@ -124,10 +137,12 @@ func _armar_estepa() -> void:
 		push_warning("Falta el terreno o %s: no se siembran matas." % MATAS_SHADER)
 		return
 	var datos = terreno.get_data()
+	if _pisado == null:
+		_pisado = _mapa_pisado(terreno)
 	var comunes := {
 		"u_alturas": datos.get_texture(0),  # alturas del terreno
 		"u_suelos": datos.get_texture(2),  # qué suelo hay en cada lugar (estepa, tierra, vega, canto)
-		"u_pisado": _mapa_pisado(terreno),  # el camino de huellas: ahí no crece nada
+		"u_pisado": _pisado,  # el camino de huellas: ahí no crece nada
 		"u_mundo_a_mapa": terreno.get_internal_transform().affine_inverse(),
 		"u_escala_altura": terreno.map_scale.y,
 		"viento": viento,
@@ -163,15 +178,33 @@ func _armar_estepa() -> void:
 		material.shader = shader
 		for nombre in comunes:
 			material.set_shader_parameter(nombre, comunes[nombre])
+		# Con menos pasto (imagen liviana) la grilla es más chica y se esfuma más cerca.
+		var lado := maxi(int(float(g[3]) * _matas), 4)
 		material.set_shader_parameter("paso", g[2])
-		material.set_shader_parameter("lado", float(g[3]))
+		material.set_shader_parameter("lado", float(lado))
 		material.set_shader_parameter("semilla", float(n + 1))
 		material.set_shader_parameter("alto_malla", maxf(malla.get_aabb().end.y, 0.05))
 		var ajustes: Dictionary = g[4]
 		for nombre in ajustes:
 			material.set_shader_parameter(nombre, ajustes[nombre])
+		material.set_shader_parameter("distancia_fin", float(ajustes.get("distancia_fin", 97.0)) * _matas)
 		_materiales_matas.append(material)
-		add_child(_grilla(g[0], malla, g[2], g[3], material))
+		add_child(_grilla(g[0], malla, g[2], lado, material))
+
+
+## Cuánto pasto se dibuja: 1 es todo; menos, más cerca y con menos matas. Lo cambia
+## scripts/Ajustes.gd con la imagen liviana. Si las matas ya están sembradas, las siembra de nuevo.
+func poner_matas(cuanto: float) -> void:
+	if is_equal_approx(cuanto, _matas):
+		return
+	_matas = cuanto
+	if _materiales_matas.is_empty():
+		return  # Todavía no se sembró: _armar_estepa lo toma al arrancar.
+	for hijo in get_children():
+		if hijo is MultiMeshInstance3D:
+			hijo.free()
+	_materiales_matas.clear()
+	_armar_estepa()
 
 ## Una imagen del mapa entero (2 m por punto) con el camino de huellas marcado, para que no crezcan
 ## matas encima. El camino son calcos (Decal) y el terreno no sabe por dónde pasa.
@@ -444,6 +477,8 @@ func _modelo_bicho(ruta: String, nombre: String, escala: float) -> Node3D:
 	bicho.name = nombre
 	bicho.scale = Vector3.ONE * escala
 	add_child(bicho)
+	# Para que scripts/sonidos.gd sepa qué animales hay (les da voz y oye su tropel).
+	bicho.add_to_group("hacienda")
 	return bicho
 
 ## Choique, guanacos, zorro, cóndores y los animales de la estancia y la pulpería.
@@ -516,6 +551,7 @@ func _armar_bichos() -> void:
 			# los de adentro y los de afuera giran a la par, con uno o dos segundos de diferencia.
 			if d[8] == "tropilla":
 				ficha["radio_ref"] = 46.0
+				ficha["junta"] = true
 			else:
 				ficha["paso"] = (int(float(d[6]) * 7.0) % PLANES[d[8]].size()) - 1
 			_siguiente_paso(ficha)
@@ -567,15 +603,19 @@ func _mover_bichos(delta: float) -> void:
 			nodo.global_position = Vector3(bajo.x, bajo.y + float(b.alto) + ola, bajo.z)
 			nodo.rotation = Vector3(0.0, -giro, -0.22 + sin(_reloj * 0.4 + float(b.ang)) * 0.05)
 			continue
+		# Espantado no sigue su plan: dispara por su vuelta, hacia el lado que lo aleja de Zenón.
+		var sentido := _espantar(b, nodo)
 		b.t = float(b.t) + delta
-		if float(b.t) >= float(b.dura):
-			_siguiente_paso(b)
+		if sentido == 0.0:
+			sentido = 1.0
+			if float(b.t) >= float(b.dura):
+				_siguiente_paso(b)
 		# Lejos de la cámara no se anima el esqueleto (sigue su vuelta igual): no se ve y ahorra trabajo.
 		var anim_b := b.get("anim") as AnimationPlayer
 		if anim_b != null and camara != null:
 			anim_b.active = camara.global_position.distance_squared_to(nodo.global_position) < 150.0 * 150.0
 		var vel: float = b.vel
-		b.ang = float(b.ang) + vel * delta / radio
+		b.ang = float(b.ang) + sentido * vel * delta / radio
 		var ang: float = b.ang
 		var suelo := _altura_mundo(centro.x + cos(ang) * radio, centro.y + sin(ang) * radio)
 		var t: float = b.t
@@ -594,7 +634,52 @@ func _mover_bichos(delta: float) -> void:
 		if b.especie in DE_CERRO:
 			var adelante := Vector2(-sin(ang), cos(ang)) * 0.5
 			var sube := _altura_mundo(suelo.x + adelante.x, suelo.z + adelante.y).y - _altura_mundo(suelo.x - adelante.x, suelo.z - adelante.y).y
-			cabeceo -= atan2(sube, 1.0)
+			# (Espantado puede ir para el otro lado: ahí la cuesta se le da vuelta.)
+			cabeceo -= atan2(sube * sentido, 1.0)
 		nodo.global_position = suelo
 		# La cabeza apunta a +Z. Con giro en Y, +Z queda en (sin(yaw), 0, cos(yaw)).
-		nodo.rotation = Vector3(cabeceo, -ang + vaiven, 0.0)
+		var giro := -ang + vaiven
+		if SE_ESPANTA.has(b.especie):
+			# Los que se espantan pueden ir para el otro lado: se dan vuelta rápido, pero no de golpe.
+			giro = lerp_angle(nodo.rotation.y, giro + (PI if sentido < 0.0 else 0.0), clampf(8.0 * delta, 0.0, 1.0))
+		nodo.rotation = Vector3(cabeceo, giro, 0.0)
+
+
+## ¿Este bicho está disparando? Devuelve hacia qué lado de su vuelta (1 o -1), o 0 si anda tranquilo.
+## Se espanta cuando Zenón se le arrima (SE_ESPANTA); pasado el susto vuelve a su plan y por un rato
+## no se espanta de nuevo.
+func _espantar(b: Dictionary, nodo: Node3D) -> float:
+	var susto: Array = SE_ESPANTA.get(b.especie, [])
+	if susto.is_empty() or _zenon == null:
+		return 0.0
+	# La tropilla se espanta toda junta: si cada guanaco disparara por su cuenta y para su lado,
+	# quedarían desparramados por la vuelta y no volverían a juntarse.
+	var e: Dictionary = _susto_tropilla if b.get("junta", false) else b
+	if float(e.get("huye_hasta", 0.0)) <= _reloj:
+		if b.get("huyendo", false):
+			b["huyendo"] = false
+			e["calma_hasta"] = _reloj + float(susto[2])
+			# La tropilla retoma el plan toda en el mismo paso, el que llevaba el que dio el susto.
+			if b.get("junta", false) and e.has("paso"):
+				b.paso = e["paso"]
+			_siguiente_paso(b)
+		var de_zenon := Vector2(nodo.global_position.x - _zenon.global_position.x, nodo.global_position.z - _zenon.global_position.z)
+		if de_zenon.length() > float(susto[0]) or float(e.get("calma_hasta", 0.0)) > _reloj:
+			return 0.0
+		e["huye_hasta"] = _reloj + float(susto[1])
+		# Su vuelta es un círculo: de los dos lados, el que lo aleja. Se elige una vez, al espantarse.
+		var ang: float = b.ang
+		e["sentido"] = 1.0 if Vector2(-sin(ang), cos(ang)).dot(de_zenon) >= 0.0 else -1.0
+		e["paso"] = b.paso
+	if not b.get("huyendo", false):
+		b["huyendo"] = true
+		# Sale con el paso más ligero que tenga, apurado todo lo que da el clip (no hay clip de disparada:
+		# de cerca las patas van más despacio que el suelo, pero se están yendo).
+		var clip := "trot" if PASO_NATURAL[b.especie].has("trot") else "walk"
+		b.clip = clip
+		b.vel = float(susto[3]) * float(b.radio) / float(b.radio_ref)
+		var anim := b.get("anim") as AnimationPlayer
+		if anim != null and anim.has_animation(clip):
+			anim.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
+			anim.play(clip, 0.25, clampf(float(susto[3]) / (float(PASO_NATURAL[b.especie][clip]) * float(b.escala)), 0.6, 1.6))
+	return float(e.sentido)

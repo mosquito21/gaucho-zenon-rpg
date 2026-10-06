@@ -121,6 +121,8 @@ func _nueva_vaca(i: int) -> Dictionary:
 	modelo.scale = Vector3.ONE * talla
 	nodo.add_child(modelo)
 	add_child(nodo)
+	# Para que scripts/sonidos.gd sepa qué animales hay (les da voz y oye su tropel).
+	nodo.add_to_group("hacienda")
 	nodo.call("llevar", true)
 	var lugares: Array = datos.get("lugares_en_el_corral", [])
 	var lugar: Vector2 = _v2(lugares[i % lugares.size()]) if not lugares.is_empty() else _v2(datos.get("corral", [0, 0]))

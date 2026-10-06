@@ -9,6 +9,10 @@ extends Control
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	# Los ajustes (volumen, mouse, pantalla, imagen), justo arriba de "Salir".
+	_sumar_boton("Ajustes", Ajustes.abrir_ajustes, _empezar.get_parent().get_child_count() - 1)
+	_poner_version()
+	_poner_titulo()
 	if Historia.hay_abril():
 		_sumar_boton("Volver a abril de 1881", _on_abril_pressed, _empezar.get_index() + 1)
 	if not Historia.hay_partida():
@@ -35,6 +39,36 @@ func _sumar_boton(texto: String, accion: Callable, lugar: int) -> Button:
 	_empezar.add_sibling(boton)
 	_empezar.get_parent().move_child(boton, lugar)
 	return boton
+
+
+## La versión del juego, abajo a la derecha (está en Proyecto > Configuración del proyecto >
+## Aplicación > Configuración > Versión).
+func _poner_version() -> void:
+	var version := str(ProjectSettings.get_setting("application/config/version", ""))
+	if version == "":
+		return
+	var rotulo := Label.new()
+	rotulo.text = "v" + version
+	rotulo.add_theme_font_size_override("font_size", 18)
+	rotulo.modulate = Color(1.0, 1.0, 1.0, 0.6)
+	add_child(rotulo)
+	rotulo.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 24)
+
+
+## El nombre del juego arriba del menú, dónde y cuándo pasa, y de quién es la música (pase libre de
+## la tanda 9; se saca borrando esta función y su llamada en _ready).
+func _poner_titulo() -> void:
+	# En una pantalla baja (una notebook de 768) el título sube, para no pisar el primer botón.
+	var arriba := 90 if get_viewport_rect().size.y >= 800.0 else 40
+	for dato: Array in [["El Gaucho Zenón", 64, Control.PRESET_CENTER_TOP, arriba, 1.0],
+			["Norte de la Patagonia, 1881", 24, Control.PRESET_CENTER_TOP, arriba + 86, 0.75],
+			["Música: Mariano Amir Jatip", 18, Control.PRESET_BOTTOM_LEFT, 24, 0.6]]:
+		var rotulo := Label.new()
+		rotulo.text = dato[0]
+		rotulo.add_theme_font_size_override("font_size", dato[1])
+		rotulo.add_theme_color_override("font_color", Color(0.96, 0.91, 0.78, dato[4]))
+		add_child(rotulo)
+		rotulo.set_anchors_and_offsets_preset(dato[2], Control.PRESET_MODE_MINSIZE, dato[3])
 
 
 func _confirmar(titulo: String, texto: String, accion: Callable) -> void:

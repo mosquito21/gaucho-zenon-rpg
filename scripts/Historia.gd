@@ -61,6 +61,13 @@ var _rebanos := {}
 var _jornada: Dictionary = {}
 ## Cómo estaba en la escena cada cosa que "mundo" prende, apaga o mueve, para dejarla igual después.
 var _de_escena := {}
+## Cuándo saludó cada uno por última vez (en milésimas), y cuándo fue el último saludo de cualquiera.
+var _saludo_de := {}
+var _ultimo_saludo := 0
+
+## Una jornada de trabajo pide su sonido ("suena" en el efecto "jornada": los hachazos de la leña).
+## Lo escucha scripts/sonidos.gd.
+signal sonar(que: String)
 
 
 func _init() -> void:
@@ -82,14 +89,63 @@ func _ruta(nombre: String) -> String:
 ## es el que amanece, pasa de capítulo y guarda la copia de abril), así que se vuelve al último guardado.
 ## Con un final elegido tampoco: la gente que sigue a Zenón no se guarda, y al volver quedaría atrás.
 func _notification(que: int) -> void:
-	if que == NOTIFICATION_WM_CLOSE_REQUEST and not terminado and final_elegido == "" and _nodo.is_empty():
-		guardar()
+	if que == NOTIFICATION_WM_CLOSE_REQUEST:
+		guardar_al_salir()
+
+
+## ¿Se puede guardar ahora? (Las dos excepciones de arriba: un diálogo abierto o un final elegido.)
+func se_puede_guardar() -> bool:
+	return not terminado and final_elegido == "" and _nodo.is_empty()
+
+
+## Guarda si se puede. Lo usan el cierre de la ventana y el menú de pausa (scripts/Ajustes.gd).
+func guardar_al_salir() -> bool:
+	if not se_puede_guardar():
+		return false
+	guardar()
+	return true
+
+
+## Se sale del mundo hacia el menú principal (por la pausa): suelta lo que haya en pantalla y olvida
+## el mundo. Lo que estuviera a medias sin guardar se pierde, igual que al cerrar la ventana; el
+## menú vuelve a leer la partida guardada al continuar.
+func dejar_el_mundo() -> void:
+	if _cuadro != null:
+		_cuadro.soltar()
+	_nodo = {}
+	_visibles = []
+	_jornada = {}
+	_pendiente_mundo = false
+	_en_fogon = false
+	ocupado = false
+	hablando_con = ""
+	_jugador = null
+	_mundo = null
+	_rebanos = {}
 
 
 func _ready() -> void:
 	if ResourceLoader.exists("res://scripts/Dialogo.gd"):
 		_cuadro = (load("res://scripts/Dialogo.gd") as GDScript).new()
 		add_child(_cuadro)
+	_correr_prueba_de_afuera()
+
+
+## Solo en una versión de depuración (el editor, o la exportada con "exportar.py --depuracion"): si el
+## juego se abre con "-- --probar=<archivo.gd>", carga ese programa de prueba y lo suma al árbol
+## (tools/exportar/probar_exe.gd). La versión que se pasa, la de entrega, no lo hace: Godot ya no
+## deja correr programas de afuera en un juego exportado, y esta puerta es solo para probar.
+func _correr_prueba_de_afuera() -> void:
+	if not OS.is_debug_build():
+		return
+	for argumento in OS.get_cmdline_user_args():
+		if argumento.begins_with("--probar="):
+			var guion := GDScript.new()
+			guion.source_code = FileAccess.get_file_as_string(argumento.trim_prefix("--probar="))
+			if guion.source_code != "" and guion.reload() == OK:
+				var prueba: Node = guion.new()
+				prueba.name = "Prueba"
+				get_tree().root.add_child.call_deferred(prueba)
 
 
 # ------------------------------------------------------------------ datos y estado
@@ -154,6 +210,7 @@ func _asentar() -> void:
 ## min: {"ejercito": 3} (contra los mínimos de config si el valor es "minimo") · o: [cond, cond]
 ## menos: {"ejercito": "minimo"} (la confianza NO llega a ese valor) · final: "chile" (el final elegido)
 ## deuda_hasta: 40 (la cuenta es de 40 o menos) · cerca: "ceniza" (la tiene a mano; ver config.cerca)
+## montado: true (Zenón va a caballo) · ligero: true (viene al galope; ver config.ligero_desde)
 func cumple(cond: Dictionary) -> bool:
 	for clave in cond:
 		var valor = cond[clave]
@@ -201,6 +258,18 @@ func cumple(cond: Dictionary) -> bool:
 				var ciclo := _ciclo()
 				var ahora := str(ciclo.call("obtener_periodo_dia")) if ciclo != null else "Día"
 				if not (valor if valor is Array else [valor]).has(ahora):
+					return false
+			"montado":
+				# Sin mundo (las pruebas), a pie.
+				if (_jugador != null and is_instance_valid(_jugador) and _jugador.get("montado") == true) != bool(valor):
+					return false
+			"ligero":
+				# Viene a más de config.ligero_desde metros por segundo: el galope. Sin mundo, quieto.
+				var rapidez := 0.0
+				if _jugador != null and is_instance_valid(_jugador) and _jugador.get("velocity") is Vector3:
+					var v: Vector3 = _jugador.get("velocity")
+					rapidez = Vector2(v.x, v.z).length()
+				if (rapidez > float(datos.get("config", {}).get("ligero_desde", 7.0))) != bool(valor):
 					return false
 			"o":
 				var alguna := false
@@ -305,6 +374,8 @@ func hablar(id: String) -> bool:
 	if persona.is_empty() or ocupado:
 		return false
 	hablando_con = id
+	# Con quien acaba de hablar no lo saluda al rato como si recién llegara.
+	_saludo_de[id] = Time.get_ticks_msec()
 	if _mundo != null and is_instance_valid(_mundo):
 		var cuerpo := _mundo.get_node_or_null(str(persona.get("nodo", "")))
 		if cuerpo != null and cuerpo.has_method("gesto_de_hablar"):
@@ -412,6 +483,8 @@ func _hacer_jornada() -> void:
 		return
 	var j := _jornada
 	_jornada = {}
+	if j.has("suena"):
+		sonar.emit(str(j["suena"]))
 	var pasar := func() -> void:
 		var ciclo := _ciclo()
 		if ciclo != null:
@@ -492,6 +565,11 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	_personas = []
 	_de_escena = {}
 	_rebanos = {}
+	_saludo_de = {}
+	# Nadie saluda en el primer instante: la hora guardada se pone recién un momento después.
+	_ultimo_saludo = Time.get_ticks_msec()
+	# Y nadie quedó "saliendo al encuentro" de una partida anterior (se vuelve al menú y se continúa).
+	_saliendo = {}
 	if _partida.is_empty() and momento == 1 and flags.is_empty() and FileAccess.file_exists(ruta_partida):
 		# World.tscn se abrió sin pasar por el menú: sigue la partida que haya.
 		# Si esa partida ya llegó a un final, la aparta (no la borra) y empieza una nueva.
@@ -881,6 +959,7 @@ func _process(delta: float) -> void:
 	_llegada_revisar = 0.25
 	_salir_al_encuentro()
 	_pensar_al_pasar()
+	_saludar()
 	if final_elegido == "":
 		return
 	var final: Dictionary = datos.get("finales", {}).get(final_elegido, {})
@@ -959,6 +1038,60 @@ func _pensar_al_pasar() -> void:
 				flags[bandera] = true
 				_jugador.call("mostrar_aviso", _texto(str(caso.get("texto", ""))))
 				return
+
+
+## Lo que esa persona le dice a Zenón al pasar ("saluda" en su ficha de datos/historia.json: una
+## lista de {"si": {...}, "texto": "..."}): el primero que se cumpla, o "" si no dice nada. Si el texto
+## es una lista, dice uno al azar. {buenas} y {guenas} cambian con la hora (config.saludos_por_hora).
+func saludo_de(id: String) -> String:
+	for caso: Dictionary in datos.get("personajes", {}).get(id, {}).get("saluda", []):
+		if not cumple(caso.get("si", {})):
+			continue
+		var texto = caso.get("texto", "")
+		var linea := str((texto as Array).pick_random() if texto is Array else texto)
+		var ciclo := _ciclo()
+		var hora := float(ciclo.get("hora_del_dia")) if ciclo != null else 12.0
+		for tramo: Dictionary in datos.get("config", {}).get("saludos_por_hora", []):
+			if hora >= float(tramo.get("desde", 0.0)) and hora < float(tramo.get("hasta", 24.0)):
+				for clave: String in tramo.get("pone", {}):
+					linea = linea.replace("{%s}" % clave, str(tramo["pone"][clave]))
+				break
+		return _texto(linea)
+	return ""
+
+
+## La gente saluda o dice algo cuando Zenón le pasa cerca y lo ve venir. Sale sobre su cabeza unos
+## segundos (npc_animado.gd > decir) y no cambia nada de la historia. De a uno por vez, y nadie
+## repite hasta pasado un rato (config.saludo_desde, saludo_cada y saludo_entre).
+func _saludar() -> void:
+	if final_elegido != "":
+		return
+	var config: Dictionary = datos.get("config", {})
+	var ahora := Time.get_ticks_msec()
+	if ahora - _ultimo_saludo < int(float(config.get("saludo_entre", 2.5)) * 1000.0):
+		return
+	for area: Interactable in _personas:
+		if not is_instance_valid(area) or area.rol != Interactable.Rol.PERSONA or not area.is_visible_in_tree():
+			continue
+		var id := area.personaje
+		if _saludo_de.has(id) and ahora - int(_saludo_de[id]) < int(float(config.get("saludo_cada", 240.0)) * 1000.0):
+			continue
+		var quien := area.get_parent() as Node3D
+		if quien == null or not quien.has_method("decir"):
+			continue
+		var hacia := _jugador.global_position - quien.global_position
+		hacia.y = 0.0
+		# Saluda el que lo tiene cerca y lo ve venir (de frente o de costado), no el que le da la espalda.
+		if hacia.length() > float(config.get("saludo_desde", 6.0)) or absf(angle_difference(quien.global_rotation.y, atan2(hacia.x, hacia.z))) > deg_to_rad(100.0):
+			continue
+		var linea := saludo_de(id)
+		if linea == "":
+			continue
+		_saludo_de[id] = ahora
+		# De a uno: el siguiente espera a que se vaya este cartel (dura según el largo del texto).
+		var dura := float(quien.call("decir", linea))
+		_ultimo_saludo = ahora + int(maxf(0.0, dura - float(config.get("saludo_entre", 2.5))) * 1000.0)
+		return
 
 
 ## Cierra la historia con el final elegido y muestra el epílogo.

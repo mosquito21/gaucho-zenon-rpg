@@ -252,10 +252,19 @@ func _seguir_telon() -> void:
 		hecho.call()
 
 
+## Se sale al menú con algo en pantalla (por la pausa): se cierra todo sin avisarle a nadie.
+func soltar() -> void:
+	_modo = ""
+	_al_terminar = Callable()
+	_panel.hide()
+	_telon.hide()
+
+
 # ------------------------------------------------------------------ teclas
 
 func _input(event: InputEvent) -> void:
-	if _modo == "":
+	# Con el juego en pausa las teclas son del menú de pausa (scripts/Ajustes.gd).
+	if _modo == "" or get_tree().paused:
 		return
 	# Espacio no cuenta para seguir: también es la tecla de saltar, y al cerrar el cuadro Zenón saltaba.
 	var seguir: bool = event.is_action_pressed("interact") \

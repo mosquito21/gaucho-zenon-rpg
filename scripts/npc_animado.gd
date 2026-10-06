@@ -40,6 +40,12 @@ extends Node3D
 ## lo atraviesa cuando vuelve sobre sus pasos).
 @export var al_costado: float = 0.0
 
+@export_group("Reacción")
+## Desde cuántos metros sigue a Zenón con la mirada cuando le pasa cerca (0: no lo mira nunca).
+@export var mira_desde: float = 8.0
+## Hasta cuántos grados gira la cabeza para seguirlo. Si Zenón le queda más atrás que eso, lo suelta.
+@export_range(0.0, 90.0, 1.0) var mira_hasta: float = 75.0
+
 @export_group("Montura")
 ## Solo para los caballos. Dónde va sentado el jinete, dónde pisan los estribos (el izquierdo; el
 ## derecho es su espejo) y dónde lleva las manos, en metros: x al costado, y arriba, z hacia la cabeza.
@@ -96,6 +102,11 @@ var _descanso := 0.0
 var _jugador: Node3D
 var _hablando := false
 var _atendiendo := false
+# Reacción: si tiene esqueleto de persona, si está mirando a Zenón y el cartelito de lo que dice.
+var _es_persona := false
+var _mirando := false
+var _cartel: Label3D
+var _cartel_falta := 0.0
 # Fila y llamado
 var _guia: Node3D
 var _separacion := 2.5
@@ -125,6 +136,8 @@ func _ready() -> void:
 	if clips.is_empty():
 		return
 	_armar_porte()
+	var esqueleto := find_child("Skeleton3D", true, false) as Skeleton3D
+	_es_persona = esqueleto != null and esqueleto.find_bone("mixamorig_Head") >= 0
 	_anim.playback_default_blend_time = mezcla
 	_anim.animation_finished.connect(_al_terminar)
 	if arranque_al_azar:
@@ -148,6 +161,10 @@ func _process(delta: float) -> void:
 		return
 	if _modo != Modo.QUIETO and _modo != Modo.LLEVADO:
 		_andar(delta)
+	if _es_persona and mira_desde > 0.0:
+		_seguir_con_la_mirada()
+	if _cartel != null and _cartel.visible:
+		_apagar_cartel(delta)
 	# Dos o tres veces por segundo mira si la cámara está cerca; si no, deja la animación en pausa.
 	_falta_revisar -= delta
 	if _falta_revisar > 0.0:
@@ -175,6 +192,76 @@ func gesto_de_hablar() -> void:
 	_hablando = true
 	if _anim != null and _andando == "" and _anim.has_animation("talking") and _anim.current_animation != "talking":
 		_anim.play("talking", -1.0, ritmo)
+
+
+## Sigue a Zenón con la cabeza y un poco con los hombros cuando le pasa cerca y lo tiene adelante o
+## al costado; cuando Zenón se va, o le queda a la espalda, vuelve a lo suyo. No mueve los pies:
+## el giro lo hace scripts/porte.gd, encima del clip que esté haciendo.
+func _seguir_con_la_mirada() -> void:
+	var zenon := _zenon()
+	if zenon == null:
+		return
+	var hacia := zenon.global_position - global_position
+	hacia.y = 0.0
+	var angulo := rad_to_deg(angle_difference(global_rotation.y, atan2(hacia.x, hacia.z)))
+	# Una vez que lo mira, lo sigue un poco más lejos y un poco más atrás: si no, en el borde parpadea.
+	_mirando = hacia.length() < mira_desde + (1.5 if _mirando else 0.0) and absf(angulo) < mira_hasta + (20.0 if _mirando else 0.0)
+	if _mirando and _porte == null:
+		_armar_porte(true)
+	if _porte != null:
+		_porte.seguir = clampf(angulo, -mira_hasta, mira_hasta) if _mirando else NAN
+
+
+## Dice algo corto sin abrir un diálogo: un cartelito sobre su cabeza que se va solo. Lo pide
+## scripts/Historia.gd cuando Zenón le pasa cerca (los saludos de datos/historia.json). Si el modelo
+## trae el clip "salute" (los soldados de guardia), además hace la venia. Devuelve cuánto dura.
+func decir(texto: String) -> float:
+	if _cartel == null:
+		_cartel = Label3D.new()
+		_cartel.name = "Dice"
+		_cartel.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		# Siempre del mismo tamaño en pantalla, esté cerca o lejos: es un texto para leer.
+		_cartel.fixed_size = true
+		_cartel.pixel_size = 0.0009
+		_cartel.font_size = 34
+		_cartel.outline_size = 10
+		_cartel.width = 640.0
+		_cartel.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_cartel.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		add_child(_cartel)
+	_cartel.text = texto
+	_cartel.modulate = Color(0.98, 0.93, 0.78)
+	_cartel.outline_modulate = Color(0.05, 0.04, 0.03, 0.9)
+	# Un poco por encima de la cabeza, esté parado o sentado.
+	var alto := 2.0
+	var esqueleto := find_child("Skeleton3D", true, false) as Skeleton3D
+	var cabeza := esqueleto.find_bone("mixamorig_Head") if esqueleto != null else -1
+	if cabeza >= 0:
+		alto = (esqueleto.global_transform * esqueleto.get_bone_global_pose(cabeza).origin).y - global_position.y + 0.36
+	_cartel.position = Vector3(0.0, alto, 0.0)
+	_cartel.visible = true
+	_cartel_falta = maxf(3.2, texto.length() * 0.085)
+	if _anim != null and _andando == "" and _anim.has_animation("salute") and _anim.current_animation != "salute":
+		_anim.play("salute", -1.0, ritmo)
+	# Cuántos segundos queda el cartel: Historia espera eso antes de que salude otro.
+	return _cartel_falta
+
+
+## El cartelito dura unos segundos y se desvanece; si se abre un diálogo, se va en el acto.
+func _apagar_cartel(delta: float) -> void:
+	_cartel_falta -= delta
+	if _cartel_falta <= 0.0 or Historia.ocupado:
+		_cartel.visible = false
+	elif _cartel_falta < 0.6:
+		_cartel.modulate.a = _cartel_falta / 0.6
+		_cartel.outline_modulate.a = 0.9 * _cartel_falta / 0.6
+
+
+func _zenon() -> Node3D:
+	if _jugador == null or not is_instance_valid(_jugador):
+		var mundo := get_tree().current_scene
+		_jugador = mundo.get_node_or_null("Player") as Node3D if mundo != null else null
+	return _jugador
 
 
 ## Cambia la lista de clips: la historia mueve a alguien y lo pone a hacer otra cosa (el peón, de
@@ -413,10 +500,8 @@ func _en_fila(delta: float) -> void:
 
 ## Con Zenón cerca, o mientras le habla, deja de caminar y lo mira. Verdadero si lo está atendiendo.
 func _atender(delta: float) -> bool:
-	if _jugador == null or not is_instance_valid(_jugador):
-		_jugador = get_tree().current_scene.get_node_or_null("Player") as Node3D if get_tree().current_scene != null else null
-		if _jugador == null:
-			return false
+	if _zenon() == null:
+		return false
 	if _hablando and not Historia.ocupado:
 		_hablando = false
 	var hacia := _jugador.global_position - global_position

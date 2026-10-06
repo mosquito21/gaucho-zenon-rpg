@@ -145,6 +145,7 @@
 [ext_resource type="Texture2D" uid="uid://ppyfqfwtu8tc" path="res://assets/terreno/huellas_hacienda.png" id="138_rv5cv"]
 [ext_resource type="Texture2D" uid="uid://c8qjkosc88b4x" path="res://assets/terreno/huellas_caballada.png" id="139_6ym5l"]
 [ext_resource type="ArrayMesh" uid="uid://sc8pqjty0nwa" path="res://assets/terreno/agua_aguada_del_cerro.res" id="142_6ym5l"]
+[ext_resource type="Script" uid="uid://cwc7vqn1ke0v4" path="res://scripts/sonidos.gd" id="148_36aml"]
 [ext_resource type="PackedScene" uid="uid://40cfuoop8by4" path="res://assets/props/carga_cueros.glb" id="t6_carga"]
 [ext_resource type="PackedScene" uid="uid://bie77e52yoope" path="res://assets/props/montura_mantas.glb" id="t6_mantas"]
 
@@ -1772,6 +1773,7 @@ transform = Transform3D(-0.1736482, 0, 0.9848077, 0, 1, 0, -0.9848077, 0, -0.173
 [node name="CoronelVillegas" type="Node3D" parent="Lugares/CampamentoDeLaTropa/Gente" unique_id=1534805331]
 transform = Transform3D(-0.1736482, 0, -0.9848077, 0, 1, 0, 0.9848077, 0, -0.1736482, -32, -0.3621036, -11)
 script = ExtResource("50_jamvv")
+mira_desde = 0.0
 ritmo = 0.8
 encorvar = -5.0
 cabeza = -3.0
@@ -4989,3 +4991,6 @@ shape = SubResource("ConcavePolygonShape3D_jy8fo")
 [node name="AguadaDelCerro" type="MeshInstance3D" parent="Agua" unique_id=1270161623]
 cast_shadow = 0
 mesh = ExtResource("142_6ym5l")
+
+[node name="Sonidos" type="Node" parent="." unique_id=1084993531]
+script = ExtResource("148_36aml")

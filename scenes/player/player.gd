@@ -1,5 +1,8 @@
 extends CharacterBody3D
 
+## Zenón silbó para llamar a Ceniza (lo escucha scripts/sonidos.gd, que hace sonar el silbido).
+signal silbo
+
 @export var walk_speed := 4.0
 @export var run_speed := 8.0
 @export var jump_velocity := 4.5
@@ -170,12 +173,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Con un diálogo abierto, Zenón no mira ni interactúa: las teclas son del cuadro.
 	if Historia.ocupado:
 		return
-	# togglear captura del mouse con ESC
-	if event.is_action_pressed("ui_cancel"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	# Esc abre la pausa (scripts/Ajustes.gd), que suelta el mouse y lo devuelve al seguir.
 	# Con el mouse suelto, un clic lo vuelve a capturar y no hace otra cosa.
 	var clic: bool = event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]
 	if clic and Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
@@ -185,8 +183,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# mirar con el mouse
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		yaw -= event.relative.x * mouse_sensitivity
-		pitch -= event.relative.y * mouse_sensitivity
+		# Ajustes.mouse es el ajuste de sensibilidad del menú (1 es la de siempre).
+		yaw -= event.relative.x * mouse_sensitivity * Ajustes.mouse
+		pitch -= event.relative.y * mouse_sensitivity * Ajustes.mouse
 
 		var min_pitch := deg_to_rad(min_pitch_deg)
 		var max_pitch := deg_to_rad(max_pitch_deg)
@@ -820,8 +819,10 @@ func silbar() -> void:
 					puesta = true
 		if not puesta:
 			# Zenón está encerrado (adentro del fortín, de un corral): Ceniza no atraviesa cercos.
+			silbo.emit()
 			mostrar_aviso("Silbás, pero Ceniza no tiene por dónde llegar. Salí a campo abierto y volvé a silbar.")
 			return
+	silbo.emit()
 	_ceniza.venir(self, 2.6)
 	mostrar_aviso("Silbás. Ceniza levanta la cabeza y viene.")
 

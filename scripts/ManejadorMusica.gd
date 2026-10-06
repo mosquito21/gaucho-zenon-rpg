@@ -26,10 +26,14 @@ func _ready():
 	Se ejecuta automáticamente cuando el juego inicia
 	"""
 	print("ManejadorMusica: Inicializando sistema de música...")
+	# La música sigue sonando con el juego en pausa (scripts/Ajustes.gd).
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	# Crear el nodo AudioStreamPlayer
 	reproductor_musica = AudioStreamPlayer.new()
-	
+	# La música sale por su propio canal, para poder darle su volumen aparte del de los sonidos.
+	reproductor_musica.bus = &"Musica"
+
 	# Añadir el reproductor como hijo de este nodo
 	add_child(reproductor_musica)
 	
@@ -48,26 +52,16 @@ func buscar_canciones():
 	"""
 	lista_canciones.clear()
 	
-	var dir = DirAccess.open(carpeta_musica)
-	if dir != null:
-		dir.list_dir_begin()
-		var nombre_archivo = dir.get_next()
-		
-		while nombre_archivo != "":
-			# Verificar si es un archivo (no una carpeta) y si tiene extensión soportada
-			if not dir.current_is_dir():
-				for extension in extensiones_soportadas:
-					if nombre_archivo.to_lower().ends_with(extension):
-						var ruta_completa = carpeta_musica + nombre_archivo
-						lista_canciones.append(ruta_completa)
-						print("ManejadorMusica: Canción encontrada - " + nombre_archivo)
-						break
-			
-			nombre_archivo = dir.get_next()
-		
-		dir.list_dir_end()
-	else:
-		print("ManejadorMusica: No se pudo abrir la carpeta de música - " + carpeta_musica)
+	# ResourceLoader.list_directory lista lo que el juego puede cargar, también dentro del paquete
+	# exportado: ahí los .mp3 no existen como archivos (existe lo importado) y DirAccess no veía
+	# ninguno, así que el juego exportado quedaba mudo. Las subcarpetas vienen terminadas en "/" y
+	# quedan afuera (así "afuera_por_ahora/" sigue sin sonar).
+	for nombre_archivo in ResourceLoader.list_directory(carpeta_musica):
+		for extension in extensiones_soportadas:
+			if nombre_archivo.to_lower().ends_with(extension):
+				lista_canciones.append(carpeta_musica + nombre_archivo)
+				print("ManejadorMusica: Canción encontrada - " + nombre_archivo)
+				break
 	
 	print("ManejadorMusica: Se encontraron " + str(lista_canciones.size()) + " canciones")
 

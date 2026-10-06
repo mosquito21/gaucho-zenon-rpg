@@ -6,11 +6,21 @@
 		"minimos": { "ejercito": 3, "estancieros": 3, "tolderia": 3 },
 		"ocultos_hasta_la_linea": [ "Lugares/CampamentoDeLaTropa", "Lugares/FortinNuevo" ],
 		"_cerca": "La condición 'cerca': qué nodo es y a cuántos metros de Zenón cuenta como a mano.",
-		"cerca": { "ceniza": { "nodo": "Ceniza", "metros": 14 } },
+		"cerca": { "ceniza": { "nodo": "Ceniza", "metros": 14 }, "mostrador": { "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "metros": 3.5 } },
 		"_jornada_hasta": "Un trabajo de 'jornada' adelanta el reloj, pero nunca más allá de esta hora.",
 		"jornada_hasta": 21.0,
 		"_sol_al_norte": "Cuántos grados se aparta el sol del cenit, hacia el norte, al mediodía, en cada momento (1 a 4): en enero pasa alto; en abril, bajo. La sombra del mediodía apunta al sur.",
 		"sol_al_norte": [ 25, 25, 40, 40 ],
+		"_saludos": "Tanda 8, la gente saluda al pasar: desde cuántos metros (0: nadie saluda), cada cuántos segundos repite cada uno, cuántos segundos pasan entre el saludo de uno y el de otro, y desde qué velocidad (metros por segundo) Zenón viene 'ligero' (el galope). 'saludos_por_hora' dice qué ponen {buenas} y {guenas} según la hora.",
+		"saludo_desde": 6.0,
+		"saludo_cada": 240,
+		"saludo_entre": 2.5,
+		"ligero_desde": 7.0,
+		"saludos_por_hora": [
+			{ "desde": 5, "hasta": 12, "pone": { "buenas": "Buenos días", "guenas": "Güenos días" } },
+			{ "desde": 12, "hasta": 19.5, "pone": { "buenas": "Buenas tardes", "guenas": "Güenas tardes" } },
+			{ "desde": 0, "hasta": 24, "pone": { "buenas": "Buenas noches", "guenas": "Güenas noches" } }
+		],
 		"_epocas": "Cómo se llama cada momento (1 a 4) en el botón 'Continuar' del menú.",
 		"epocas": [ "enero de 1881", "verano de 1881", "abril de 1881", "abril de 1881" ]
 	},
@@ -194,30 +204,85 @@
 			"mover": [ { "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "a": [-140.8, -269.6], "mira": [-139.0, -271.0], "clips": ["idle"] } ] }
 	],
 
+	"_saluda": "Tanda 8: lo que cada uno le dice a Zenón al pasar, sin abrir un diálogo (sale sobre su cabeza unos segundos). 'saluda' es una lista de {'si': condición, 'texto': '...'}: dice el primero que se cumpla; si 'texto' es una lista, uno al azar. {buenas} y {guenas} cambian con la hora. Dos condiciones que solo tienen sentido acá: 'montado' (true: Zenón va a caballo) y 'ligero' (true: viene al galope). No cambian nada de la historia. Para que alguien no diga nada, borrarle 'saluda' (la anciana no lo tiene: no quiere tratos). Los de la toldería están marcados 'revisar' en docs/agente/ESTADO.md.",
 	"personajes": {
-		"ceferino": { "nombre": "Don Ceferino", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "alcance": 4.0, "charla": "ceferino" },
+		"ceferino": { "nombre": "Don Ceferino", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonCeferino", "alcance": 4.0, "charla": "ceferino",
+			"saluda": [
+				{ "si": { "momento": [2, 3], "deuda_hasta": 40, "cerca": "mostrador" }, "texto": "La cuenta va quedando flaca, Zenón." },
+				{ "si": { "periodo": "Noche", "cerca": "mostrador" }, "texto": "A esta hora no fío ni la yerba." },
+				{ "si": { "cerca": "mostrador" }, "texto": "{buenas}, Zenón." } ] },
 		"rosario": { "nombre": "Doña Rosario", "nodo": "Lugares/PulperiaDonCeferino/Cuerpo/DonaRosario", "charla": "rosario",
-			"mira": { "si": { "var": { "sellado": 1 }, "no": ["sellado_leido"] }, "texto": "«¿Qué llevás con el lacre de Don Rufino?» Presioná E para hablar con Doña Rosario" } },
-		"lucero": { "nombre": "el sargento Lucero", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "charla": "lucero" },
-		"rufino": { "nombre": "Don Rufino", "nodo": "Lugares/EstanciaDonRufino/Cuerpo/DonRufino", "charla": "rufino" },
+			"mira": { "si": { "var": { "sellado": 1 }, "no": ["sellado_leido"] }, "texto": "«¿Qué llevás con el lacre de Don Rufino?» Presioná E para hablar con Doña Rosario" },
+			"saluda": [
+				{ "si": { "momento": [2, 3], "var": { "ponchos": 1 }, "cerca": "ceniza" }, "texto": "Esos ponchos son de la tejedora. Buen tejido." },
+				{ "si": { "periodo": "Noche" }, "texto": "No andes de noche sin necesidad, Zenón." },
+				{ "texto": "{buenas}, Zenón." } ] },
+		"lucero": { "nombre": "el sargento Lucero", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/SargentoLucero", "charla": "lucero",
+			"saluda": [
+				{ "si": { "ligero": true }, "texto": "¡Al paso adentro del fortín, baqueano!" },
+				{ "si": { "momento": [2, 3], "var": { "caballada": 1 }, "no": ["_tropilla_vista"] }, "texto": "¿Y mi caballada, baqueano?" },
+				{ "si": { "periodo": ["Crepúsculo", "Noche"] }, "texto": "Tarde pa andar solo, baqueano." },
+				{ "texto": "{buenas}, baqueano." } ] },
+		"rufino": { "nombre": "Don Rufino", "nodo": "Lugares/EstanciaDonRufino/Cuerpo/DonRufino", "charla": "rufino",
+			"saluda": [
+				{ "si": { "ligero": true }, "texto": "¡Despacio entre la hacienda!" },
+				{ "texto": ["{buenas}, Zenón.", "Zenón. Siempre de paso."] } ] },
 		"nicasio": { "nombre": "Nicasio, el lenguaraz", "nodo": "Caminos/ParadaDeNicasio/Nicasio", "charla": "nicasio",
-			"encuentro": { "si": { "momento": 2, "no": ["nicasio_aviso"], "var": { "favor": 0 } }, "desde": 30 } },
-		"painefil": { "nombre": "Painefil", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Painefil", "charla": "painefil" },
-		"millaray": { "nombre": "Millaray", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "charla": "millaray" },
+			"encuentro": { "si": { "momento": 2, "no": ["nicasio_aviso"], "var": { "favor": 0 } }, "desde": 30 },
+			"saluda": [ { "texto": "{buenas}, Zenón." } ] },
+		"painefil": { "nombre": "Painefil", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Painefil", "charla": "painefil",
+			"saluda": [ { "texto": "Baqueano." } ] },
+		"millaray": { "nombre": "Millaray", "nodo": "Lugares/TolderiaPainefil/Cuerpo/Millaray", "charla": "millaray",
+			"saluda": [ { "texto": "Zenón." } ] },
 
-		"soldado1": { "nombre": "un soldado", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado1", "charla": "soldado1" },
-		"soldado2": { "nombre": "un soldado joven", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado2", "charla": "soldado2" },
-		"soldado3": { "nombre": "un veterano", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado3", "charla": "soldado3" },
-		"gaucho1": { "nombre": "un paisano viejo", "nodo": "Lugares/PulperiaDonCeferino/Gaucho1", "charla": "gaucho1" },
-		"gaucho3": { "nombre": "el capataz", "nodo": "Lugares/PulperiaDonCeferino/Gaucho3", "charla": "gaucho3" },
-		"gaucho2": { "nombre": "un peón", "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "charla": "gaucho2" },
+		"soldado1": { "nombre": "un soldado", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado1", "charla": "soldado1",
+			"saluda": [
+				{ "si": { "momento": [2, 3], "var": { "lenia": 2 }, "cerca": "ceniza" }, "texto": "Esa leña ha de ser pa'l veterano. Suerte la suya." },
+				{ "si": { "periodo": ["Crepúsculo", "Noche"] }, "texto": "Arrímese al fogón, amigo, que el frío no le pide permiso a naides." },
+				{ "texto": "{guenas}, amigo." } ] },
+		"soldado2": { "nombre": "un soldado joven", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado2", "charla": "soldado2",
+			"saluda": [
+				{ "si": { "ligero": true }, "texto": "¡Cuidado, amigo, que acá hay gente de a pie!" },
+				{ "si": { "montado": true }, "texto": "Lindo montado, amigo." },
+				{ "texto": "{guenas}, amigo." } ] },
+		"soldado3": { "nombre": "un veterano", "nodo": "Lugares/FortinDelSalitral/Cuerpo/Fortin/Soldado3", "charla": "soldado3",
+			"saluda": [
+				{ "si": { "ligero": true }, "texto": "¡Sofrene, amigo, que el fortín es chico!" },
+				{ "texto": ["{guenas}, amigo.", "{guenas}. ¿Qué se dice por el pago?"] } ] },
+		"gaucho1": { "nombre": "un paisano viejo", "nodo": "Lugares/PulperiaDonCeferino/Gaucho1", "charla": "gaucho1",
+			"saluda": [
+				{ "si": { "momento": [2, 3], "var": { "ponchos": 1 }, "cerca": "ceniza" }, "texto": "Lindos ponchos lleva, mozo. De los toldos han de ser." },
+				{ "si": { "momento": 3 }, "texto": ["{guenas}, mozo.", "¿Vio la polvareda al poniente? Es la tropa."] },
+				{ "texto": "{guenas}, mozo." } ] },
+		"gaucho3": { "nombre": "el capataz", "nodo": "Lugares/PulperiaDonCeferino/Gaucho3", "charla": "gaucho3",
+			"saluda": [
+				{ "si": { "ligero": true }, "texto": "¡Más despacio, amigo, que me espanta las gallinas!" },
+				{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "La punta no se va a arrear sola, amigo." },
+				{ "texto": "{buenas}, amigo." } ] },
+		"gaucho2": { "nombre": "un peón", "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "charla": "gaucho2",
+			"saluda": [
+				{ "si": { "momento": 3 }, "texto": "{guenas}, amigo. Acá andamos, de yerra." },
+				{ "texto": "{guenas}, amigo." } ] },
 		"anciana": { "nombre": "una anciana", "nodo": "Lugares/TolderiaPainefil/Anciana", "charla": "anciana" },
-		"tejedora": { "nombre": "una tejedora", "nodo": "Lugares/TolderiaPainefil/Tejedora", "charla": "tejedora" },
-		"muchacho": { "nombre": "un muchacho", "nodo": "Lugares/TolderiaPainefil/Muchacho", "charla": "muchacho" },
-		"centinela": { "nombre": "el centinela", "nodo": "Lugares/CampamentoDeLaTropa/Gente/Centinela", "charla": "centinela" },
-		"soldado_fogon": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon", "charla": "soldado_fogon" },
-		"soldado_carga": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga", "charla": "soldado_carga" },
-		"soldado_fortin_nuevo": { "nombre": "un soldado", "nodo": "Lugares/FortinNuevo/Soldado", "charla": "soldado_fortin_nuevo" }
+		"tejedora": { "nombre": "una tejedora", "nodo": "Lugares/TolderiaPainefil/Tejedora", "charla": "tejedora",
+			"saluda": [ { "texto": "{buenas}." } ] },
+		"muchacho": { "nombre": "un muchacho", "nodo": "Lugares/TolderiaPainefil/Muchacho", "charla": "muchacho",
+			"saluda": [
+				{ "si": { "montado": true }, "texto": "Lindo caballo." },
+				{ "texto": "{buenas}." } ] },
+		"centinela": { "nombre": "el centinela", "nodo": "Lugares/CampamentoDeLaTropa/Gente/Centinela", "charla": "centinela",
+			"saluda": [
+				{ "si": { "periodo": ["Crepúsculo", "Noche"], "var": { "chasque": [2, 3, 4] } }, "texto": "¿Quién vive?... Ah, el baqueano. Pase." },
+				{ "si": { "periodo": ["Crepúsculo", "Noche"] }, "texto": "¡Alto! ¿Quién vive?" },
+				{ "texto": "{buenas}, baqueano." } ] },
+		"soldado_fogon": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDelFogon", "charla": "soldado_fogon",
+			"saluda": [
+				{ "si": { "periodo": ["Crepúsculo", "Noche"] }, "texto": "Arrímese, amigo, que este fogón tira bien." },
+				{ "texto": "{guenas}, amigo." } ] },
+		"soldado_carga": { "nombre": "un soldado", "nodo": "Lugares/CampamentoDeLaTropa/Gente/SoldadoDeLaCarga", "charla": "soldado_carga",
+			"saluda": [ { "texto": ["Paso, amigo, que vengo cargao.", "{guenas}."] } ] },
+		"soldado_fortin_nuevo": { "nombre": "un soldado", "nodo": "Lugares/FortinNuevo/Soldado", "charla": "soldado_fortin_nuevo",
+			"saluda": [ { "texto": "{guenas}, amigo." } ] }
 	},
 
 	"nodos": {
@@ -913,7 +978,7 @@
 			],
 			"opciones": [
 				{ "texto": "Doy una mano.", "hace": { "var": { "yerra": 1 }, "nota": "Di una mano en la yerra de Don Rufino. Pialé terneros hasta la tarde.",
-					"jornada": { "horas": 4, "texto": [ "Pialé terneros hasta que se me durmieron los brazos. Olía a pelo quemado." ] } } },
+					"jornada": { "horas": 4, "suena": "mugido", "texto": [ "Pialé terneros hasta que se me durmieron los brazos. Olía a pelo quemado." ] } } },
 				{ "texto": "Otro día." }
 			]
 		},
@@ -1010,7 +1075,7 @@
 			"texto": "Jarilla seca y alpataco. Leña hay de sobra; lo que lleva tiempo es cortarla.",
 			"opciones": [
 				{ "texto": "Cortar un atado.", "hace": { "var": { "lenia": 2 }, "nota": "Corté leña en el jarillal y la cargué en Ceniza.",
-					"jornada": { "horas": 1, "texto": [ "Corté jarilla y alpataco, y armé un atado con los tientos." ] } } },
+					"jornada": { "horas": 1, "suena": "hacha", "texto": [ "Corté jarilla y alpataco, y armé un atado con los tientos." ] } } },
 				{ "texto": "Después." }
 			]
 		},

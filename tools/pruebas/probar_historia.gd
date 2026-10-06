@@ -8,7 +8,7 @@ extends SceneTree
 ##   godot --headless --path <carpeta del proyecto> --script res://tools/pruebas/probar_historia.gd
 ## Tiene que terminar en "FALLAS: 0".
 
-const CONDICIONES := ["momento", "var", "si", "no", "min", "menos", "final", "o", "deuda_hasta", "cerca", "periodo"]
+const CONDICIONES := ["momento", "var", "si", "no", "min", "menos", "final", "o", "deuda_hasta", "cerca", "periodo", "montado", "ligero"]
 const EFECTOS := ["var", "flag", "confianza", "deuda", "saldar", "nota", "momento", "final", "jornada"]
 ## Los cinco conchabos de la tanda 7: el valor "hecho" (el que Ceferino cobra), el "cobrado" y cuánto paga.
 const CONCHABOS := {"caballada": [2, 3, 12], "lenia": [3, 4, 5], "ponchos": [3, 4, 6], "chasque": [3, 4, 5], "yerra": [1, 2, 12]}
@@ -49,6 +49,7 @@ func _initialize() -> void:
 	_cobros_y_salto()
 	_calibracion_y_umbral()
 	_fogon_con_arreo_a_medias()
+	_saludos()
 	_guardado()
 	print("FALLAS: %d" % fallas)
 	H.free()
@@ -146,6 +147,17 @@ func _revisar_datos() -> void:
 			var mira = ficha.get("mira", [])
 			for caso in (mira if mira is Array else [mira]):
 				_condicion(caso.get("si", {}), "el cartel de '%s'" % id)
+			# Los saludos (tanda 8): cortos, con texto, y sin llaves que nadie reemplace.
+			for caso in ficha.get("saluda", []):
+				_condicion(caso.get("si", {}), "el saludo de '%s'" % id)
+				var textos = caso.get("texto", "")
+				for texto in (textos if textos is Array else [textos]):
+					if str(texto) == "" or str(texto).length() > 80:
+						_mal("un saludo de '%s' está vacío o es largo para un cartelito: '%s'" % [id, texto])
+					for llave in ["{buenas}", "{guenas}", "{deuda}"]:
+						texto = str(texto).replace(llave, "")
+					if str(texto).contains("{"):
+						_mal("un saludo de '%s' trae una llave que nadie reemplaza: '%s'" % [id, texto])
 	for par in _puesto:
 		if not _leido.has(par):
 			_mal("%s pone %s y ninguna condición mira ese valor" % [_puesto[par], par])
@@ -189,6 +201,31 @@ func _efecto(efectos: Dictionary, donde: String) -> void:
 		elif clave == "flag":
 			for bandera in efectos[clave]:
 				_banderas_puestas[bandera] = true
+
+
+## Los saludos de la tanda 8 no cambian nada: pedirlos todos, en cada momento, deja la historia igual.
+## Y Don Ceferino dice lo de la cuenta flaca justo cuando la cuenta bajó a cuarenta.
+func _saludos() -> void:
+	H.nueva()
+	for momento in [1, 2, 3]:
+		H.momento = momento
+		var antes := JSON.stringify(H.estado())
+		for id in H.datos.get("personajes", {}):
+			var linea: String = H.saludo_de(id)
+			if linea.contains("{"):
+				_mal("el saludo de '%s' en el momento %d quedó con una llave sin reemplazar: '%s'" % [id, momento, linea])
+		if JSON.stringify(H.estado()) != antes:
+			_mal("pedir los saludos cambió la historia en el momento %d" % momento)
+	if H.saludo_de("anciana") != "":
+		_mal("la anciana saluda, y no quiere tratos")
+	H.momento = 2
+	H.deuda = 41
+	if H.saludo_de("ceferino").contains("flaca"):
+		_mal("Ceferino dice que la cuenta va flaca con 41")
+	H.deuda = 40
+	if not H.saludo_de("ceferino").contains("flaca"):
+		_mal("Ceferino no dice que la cuenta va flaca con 40")
+	H.nueva()
 
 
 ## Habla con alguien y va eligiendo la opción que contiene cada trozo de texto, en orden.

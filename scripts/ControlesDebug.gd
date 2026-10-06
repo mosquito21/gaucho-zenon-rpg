@@ -6,6 +6,11 @@ extends Node
 var sistema_dia_noche: CicloDiaNoche
 
 func _ready():
+	# Las teclas de prueba (F1 a F9) son para armar el juego, no para jugarlo: en la versión de
+	# entrega no existen (pase libre de la tanda 9; se saca borrando estas tres líneas).
+	if not OS.is_debug_build():
+		set_process_input(false)
+		return
 	print("🎮 Controles de debug cargados:")
 	print("F1 = Amanecer | F2 = Mediodía | F3 = Atardecer | F4 = Medianoche")
 	print("F5 = Ver estado del sistema | F6 = Arreglar referencias")
