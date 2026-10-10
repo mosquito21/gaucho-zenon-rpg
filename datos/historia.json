@@ -187,6 +187,8 @@
 
 	"_mundo": "Lo que se ve, se esconde o cambia de lugar según la historia. Mientras se cumple 'si', se prenden los nodos de 'mostrar', se apagan los de 'ocultar' y los de 'mover' van a otro lugar; cuando deja de cumplirse, todo vuelve a estar como en World.tscn.",
 	"mundo": [
+		{ "_": "La pava del fogón de Zenón: en World.tscn quedó metida en una de las piedras del fogón, y esta entrada la lleva siempre (su 'si' está vacío) al lado del mate, sobre la tierra. Si un día se la corre en la escena, esta entrada sobra y se puede borrar.",
+			"si": {}, "mover": [ { "nodo": "FogonDeZenon/Pava", "a": [-6.07, -0.2] } ] },
 		{ "si": { "momento": [2, 3], "var": { "ponchos": 1 } }, "mostrar": [ "Ceniza/Carga/Ponchos" ] },
 		{ "si": { "momento": [2, 3], "var": { "ponchos": 2 } }, "mostrar": [ "Ceniza/Carga/Tercio" ] },
 		{ "si": { "momento": [2, 3], "var": { "lenia": 2 } }, "mostrar": [ "Ceniza/Carga/Lenia" ] },

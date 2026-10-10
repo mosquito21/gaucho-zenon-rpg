@@ -141,6 +141,11 @@ var _huellas: MultiMesh
 var _huella_n := 0
 var _huella_falta := 0.0
 var _sofrenando := 0.0
+## La intro (scripts/Intro.gd) maneja a Zenón como a un títere: lo pone donde va cada plano con
+## titere_poner() y lo deja montar aunque haya algo en pantalla. Con titere_anda, montado, anda al
+## paso hacia donde apunta `yaw` sin que nadie toque una tecla.
+var titere := false
+var titere_anda := false
 # A cuánto queda el centro de este cuerpo del suelo que pisa (media cápsula más el margen del choque).
 const ALTO_DEL_CUERPO := 1.0
 
@@ -744,7 +749,7 @@ func _armar_choque_montado() -> void:
 
 ## Sube a Ceniza. `de_una` es para cuando se carga una partida: aparece ya montado.
 func montar(de_una := false) -> void:
-	if montado or _ceniza == null or (not de_una and (Historia.ocupado or _subiendo > 0.0)):
+	if montado or _ceniza == null or (not de_una and ((Historia.ocupado and not titere) or _subiendo > 0.0)):
 		return
 	_cuerpo_de = cuerpo.global_transform if cuerpo != null else global_transform
 	_ceniza.llevar(true)
@@ -764,7 +769,7 @@ func montar(de_una := false) -> void:
 	if _porte != null:
 		_porte.sentar(_ceniza.montura())
 	_subiendo = 1.0 if de_una else 0.001
-	if not Historia.flags.has("_pista_montar"):
+	if not titere and not Historia.flags.has("_pista_montar"):
 		Historia.flags["_pista_montar"] = true
 		mostrar_aviso("W: andar al paso. Shift: más ligero (trote, galope). S: sofrenar. Q: bajarse.")
 
@@ -852,6 +857,42 @@ func poner_caballo(partida: Dictionary) -> void:
 		montar(true)
 
 
+## Para la intro: pone a Zenón en ese lugar en el acto, mirando hacia `rumbo`, a pie o ya montado (con
+## Ceniza debajo). No sofrena, no busca dónde bajarse ni muestra pistas. La altura la pone el suelo.
+func titere_poner(lugar: Vector3, rumbo: float, a_caballo: bool) -> void:
+	titere = true
+	titere_anda = false
+	if montado:
+		montado = false
+		for forma in _choque_montado:
+			forma.set_deferred("disabled", true)
+		_ceniza.llevar(false)
+		_prender_choque_de_ceniza(true)
+	_subiendo = 0.0
+	_quiere_bajar = false
+	if cuerpo != null:
+		cuerpo.transform = Transform3D.IDENTITY
+	if _porte != null:
+		_porte.sentar({})
+		_porte.inclinar = 0.0
+	yaw = rumbo
+	_yaw_anterior = rumbo
+	_vuelta = 0.0
+	_atraso_giro = 0.0
+	velocity = Vector3.ZERO
+	_rapidez = 0.0
+	# Las pisadas de Ceniza que dejó el plano anterior se borran: son de la intro, no del mundo.
+	_huella_n = 0
+	if _huellas != null:
+		_huellas.visible_instance_count = 0
+	var suelo := Historia.altura_suelo(lugar.x, lugar.z)
+	if a_caballo and _ceniza != null:
+		_ceniza.global_transform = Transform3D(Basis(Vector3.UP, rumbo + PI), Vector3(lugar.x, suelo, lugar.z))
+		montar(true)
+	else:
+		global_position = Vector3(lugar.x, suelo + ALTO_DEL_CUERPO, lugar.z)
+
+
 ## El andar montado: la marcha elegida da la velocidad a la que quiere ir, y llega de a poco.
 ## Va hacia donde mira la cámara (A y D la corren hacia los costados), doblando a lo que le da
 ## el cuerpo a esa velocidad.
@@ -859,7 +900,7 @@ func _mover_montado(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	var libre := not Historia.ocupado and _subiendo >= 1.0
-	var avanza := libre and Input.is_action_pressed("move_forward")
+	var avanza := (libre and Input.is_action_pressed("move_forward")) or (titere_anda and _subiendo >= 1.0)
 	var costado := Input.get_axis("move_left", "move_right") if libre else 0.0
 	var sofrena := (libre and Input.is_action_pressed("move_backward")) or _quiere_bajar
 	# Con Shift apretado un rato sube otra marcha, sin tener que soltarlo.

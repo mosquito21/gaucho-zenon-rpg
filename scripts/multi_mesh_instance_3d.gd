@@ -85,7 +85,9 @@ func _ready() -> void:
 	cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	await get_tree().process_frame
 	_armar_estepa()
-	_armar_pajaros()
+	# Los seis pajaritos armados con esferas (_armar_pajaros) ya no salen: se quedaban pegados al
+	# fogón de Zenón, lo atravesaban, y no están hechos como el resto de la fauna. El código queda
+	# abajo; para que vuelvan, basta llamar acá a _armar_pajaros().
 	_armar_bichos()
 
 func _process(delta: float) -> void:

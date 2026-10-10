@@ -99,6 +99,8 @@ func _empezar_de_nuevo() -> void:
 	if not Historia.borrar_partida():
 		_no_se_pudo_apartar()
 		return
+	# La historia empieza de cero: antes del cartel va la intro (scripts/Intro.gd).
+	Historia.intro_pendiente = true
 	get_tree().change_scene_to_file("res://scenes/World.tscn")
 
 

@@ -36,6 +36,10 @@ var terminado := false
 var ocupado := false
 ## Con la que está hablando (la usa el gesto de hablar).
 var hablando_con := ""
+## Al entrar al mundo con una partida nueva, antes del cartel va la intro (scripts/Intro.gd). Lo pone
+## el menú al empezar de nuevo (no al continuar) y el argumento "-- --intro", que sirve para grabarla
+## abriendo World.tscn derecho.
+var intro_pendiente := false
 
 var _nodo: Dictionary = {}
 var _quien := ""
@@ -71,7 +75,12 @@ signal sonar(que: String)
 
 
 func _init() -> void:
-	if OS.get_cmdline_user_args().has("--partida-de-prueba"):
+	for argumento in OS.get_cmdline_user_args():
+		if argumento.begins_with("--intro"):
+			intro_pendiente = true
+	# Con "--intro" también se juega sobre la partida de prueba: esa partida empieza de cero sin
+	# cargar la guardada, y si guardara en la de siempre la pisaría.
+	if OS.get_cmdline_user_args().has("--partida-de-prueba") or intro_pendiente:
 		_sufijo = "_prueba"
 	ruta_partida = _ruta("partida")
 	_cargar_datos()
@@ -94,8 +103,10 @@ func _notification(que: int) -> void:
 
 
 ## ¿Se puede guardar ahora? (Las dos excepciones de arriba: un diálogo abierto o un final elegido.)
+## Durante la intro tampoco: Zenón anda de plano en plano, y la partida quedaría empezada sin haberla visto.
 func se_puede_guardar() -> bool:
-	return not terminado and final_elegido == "" and _nodo.is_empty()
+	var en_la_intro := _mundo != null and is_instance_valid(_mundo) and _mundo.has_node("Intro")
+	return not terminado and final_elegido == "" and _nodo.is_empty() and not en_la_intro
 
 
 ## Guarda si se puede. Lo usan el cierre de la ventana y el menú de pausa (scripts/Ajustes.gd).
@@ -570,7 +581,7 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	_ultimo_saludo = Time.get_ticks_msec()
 	# Y nadie quedó "saliendo al encuentro" de una partida anterior (se vuelve al menú y se continúa).
 	_saliendo = {}
-	if _partida.is_empty() and momento == 1 and flags.is_empty() and FileAccess.file_exists(ruta_partida):
+	if _partida.is_empty() and momento == 1 and flags.is_empty() and not intro_pendiente and FileAccess.file_exists(ruta_partida):
 		# World.tscn se abrió sin pasar por el menú: sigue la partida que haya.
 		# Si esa partida ya llegó a un final, la aparta (no la borra) y empieza una nueva.
 		cargar()
@@ -626,6 +637,20 @@ func entrar_al_mundo(jugador: Node3D) -> void:
 	if momento == 1 and not flags.has("_arranque"):
 		# Partida nueva: el cartel de dónde y cuándo, con las teclas (avisos.cartel_momento_1).
 		flags["_arranque"] = true
+		if intro_pendiente and ResourceLoader.exists("res://scripts/Intro.gd"):
+			# Antes del cartel, la intro. Mientras dura nadie se mueve; cuando termina (o la saltean)
+			# deja la pantalla tapada, y el cartel sale encima como siempre.
+			intro_pendiente = false
+			ocupado = true
+			var intro: Node = (load("res://scripts/Intro.gd") as GDScript).new()
+			intro.name = "Intro"
+			# Al terminar suelta a Zenón y sigue con el cartel, que lo vuelve a ocupar mientras dura (si un
+			# día el cartel no está, Zenón no queda trabado).
+			intro.connect("terminada", func() -> void:
+				ocupado = false
+				_al_cambiar_de_momento())
+			_mundo.add_child(intro)
+			return
 		_al_cambiar_de_momento()
 		return
 	if _partida.has("hora"):
