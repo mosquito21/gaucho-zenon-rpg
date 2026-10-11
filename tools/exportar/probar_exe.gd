@@ -6,7 +6,7 @@ extends Node
 ##   py tools/exportar/exportar.py --depuracion
 ##   GauchoZenon.console.exe --audio-driver Dummy -- --partida-de-prueba
 ##       --probar=<proyecto>/tools/exportar/probar_exe.gd --repo=<proyecto> --salida=<carpeta>
-## Mira el menú, empieza una partida nueva de prueba, comprueba que estén la música, la historia, el
+## Mira el menú, empieza una partida nueva de prueba, deja correr la intro entera (1:45), comprueba que estén la música, la historia, el
 ## terreno, la gente y los sonidos, juega un tramo con tools/pruebas/recorrida.gd (leída del
 ## proyecto: no va en el paquete), pausa, vuelve al menú, continúa, y deja en la carpeta de salida
 ## unas capturas y resultado.txt. Sin "--partida-de-prueba" no hace nada: nunca toca la partida de
@@ -22,6 +22,7 @@ var _total := 0.0
 var _recorrida: Node
 var _cuadros := 0
 var _lugar := Vector3.ZERO
+var _vio_intro := false
 
 
 func _ready() -> void:
@@ -126,13 +127,18 @@ func _process(delta: float) -> void:
 			_foto("1_menu")
 			_boton("Comenzar").pressed.emit()
 			_siguiente()
-		1:  # El mundo: pasa el cartel de arranque.
+		1:  # El mundo: corre la intro entera (1:45; la E no la saltea) y pasa el cartel de arranque.
 			if escena.get_node_or_null("Player") == null or _t < 1.5:
 				return
+			if escena.has_node("Intro") and not _vio_intro:
+				_vio_intro = true
+				_foto("1b_intro")
 			if h.get("ocupado") == true:
 				if fmod(_t, 0.5) < delta:
 					_tecla_e()
 				return
+			_espero(_vio_intro, "antes del cartel corrió la intro")
+			_espero(ResourceLoader.exists("res://audio/intro/intro_voz.ogg") and ResourceLoader.exists("res://audio/intro/intro_musica.ogg"), "la voz y la música de la intro están en el paquete")
 			_siguiente()
 		2:  # Lo que tiene que estar.
 			if _t < 2.0:

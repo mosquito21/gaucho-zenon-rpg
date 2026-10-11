@@ -71,6 +71,8 @@ def limpiar_proyecto():
     for linea in lineas:
         if re.match(r'^MCP\w+="\*res://addons/godot_mcp/', linea):
             continue
+        if linea.startswith('movie_writer/movie_file='):  # una ruta del disco de quien exporta; el juego no la usa
+            continue
         if linea.startswith('enabled=PackedStringArray('):
             quedan = [p for p in re.findall(r'"([^"]+)"', linea) if 'godot_mcp' not in p and 'ambientcg' not in p]
             linea = 'enabled=PackedStringArray(%s)' % ', '.join('"%s"' % p for p in quedan)
@@ -109,6 +111,8 @@ pulpería de Don Ceferino. La línea del ejército viene llegando al Nahuel Huap
 CÓMO SE JUEGA
   Abrí GauchoZenon.exe. No hace falta instalar nada.
   GauchoZenon.exe y GauchoZenon.pck tienen que quedar juntos, en la misma carpeta.
+  GauchoZenon.console.exe abre el mismo juego con una ventana de mensajes, por si algo
+  falla: para jugar no hace falta.
 
   WASD        andar                  Shift     correr
   Mouse       mirar                  Rueda     acercar o alejar la cámara
@@ -120,6 +124,10 @@ CÓMO SE JUEGA
   galope), S sofrena, A y D tuercen el rumbo, Q se baja. A pie, Q la silba y viene.
 
   En un diálogo: E o Enter para seguir; los números o el mouse para elegir.
+
+  Al empezar una partida nueva corre una intro de un minuto y tres cuartos, que arranca con
+  unos segundos en negro. Se saltea con Espacio, Enter o Esc: la primera vez avisa y la
+  segunda saltea.
 
 SI ANDA LENTO
   Esc, Ajustes, "Imagen: liviana". Dibuja la imagen más chica, con sombras más cortas y menos
