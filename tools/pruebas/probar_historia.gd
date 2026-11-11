@@ -8,8 +8,8 @@ extends SceneTree
 ##   godot --headless --path <carpeta del proyecto> --script res://tools/pruebas/probar_historia.gd
 ## Tiene que terminar en "FALLAS: 0".
 
-const CONDICIONES := ["momento", "var", "si", "no", "min", "menos", "final", "o", "deuda_hasta", "cerca", "periodo", "montado", "ligero"]
-const EFECTOS := ["var", "flag", "confianza", "deuda", "saldar", "nota", "momento", "final", "jornada"]
+const CONDICIONES := ["momento", "var", "si", "no", "min", "menos", "final", "o", "deuda_hasta", "cerca", "periodo", "montado", "ligero", "tiene"]
+const EFECTOS := ["var", "flag", "confianza", "deuda", "saldar", "nota", "momento", "final", "jornada", "cosa"]
 ## Los cinco conchabos de la tanda 7: el valor "hecho" (el que Ceferino cobra), el "cobrado" y cuánto paga.
 const CONCHABOS := {"caballada": [2, 3, 12], "lenia": [3, 4, 5], "ponchos": [3, 4, 6], "chasque": [3, 4, 5], "yerra": [1, 2, 12]}
 
@@ -50,6 +50,7 @@ func _initialize() -> void:
 	_calibracion_y_umbral()
 	_fogon_con_arreo_a_medias()
 	_saludos()
+	_morral()
 	_guardado()
 	print("FALLAS: %d" % fallas)
 	H.free()
@@ -673,6 +674,45 @@ func _fogon_con_arreo_a_medias() -> void:
 	_espero(_vio("la trajo otro"), "en abril el capataz diga que la punta la trajo otro")
 	_hablar("gaucho3")
 	_espero(not _vio("la trajo otro"), "y lo diga una sola vez")
+
+
+## El morral y las señas del mapa (noviembre de 2026): que los datos estén bien escritos, que las
+## cosas de los encargos aparezcan y se vayan con la historia, y que lo guardado vuelva con la partida.
+func _morral() -> void:
+	for id: String in H.datos.get("cosas", {}):
+		var ficha: Dictionary = H.datos["cosas"][id]
+		if str(ficha.get("nombre", "")) == "" or not ["encima", "recado"].has(str(ficha.get("donde", ""))):
+			_mal("la cosa '%s' no tiene nombre, o su 'donde' no es 'encima' ni 'recado'" % id)
+		if ficha.has("si"):
+			_condicion(ficha["si"], "la cosa '%s'" % id)
+	for lugar: Dictionary in H.datos.get("mapa", {}).get("lugares", []):
+		if str(lugar.get("nombre", "")) == "" or not (lugar.has("nodo") or lugar.has("en")):
+			_mal("un lugar del mapa no tiene nombre, o le falta 'nodo' o 'en': %s" % str(lugar))
+	for caso: Dictionary in H.datos.get("mapa", {}).get("senias", []):
+		_condicion(caso.get("si", {}), "una seña del mapa")
+		if (caso.get("a", []) as Array).is_empty():
+			_mal("una seña del mapa no dice adónde ('a'): %s" % str(caso))
+	H.nueva()
+	var lleva := func() -> Array: return H.lo_que_lleva().map(func(cosa: Dictionary) -> String: return str(cosa.id))
+	_espero(lleva.call().has("facon") and lleva.call().has("boleadoras") and not lleva.call().has("recado_posta"), "Zenón arranque con el facón y las boleadoras, y sin el recado")
+	H.poner("recado", 1)
+	_espero(lleva.call().has("recado_posta"), "con el recado tomado, el recado esté en el morral")
+	H.poner("recado", 2)
+	_espero(not lleva.call().has("recado_posta"), "con el recado entregado, salga del morral")
+	H.aplicar({"cosa": {"yerba": 2}})
+	_espero(H.tiene("yerba") == 2 and H.cumple({"tiene": {"yerba": 2}}) and not H.cumple({"tiene": {"yerba": 3}}), "el efecto 'cosa' le dé dos y la condición 'tiene' las cuente")
+	_espero(lleva.call().has("yerba"), "una cosa guardada se vea en el morral aunque no tenga ficha")
+	H.aplicar({"cosa": {"yerba": -5}})
+	_espero(H.tiene("yerba") == 0 and not H.cosas.has("yerba"), "sacarle más de las que tiene lo deje en cero")
+	H.dar("yerba", 3)
+	var copia: Dictionary = JSON.parse_string(JSON.stringify(H.estado()))
+	H.nueva()
+	_espero(H.tiene("yerba") == 0, "una partida nueva arranque con el morral vacío")
+	H.poner_estado(copia)
+	_espero(H.tiene("yerba") == 3, "lo guardado en el morral vuelva con la partida")
+	H.poner_estado({"momento": 4, "final": "chile"})
+	_espero(H.senias().size() == 1, "con un final elegido, la seña sea la llegada de ese final")
+	H.nueva()
 
 
 func _guardado() -> void:

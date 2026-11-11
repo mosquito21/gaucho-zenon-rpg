@@ -33,6 +33,11 @@ var dedos := 1.0
 var montado := 0.0
 ## Cuánto se echa hacia adelante sobre el recado, en grados (al galope, más).
 var inclinar := 0.0
+## El jinete acompaña el andar del caballo (lo pone player.gd en cada cuadro): cuántos metros queda
+## la cadera por encima del recado cuando el lomo baja de golpe (al trote y al galope, se despega
+## apenas y vuelve a caer), y cuántos grados cabecea el tronco con el envión, además de `inclinar`.
+var levantar := 0.0
+var cabecear := 0.0
 ## Cuánto se abren las rodillas hacia afuera (0 las deja mirando al frente).
 var abrir_rodillas := 0.55
 var _puntos := {}
@@ -103,14 +108,15 @@ func _process_modification_with_delta(delta: float) -> void:
 
 	# Girar sobre el eje del lado inclina hacia adelante, sobre el de arriba hace mirar a los costados
 	# y sobre el del frente ladea.
-	_girar(esqueleto, "Spine", _lado, encorvar * 0.3 + inclinar * montado)
+	_girar(esqueleto, "Spine", _lado, encorvar * 0.3 + (inclinar + cabecear) * montado)
 	_girar(esqueleto, "Spine", _frente, vaiven)
 	_girar(esqueleto, "Spine1", _lado, encorvar * 0.35)
 	_girar(esqueleto, "Spine2", _lado, encorvar * 0.35)
 	_girar(esqueleto, "Spine2", _frente, -vaiven * 0.6)
 	_girar(esqueleto, "Spine2", _arriba, _mira * 0.2)
 	# El cuello compensa parte de lo encorvado, para que siga mirando al frente y no al piso.
-	_girar(esqueleto, "Neck", _lado, cabeza * 0.4 - encorvar * 0.3)
+	# (Y la mitad del cabeceo de a caballo: la cabeza va más quieta que el tronco.)
+	_girar(esqueleto, "Neck", _lado, cabeza * 0.4 - encorvar * 0.3 - cabecear * 0.5 * montado)
 	_girar(esqueleto, "Neck", _arriba, _mira * 0.3)
 	_girar(esqueleto, "Head", _lado, cabeza * 0.6 - encorvar * 0.2)
 	_girar(esqueleto, "Head", _arriba, _mira * 0.5)
@@ -148,7 +154,8 @@ func _sentar(esqueleto: Skeleton3D) -> void:
 	if cadera < 0:
 		return
 	var pose := esqueleto.get_bone_global_pose(cadera)
-	pose.origin = pose.origin.lerp(a_esqueleto * asiento.global_position, montado)
+	var metro := 1.0 / maxf(esqueleto.global_transform.basis.x.length(), 0.0001)  # un metro, en las unidades del esqueleto
+	pose.origin = pose.origin.lerp(a_esqueleto * asiento.global_position + _arriba * levantar * metro, montado)
 	esqueleto.set_bone_global_pose(cadera, pose)
 	for lado: Array in [["Left", "estribo_izq", 1.0], ["Right", "estribo_der", -1.0]]:
 		var estribo := _puntos.get(lado[1]) as Node3D

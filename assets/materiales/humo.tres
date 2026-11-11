@@ -1,30 +1,61 @@
-[gd_resource type="StandardMaterial3D" format=3 uid="uid://bjgm2xsmdrgh4"]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bjgm2xsmdrgh4"]
 
-[sub_resource type="Gradient" id="Gradient_humo"]
-offsets = PackedFloat32Array(0, 0.5, 1)
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+[sub_resource type="Shader" id="Shader_humo"]
+code = "shader_type spatial;
+render_mode blend_mix, depth_draw_opaque, cull_back, specular_disabled, shadows_disabled;
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_humo"]
-gradient = SubResource("Gradient_humo")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
+// El humo de los fogones y el polvo que levanta Zenon: bocanadas redondas que miran a la camara,
+// toman el color de cada particula y reciben la luz (tambien de atras, para que no queden negras
+// a contraluz).
+// Era un material comun de Godot. Paso a tener este programa por una sola razon: ponerle un tope
+// a la luz que recibe de un fuego que tiene pegado. La luz de un fogon esta adentro de su columna
+// de humo, y a pocos centimetros de una luz el brillo crece sin limite: cada bocanada que pasaba
+// por ahi se encendia hasta el blanco, y con el resplandor del ambiente se veia como un solcito
+// arriba de la llama (de lejos y desde arriba, como un disco). Con el tope, el humo junto al fuego
+// queda tibio y parejo. La luz del sol y de la luna no cambia.
+uniform vec4 color : source_color = vec4(0.6, 0.58, 0.55, 0.9);
+// Cuanta luz le llega de atras (0: nada; 1: lo mismo de los dos lados).
+uniform float contraluz : hint_range(0.0, 1.0) = 0.45;
+// Lo mas que lo alumbra un fuego de cerca: 1 es lo que le llegaria a un metro de la luz.
+uniform float tope_de_luz : hint_range(0.1, 20.0) = 1.0;
+// A cuantos metros de tocar algo (el suelo, una pared) empieza a desvanecerse, para que no se vea el corte.
+uniform float desvanecer_cerca : hint_range(0.0, 4.0) = 0.5;
+uniform sampler2D profundidad : hint_depth_texture, repeat_disable, filter_nearest;
+
+void vertex() {
+	// De frente a la camara, girada lo que diga la particula y con su tamano.
+	mat4 mundo = mat4(normalize(INV_VIEW_MATRIX[0]), normalize(INV_VIEW_MATRIX[1]), normalize(INV_VIEW_MATRIX[2]), MODEL_MATRIX[3]);
+	mundo = mundo * mat4(vec4(cos(INSTANCE_CUSTOM.x), -sin(INSTANCE_CUSTOM.x), 0.0, 0.0), vec4(sin(INSTANCE_CUSTOM.x), cos(INSTANCE_CUSTOM.x), 0.0, 0.0), vec4(0.0, 0.0, 1.0, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
+	mundo = mundo * mat4(vec4(length(MODEL_MATRIX[0].xyz), 0.0, 0.0, 0.0), vec4(0.0, length(MODEL_MATRIX[1].xyz), 0.0, 0.0), vec4(0.0, 0.0, length(MODEL_MATRIX[2].xyz), 0.0), vec4(0.0, 0.0, 0.0, 1.0));
+	MODELVIEW_MATRIX = VIEW_MATRIX * mundo;
+	MODELVIEW_NORMAL_MATRIX = mat3(MODELVIEW_MATRIX);
+}
+
+void fragment() {
+	// Redonda: opaca en el medio y transparente en el borde.
+	float redonda = clamp(1.0 - length(UV - vec2(0.5)) * 2.0, 0.0, 1.0);
+	ALBEDO = color.rgb * COLOR.rgb;
+	ALPHA = color.a * COLOR.a * redonda;
+	ROUGHNESS = 1.0;
+	float hondo = textureLod(profundidad, SCREEN_UV, 0.0).r;
+	vec4 detras = INV_PROJECTION_MATRIX * vec4(SCREEN_UV * 2.0 - 1.0, hondo, 1.0);
+	detras.xyz /= detras.w;
+	ALPHA *= clamp(1.0 - smoothstep(detras.z + desvanecer_cerca, detras.z, VERTEX.z), 0.0, 1.0);
+}
+
+void light() {
+	// La misma cuenta del material de antes (luz envuelta mas contraluz), con el tope para los fuegos.
+	float envuelta = max(0.0, (dot(NORMAL, LIGHT) + 1.0) / 4.0) / PI;
+	float llega = LIGHT_IS_DIRECTIONAL ? ATTENUATION : min(ATTENUATION, tope_de_luz);
+	DIFFUSE_LIGHT += LIGHT_COLOR * llega * mix(envuelta, 1.0 / PI, contraluz);
+}
+"
 
 [resource]
 resource_name = "Humo"
-transparency = 1
-diffuse_mode = 2
-vertex_color_use_as_albedo = true
-albedo_color = Color(0.6, 0.58, 0.55, 0.9)
-albedo_texture = SubResource("GradientTexture2D_humo")
-metallic_specular = 0.0
-backlight_enabled = true
-backlight = Color(0.45, 0.45, 0.45, 1)
-disable_receive_shadows = true
-billboard_mode = 3
-billboard_keep_scale = true
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
-proximity_fade_enabled = true
-proximity_fade_distance = 0.5
+render_priority = 0
+shader = SubResource("Shader_humo")
+shader_parameter/color = Color(0.6, 0.58, 0.55, 0.9)
+shader_parameter/contraluz = 0.45
+shader_parameter/tope_de_luz = 1.0
+shader_parameter/desvanecer_cerca = 0.5

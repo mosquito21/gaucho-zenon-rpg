@@ -579,6 +579,11 @@ func _al_trabajar(que: String) -> void:
 func _nivel_del_agua(p: Vector3) -> float:
 	if agua_db <= -59.5:
 		return -INF  # Con la perilla apagada no hay agua que suene: se pisa como en tierra.
+	return nivel_del_agua(p)
+
+
+## Lo mismo, suene o no el agua: lo pregunta scenes/player/player.gd para frenar a quien vadea.
+func nivel_del_agua(p: Vector3) -> float:
 	for caja in _aguas_quietas:
 		if p.x > caja.position.x and p.x < caja.end.x and p.z > caja.position.z and p.z < caja.end.z:
 			return caja.position.y

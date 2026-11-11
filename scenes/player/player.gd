@@ -35,13 +35,18 @@ signal silbo
 @export_range(0.0, 5.0, 0.1) var porte_mecer := 1.6
 ## Cuánto se abren los brazos hacia afuera, en grados, para que las manos no se metan en las caderas.
 @export_range(0.0, 20.0, 0.5) var porte_abrir_brazos := 5.0
-## Largo de los dedos: 1 es como viene el modelo (muy largos); 0.6 los acorta al 60 %.
-@export_range(0.4, 1.0, 0.01) var porte_dedos := 0.6
+## Largo de los dedos: 1 es como viene el modelo. Desde que Zenón tiene manos nuevas (noviembre de
+## 2026, tools/modelado/manos_zenon.py) los dedos ya vienen del largo justo; antes eran una paleta
+## larga y esto los acortaba al 60 %.
+@export_range(0.4, 1.0, 0.01) var porte_dedos := 1.0
 ## El cuerpo sigue a la cámara con un instante de atraso en vez de girar clavado a ella (0: clavado).
 @export_range(0.0, 1.0, 0.05) var soltura_giro := 0.6
 ## Con la S, Zenón se da vuelta y camina hacia la cámara. Apagado, camina para atrás sin darse
 ## vuelta, como antes.
 @export var darse_vuelta_al_volver := true
+## Con W y A (o W y D) avanza en diagonal mirando hacia donde camina. Apagado, avanza en diagonal
+## mirando al frente, como antes (los pies patinaban de costado).
+@export var mirar_en_diagonal := true
 
 ## Ceniza (tanda 6). Montado es un estado de este mismo cuerpo: Zenón va sentado en el recado y el
 ## caballo anda con inercia, dobla más abierto cuanto más rápido va y no camina de costado.
@@ -73,6 +78,15 @@ signal silbo
 @export var huellas_de_cascos := 160
 ## Cuánto se sienta sobre los garrones al sofrenarla con la S, en grados.
 @export var sentada_al_sofrenar := 5.0
+
+## El vado: el agua frena. A pie mucho (con el agua a la cintura, poco más de la mitad del paso y sin correr);
+## a caballo poco (Ceniza la pasa al paso o a un trote corto, no al galope). Con `freno_del_agua` en
+## 1 y `tope_en_el_agua` en 0, el agua no frena a nadie, como antes.
+@export_group("Vado")
+## A cuánto queda el paso de Zenón con el agua a la cintura (1: no lo frena; 0.6: algo más de la mitad).
+@export_range(0.2, 1.0, 0.05) var freno_del_agua := 0.6
+## Lo más ligero que anda Ceniza con el agua a la panza, en metros por segundo (0: sin tope).
+@export var tope_en_el_agua := 4.3
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -112,8 +126,18 @@ const CLIPS_EN_LOOP := ["idle", "walk", "run", "strafe_left", "strafe_left_walk"
 const PASO_CLIP := {"walk": 1.55, "run": 4.0, "strafe_left_walk": 1.6, "strafe_right_walk": 1.6, "strafe_left": 4.1, "strafe_right": 4.1}
 var _anim: AnimationPlayer
 var _saltando := false
+# La caída (ver _armar_caida): cuánto lleva en el aire, si está cayendo y si está aterrizando.
+var _aire := 0.0
+var _cayendo := false
+var _aterrizando := false
 var _porte: Porte
 var _polvo: GPUParticles3D
+# El vado: quién sabe dónde hay agua (scripts/sonidos.gd), a qué altura está acá, cuánta tiene
+# encima el suelo que pisa y las gotas que levanta al andar.
+var _sonidos: Node
+var _nivel_agua := -INF
+var _hondura := 0.0
+var _salpica: GPUParticles3D
 var _fov_base := 60.0
 var _yaw_anterior := 0.0
 var _atraso_giro := 0.0
@@ -141,6 +165,24 @@ var _huellas: MultiMesh
 var _huella_n := 0
 var _huella_falta := 0.0
 var _sofrenando := 0.0
+# Subir y bajar de Ceniza (ver _pase_de_montar): cuánto dura el pase entero, qué parte de él es
+# arrimarse al estribo, por qué lado sube (-1 el de montar, el izquierdo; 1 el otro), dónde queda
+# parado junto a ella (el centro de este cuerpo) y las marcas que siguen los pies y las manos.
+var _monta_dura := 1.0
+var _monta_camina := 0.0
+var _monta_lado := -1.0
+var _monta_pie := Vector3.ZERO
+var _arrimando := false
+var _marcas := {}
+# El recado visto desde Ceniza, promediado sobre los últimos instantes: lo que tarda el jinete en
+# seguirlo (ver _acompasar).
+var _recado_suave := Vector3.ZERO
+# Sentado al fogón (ver _acomodar_sentado): 0 de pie, 1 sentado en el tronco. Y la cámara que lo
+# muestra de perfil junto al fuego mientras repasa el día.
+var _sentado := 0.0
+var _camara_fogon: Camera3D
+# La brújula, el mapa y el morral (scripts/Morral.gd). Con el mapa o el morral abiertos, Zenón no se mueve.
+var _morral: CanvasLayer
 ## La intro (scripts/Intro.gd) maneja a Zenón como a un títere: lo pone donde va cada plano con
 ## titere_poner() y lo deja montar aunque haya algo en pantalla. Con titere_anda, montado, anda al
 ## paso hacia donde apunta `yaw` sin que nadie toque una tecla.
@@ -148,6 +190,16 @@ var titere := false
 var titere_anda := false
 # A cuánto queda el centro de este cuerpo del suelo que pisa (media cápsula más el margen del choque).
 const ALTO_DEL_CUERPO := 1.0
+# A cuántos metros del medio de Ceniza se para Zenón para subir (AL_ESTRIBO) y a cuántos queda al
+# bajar (AL_BAJAR, lo mismo que antes de noviembre de 2026). Al bajar no puede quedar más cerca:
+# Ceniza le queda a la derecha, justo donde mira la cámara del hombro, y con ella a menos de un
+# metro la E ofrece montarla en vez de lo que Zenón tiene adelante (la posta, el hito). Para pisar el
+# estribo se arrima hasta ARRIMADO. Y cuánto duran la subida y la bajada, en segundos.
+const AL_ESTRIBO := 0.85
+const AL_BAJAR := 1.2
+const ARRIMADO := 0.72
+const SUBIR_DURA := 1.05
+const BAJAR_DURA := 0.9
 
 
 func _ready() -> void:
@@ -164,8 +216,10 @@ func _ready() -> void:
 	floor_snap_length = 0.05
 	_armar_aviso()
 	_armar_polvo()
+	_armar_salpicadura()
 	_armar_choque_montado()
 	_armar_huellas()
+	_armar_morral()
 	_fov_base = camera.fov
 	_pivote_alto = camera_pivot.position.y
 	call_deferred("_conectar_ciclo")
@@ -175,8 +229,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Con un diálogo abierto, Zenón no mira ni interactúa: las teclas son del cuadro.
-	if Historia.ocupado:
+	# Con un diálogo abierto, Zenón no mira ni interactúa: las teclas son del cuadro. Y con el mapa
+	# o el morral abiertos tampoco.
+	if Historia.ocupado or mirando_el_morral():
 		return
 	# Esc abre la pausa (scripts/Ajustes.gd), que suelta el mouse y lo devuelve al seguir.
 	# Con el mouse suelto, un clic lo vuelve a capturar y no hace otra cosa.
@@ -241,6 +296,8 @@ func _process(delta: float) -> void:
 		_boleadoras.visible = Historia.final_elegido != "solitario" or Historia.flags.has("boleadoras_quedan")
 	if montado or _subiendo > 0.0:
 		_acomodar_jinete(delta)
+	elif _sentado > 0.0 or Historia.en_el_fogon():
+		_acomodar_sentado(delta)
 	else:
 		_soltar_giro(delta)
 		_avisar_que_se_silba()
@@ -252,7 +309,9 @@ func _process(delta: float) -> void:
 		# A caballo, el polvo sale al trote y al galope, y la cámara abre más cuanto más rápido va.
 		corriendo = _rapidez > trote_caballo * 0.7
 		abre = camara_abre_al_galope * clampf((_rapidez - paso_caballo) / maxf(galope_caballo - paso_caballo, 0.1), 0.0, 1.0)
+	_salpicar()
 	if _polvo != null:
+		corriendo = corriendo and _hondura < 0.05
 		_polvo.emitting = corriendo
 		_polvo.amount_ratio = clampf(_rapidez / maxf(galope_caballo, 0.1), 0.45, 1.0) if montado else 0.45
 	camera.fov = lerpf(camera.fov, _fov_base + abre, clampf(3.0 * delta, 0.0, 1.0))
@@ -280,8 +339,8 @@ func _update_hud() -> void:
 		return
 
 	if _aviso != null:
-		_aviso.visible = not Historia.ocupado
-	if Historia.ocupado:
+		_aviso.visible = not Historia.ocupado and not mirando_el_morral()
+	if Historia.ocupado or mirando_el_morral():
 		interact_label.text = ""
 	elif current_interactable and current_interactable.has_method("texto_mira"):
 		interact_label.text = current_interactable.texto_mira(self)
@@ -305,6 +364,7 @@ func _do_interact(obj: Interactable) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_medir_agua()
 	if montado:
 		_mover_montado(delta)
 		return
@@ -317,7 +377,7 @@ func _physics_process(delta: float) -> void:
 	var move_dir := Vector3.ZERO
 
 	# Con un diálogo abierto, o mientras termina de bajarse del caballo, no se mueve.
-	var libre := not Historia.ocupado and _subiendo <= 0.0
+	var libre := not Historia.ocupado and _subiendo <= 0.0 and not mirando_el_morral()
 	if libre and Input.is_action_pressed("move_forward"):
 		move_dir -= transform.basis.z
 	if libre and Input.is_action_pressed("move_backward"):
@@ -332,11 +392,12 @@ func _physics_process(delta: float) -> void:
 	var target_speed := 0.0
 	if move_dir != Vector3.ZERO:
 		move_dir = move_dir.normalized()
-		# caminar / correr
-		if Input.is_action_pressed("run"):
+		# caminar / correr (con el agua arriba de la rodilla no se corre, y cuanto más honda, más frena)
+		if Input.is_action_pressed("run") and _hondura < 0.45:
 			target_speed = run_speed
 		else:
 			target_speed = walk_speed
+		target_speed *= lerpf(1.0, freno_del_agua, smoothstep(0.15, 0.9, _hondura))
 
 		velocity.x = move_dir.x * target_speed
 		velocity.z = move_dir.z * target_speed
@@ -353,6 +414,22 @@ func _physics_process(delta: float) -> void:
 	_frenar_en_el_borde()
 	_recuperar_suelo()
 	_animar_gaucho(delta)
+
+
+## La brújula, el mapa (M) y el morral (I): scripts/Morral.gd. No están en la escena: se suman acá.
+func _armar_morral() -> void:
+	var guion := load("res://scripts/Morral.gd") as GDScript
+	if guion == null:
+		return
+	_morral = guion.new()
+	_morral.name = "Morral"
+	_morral.set("jugador", self)
+	add_child(_morral)
+
+
+## ¿Está mirando el mapa o el morral?
+func mirando_el_morral() -> bool:
+	return _morral != null and str(_morral.get("abierto")) != ""
 
 
 ## Polvo de tierra a la altura de las botas. Se prende solo al correr. Usa el material del humo
@@ -400,6 +477,70 @@ func _armar_polvo() -> void:
 	add_child(_polvo)
 
 
+## Cuánta agua tiene encima el suelo que pisa (Zenón, o Ceniza si va montado). El nivel del agua lo
+## sabe scripts/sonidos.gd, que ya lo usaba para el chapoteo.
+func _medir_agua() -> void:
+	_hondura = 0.0
+	if _sonidos == null:
+		_sonidos = get_parent().get_node_or_null("Sonidos")
+		if _sonidos == null or not _sonidos.has_method("nivel_del_agua"):
+			_sonidos = null
+			return
+	_nivel_agua = _sonidos.nivel_del_agua(global_position)
+	var pies := Historia.altura_suelo(global_position.x, global_position.z) if montado else global_position.y - ALTO_DEL_CUERPO
+	_hondura = maxf(_nivel_agua - pies, 0.0)
+
+
+## Las gotas que levanta al vadear: salen de la superficie del agua, donde pisa, y más cuanto más
+## ligero va. Usan el material del humo (bocanadas redondas), en chico y claras.
+func _armar_salpicadura() -> void:
+	var material := load("res://assets/materiales/humo.tres") as Material
+	if material == null:
+		return
+	var proceso := ParticleProcessMaterial.new()
+	proceso.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	proceso.emission_sphere_radius = 0.3
+	proceso.direction = Vector3(0.0, 1.0, 0.0)
+	proceso.spread = 50.0
+	proceso.initial_velocity_min = 1.3
+	proceso.initial_velocity_max = 3.0
+	proceso.gravity = Vector3(0.0, -7.0, 0.0)
+	proceso.scale_min = 0.16
+	proceso.scale_max = 0.42
+	var rampa := Gradient.new()
+	rampa.offsets = PackedFloat32Array([0.0, 0.15, 1.0])
+	rampa.colors = PackedColorArray([Color(1.5, 1.6, 1.65, 0.0), Color(1.5, 1.6, 1.65, 0.85), Color(1.5, 1.6, 1.65, 0.0)])
+	var textura_rampa := GradientTexture1D.new()
+	textura_rampa.gradient = rampa
+	proceso.color_ramp = textura_rampa
+	var gota := QuadMesh.new()
+	gota.size = Vector2(1.0, 1.0)
+	_salpica = GPUParticles3D.new()
+	_salpica.name = "Salpicadura"
+	_salpica.amount = 60
+	_salpica.lifetime = 0.6
+	_salpica.local_coords = false
+	_salpica.emitting = false
+	_salpica.process_material = proceso
+	_salpica.draw_pass_1 = gota
+	_salpica.material_override = material
+	_salpica.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# Queda en el mundo, a la altura del agua: no sube ni baja con el cuerpo.
+	_salpica.top_level = true
+	add_child(_salpica)
+
+
+func _salpicar() -> void:
+	if _salpica == null:
+		return
+	var ligero := Vector2(velocity.x, velocity.z).length()
+	_salpica.emitting = _hondura > 0.06 and ligero > 0.5
+	if _salpica.emitting:
+		var adelante := Vector3(velocity.x, 0.0, velocity.z).normalized() * (0.7 if montado else 0.2)
+		_salpica.global_position = Vector3(global_position.x, _nivel_agua + 0.04, global_position.z) + adelante
+		_salpica.amount_ratio = clampf(ligero / 4.0, 0.35, 1.0)
+
+
 ## El cuerpo de Zenón gira con la cámara, pero con un instante de atraso, y al doblar caminando
 ## se inclina apenas hacia adentro de la curva. Solo mueve el modelo: el choque y la dirección
 ## en la que camina siguen clavados a la cámara, como antes.
@@ -413,6 +554,9 @@ func _soltar_giro(delta: float) -> void:
 	var peso_vuelta := clampf(8.0 * delta, 0.0, 1.0)
 	if darse_vuelta_al_volver and local.z > 0.1:
 		# Viene hacia la cámara: se da vuelta y mira hacia donde camina.
+		_vuelta = lerp_angle(_vuelta, atan2(-local.x, -local.z), peso_vuelta)
+	elif mirar_en_diagonal and local.z < -0.1 and absf(local.x) > 0.1:
+		# Avanza en diagonal: mira hacia donde camina, con el clip de frente.
 		_vuelta = lerp_angle(_vuelta, atan2(-local.x, -local.z), peso_vuelta)
 	elif local.length() > 0.25 or absf(_vuelta) < 0.3:
 		# Avanza, va de costado o ya está casi de espaldas a la cámara: vuelve a mirar hacia adelante.
@@ -654,6 +798,7 @@ func _armar_animaciones() -> void:
 		if _anim.has_animation(nombre):
 			_anim.get_animation(nombre).loop_mode = Animation.LOOP_LINEAR
 	_anim.play("idle")
+	_armar_caida()
 	var esqueleto := cuerpo.find_child("Skeleton3D", true, false) as Skeleton3D
 	if esqueleto != null:
 		_porte = Porte.new()
@@ -667,20 +812,69 @@ func _armar_animaciones() -> void:
 		esqueleto.add_child(_porte)
 
 
+## No hay clip de caída: se arma uno con dos poses del salto, las de cuando ya viene bajando
+## (piernas sueltas, brazos abiertos), que se repiten mientras esté en el aire. La cadera queda a la
+## altura de parado, porque acá el que baja es el cuerpo entero.
+func _armar_caida() -> void:
+	if not _anim.has_animation("jump") or _anim.has_animation("fall"):
+		return
+	var salto := _anim.get_animation("jump")
+	var caida := Animation.new()
+	caida.length = 0.9
+	caida.loop_mode = Animation.LOOP_LINEAR
+	for i in salto.get_track_count():
+		var tipo := salto.track_get_type(i)
+		if tipo != Animation.TYPE_POSITION_3D and tipo != Animation.TYPE_ROTATION_3D and tipo != Animation.TYPE_SCALE_3D:
+			continue
+		var pista := caida.add_track(tipo)
+		caida.track_set_path(pista, salto.track_get_path(i))
+		for clave: Array in [[0.0, 1.24], [0.45, 1.34], [0.9, 1.24]]:
+			if tipo == Animation.TYPE_POSITION_3D:
+				caida.position_track_insert_key(pista, clave[0], salto.position_track_interpolate(i, 0.0))
+			elif tipo == Animation.TYPE_ROTATION_3D:
+				caida.rotation_track_insert_key(pista, clave[0], salto.rotation_track_interpolate(i, clave[1]))
+			else:
+				caida.scale_track_insert_key(pista, clave[0], salto.scale_track_interpolate(i, clave[1]))
+	var bibliotecas := _anim.get_animation_library_list()
+	if not bibliotecas.is_empty() and str(bibliotecas[0]) == "":
+		_anim.get_animation_library(bibliotecas[0]).add_animation("fall", caida)
+
+
 func _empezar_salto() -> void:
 	if _anim == null or not _anim.has_animation("jump"):
 		return
 	_saltando = true
+	_aterrizando = false
 	# El clip de Mixamo arranca agachándose; el cuerpo ya está en el aire, así que se saltea el envión.
 	_anim.play("jump", 0.1, 1.4)
 	_anim.seek(0.55, true)
 
 
-func _animar_gaucho(_delta: float) -> void:
+func _animar_gaucho(delta: float) -> void:
 	if _anim == null:
 		return
 	if not is_on_floor():
+		# En el aire sin haber saltado (se le acabó el piso), o cuando el salto ya dio lo suyo y
+		# sigue bajando: cae con las piernas sueltas en vez de quedar tieso.
+		_aire += delta
+		var salto_terminado := _saltando and _anim.current_animation == "jump" and _anim.current_animation_position > 1.3
+		if _anim.has_animation("fall") and ((not _saltando and _aire > 0.25) or salto_terminado):
+			_saltando = false
+			_cayendo = true
+			_poner_clip("fall", 1.0)
 		return
+	if _cayendo:
+		# Tocó el suelo después de caer: si la caída fue larga y no viene corriendo, amortigua con las
+		# rodillas (el final del clip del salto); si no, sigue como venía.
+		_cayendo = false
+		if _aire > 0.45 and _anim.has_animation("jump") and Vector2(velocity.x, velocity.z).length() < 2.5:
+			_aterrizando = true
+			_anim.play("jump", 0.12, 1.6)
+			_anim.seek(1.4, true)
+	_aire = 0.0
+	if _aterrizando and _anim.current_animation == "jump" and _anim.current_animation_position < 1.85:
+		return
+	_aterrizando = false
 	if _saltando and _anim.current_animation == "jump" and _anim.current_animation_position < 1.1:
 		return
 	_saltando = false
@@ -754,6 +948,8 @@ func montar(de_una := false) -> void:
 	_cuerpo_de = cuerpo.global_transform if cuerpo != null else global_transform
 	_ceniza.llevar(true)
 	_prender_choque_de_ceniza(false)
+	_elegir_lado_de_montar()
+	_recado_suave = Vector3.ZERO
 	# Este cuerpo pasa a ser el del caballo: se pone donde está ella, mirando hacia donde mira.
 	_rumbo = _ceniza.global_rotation.y + PI
 	# Y con la inclinación que ella trae (si vino sola al silbido, la de la cuesta que pisa).
@@ -768,6 +964,8 @@ func montar(de_una := false) -> void:
 		forma.set_deferred("disabled", false)
 	if _porte != null:
 		_porte.sentar(_ceniza.montura())
+		_porte.levantar = 0.0
+		_porte.cabecear = 0.0
 	_subiendo = 1.0 if de_una else 0.001
 	if not titere and not Historia.flags.has("_pista_montar"):
 		Historia.flags["_pista_montar"] = true
@@ -787,14 +985,19 @@ func desmontar() -> void:
 		forma.set_deferred("disabled", true)
 	_ceniza.llevar(false)
 	_cuerpo_de = cuerpo.global_transform if cuerpo != null else global_transform
-	# Se baja por el lado de montar (el izquierdo); si está tapado, por el otro, o hacia atrás.
+	# Se baja por el lado de montar (el izquierdo), junto al estribo; si está tapado, por el otro, o
+	# hacia atrás.
 	var lugar := global_position
-	for corrida: Vector3 in [Vector3(-1.2, 0.0, 0.0), Vector3(1.2, 0.0, 0.0), Vector3(-1.1, 0.0, 1.7), Vector3(1.1, 0.0, 1.7)]:
+	_monta_lado = -1.0
+	for corrida: Vector3 in [Vector3(-AL_BAJAR, 0.0, -0.1), Vector3(AL_BAJAR, 0.0, -0.1), Vector3(-1.1, 0.0, 1.7), Vector3(1.1, 0.0, 1.7)]:
 		var candidato: Vector3 = global_position + global_transform.basis * corrida
 		candidato.y = Historia.altura_suelo(candidato.x, candidato.z) + ALTO_DEL_CUERPO
 		if _lugar_libre(candidato):
 			lugar = candidato
+			_monta_lado = signf(corrida.x)
 			break
+	_monta_dura = BAJAR_DURA
+	_monta_camina = 0.0
 	global_position = lugar
 	velocity = Vector3.ZERO
 	_rapidez = 0.0
@@ -869,12 +1072,15 @@ func titere_poner(lugar: Vector3, rumbo: float, a_caballo: bool) -> void:
 		_ceniza.llevar(false)
 		_prender_choque_de_ceniza(true)
 	_subiendo = 0.0
+	_arrimando = false
 	_quiere_bajar = false
 	if cuerpo != null:
 		cuerpo.transform = Transform3D.IDENTITY
 	if _porte != null:
 		_porte.sentar({})
 		_porte.inclinar = 0.0
+		_porte.levantar = 0.0
+		_porte.cabecear = 0.0
 	yaw = rumbo
 	_yaw_anterior = rumbo
 	_vuelta = 0.0
@@ -899,7 +1105,7 @@ func titere_poner(lugar: Vector3, rumbo: float, a_caballo: bool) -> void:
 func _mover_montado(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
-	var libre := not Historia.ocupado and _subiendo >= 1.0
+	var libre := not Historia.ocupado and _subiendo >= 1.0 and not mirando_el_morral()
 	var avanza := (libre and Input.is_action_pressed("move_forward")) or (titere_anda and _subiendo >= 1.0)
 	var costado := Input.get_axis("move_left", "move_right") if libre else 0.0
 	var sofrena := (libre and Input.is_action_pressed("move_backward")) or _quiere_bajar
@@ -914,6 +1120,9 @@ func _mover_montado(delta: float) -> void:
 	var meta := 0.0
 	if (avanza or costado != 0.0) and not sofrena:
 		meta = [paso_caballo, trote_caballo, galope_caballo][_marcha - 1]
+		if tope_en_el_agua > 0.0 and _hondura > 0.3:
+			# Vadeando no galopa: con el agua a la panza, un trote corto.
+			meta = minf(meta, lerpf(galope_caballo, tope_en_el_agua, smoothstep(0.3, 0.9, _hondura)))
 		var deseo := yaw - atan2(costado, 1.0 if avanza else 0.0)
 		var giro := deg_to_rad(lerpf(giro_al_paso, giro_al_galope, clampf(_rapidez / maxf(galope_caballo, 0.1), 0.0, 1.0)))
 		_rumbo = wrapf(rotate_toward(_rumbo, deseo, giro * delta), -PI, PI)
@@ -940,7 +1149,8 @@ func _mover_montado(delta: float) -> void:
 	_frenar_en_el_borde()
 	_recuperar_suelo()
 	if _anim != null:
-		_poner_clip("idle", 1.0)
+		# Mientras se arrima al estribo, camina; lo demás lo hace la postura de jinete.
+		_poner_clip("walk" if _arrimando else "idle", 1.0)
 	if _porte != null:
 		_porte.mirar = 0.0
 		_porte.mecer = lerpf(_porte.mecer, 0.0, 0.08)
@@ -950,14 +1160,11 @@ func _mover_montado(delta: float) -> void:
 
 
 ## Pone a Ceniza debajo de este cuerpo y a Zenón en el recado. Subiendo o bajando, lo lleva del
-## suelo al recado (o al revés) en algo más de medio segundo: no hay clip de montar.
+## suelo al recado (o al revés) por el estribo: ver _pase_de_montar.
 func _acomodar_jinete(delta: float) -> void:
 	if _ceniza == null or cuerpo == null:
 		return
-	_subiendo = move_toward(_subiendo, 1.0 if montado else 0.0, delta / 0.65)
-	var s := smoothstep(0.0, 1.0, _subiendo)
-	if _porte != null:
-		_porte.montado = s
+	_subiendo = move_toward(_subiendo, 1.0 if montado else 0.0, delta / maxf(_monta_dura, 0.05))
 	if montado:
 		# Las patas en el suelo, y el cuerpo acompañando la pendiente que pisa.
 		var adelante := Vector3(-sin(_rumbo), 0.0, -cos(_rumbo))
@@ -969,21 +1176,205 @@ func _acomodar_jinete(delta: float) -> void:
 		_ceniza.global_transform = Transform3D(Basis(Vector3.UP, _rumbo + PI) * Basis(Vector3.RIGHT, -_cabeceo), Vector3(p.x, cascos, p.z))
 		_ceniza.pisar(_rapidez)
 		_marcar_huellas(delta, cascos)
-	var asiento := _ceniza.montura().get("asiento") as Node3D
+	var puntos: Dictionary = _ceniza.montura()
+	var asiento := puntos.get("asiento") as Node3D
 	if asiento == null:
 		return
 	var base := _ceniza.global_transform.basis.orthonormalized() * Basis(Vector3.UP, PI)
-	var sentado := Transform3D(base, asiento.global_position - base.y * 0.1)
-	var parado := _cuerpo_de if montado else global_transform
-	var ahora := parado.interpolate_with(sentado, s)
-	ahora.origin.y += sin(s * PI) * 0.3
-	cuerpo.global_transform = ahora
+	if _subiendo >= 1.0:
+		# Sentado en el recado.
+		_arrimando = false
+		cuerpo.global_transform = Transform3D(base, asiento.global_position - base.y * 0.1)
+		if _porte != null:
+			_porte.sentar(puntos)
+			_porte.montado = 1.0
+			_acompasar(delta, asiento)
+		return
+	_pase_de_montar(puntos, base)
 	if _subiendo <= 0.0:
 		# Ya está en el suelo: el cuerpo vuelve a colgar de este nodo como siempre.
+		_arrimando = false
 		cuerpo.transform = Transform3D.IDENTITY
 		if _porte != null:
 			_porte.sentar({})
 			_porte.inclinar = 0.0
+			_porte.levantar = 0.0
+			_porte.cabecear = 0.0
+
+
+## Mientras repasa el día en el fogón, Zenón se sienta en el tronco, de cara al fuego, y al terminar se
+## para. No hay clip de sentarse: es la misma postura de jinete (scripts/porte.gd), con la cadera en
+## el tronco, los pies en el suelo y las manos sobre las rodillas. El cuerpo que choca y la cámara
+## quedan donde estaba parado; lo que se mueve es el modelo, que va hasta el tronco rodeando el fuego.
+func _acomodar_sentado(delta: float) -> void:
+	var tronco := get_parent().get_node_or_null("FogonDeZenon/Tronco") as Node3D
+	var fogon := get_parent().get_node_or_null("FogonDeZenon") as Node3D
+	if tronco == null or fogon == null or cuerpo == null or _porte == null:
+		_sentado = 0.0
+		return
+	_sentado = move_toward(_sentado, 1.0 if Historia.en_el_fogon() else 0.0, delta / 0.7)
+	var s := smoothstep(0.0, 1.0, _sentado)
+	# Dónde apoya: arriba del tronco (lo más alto de su modelo), mirando al fuego.
+	var arriba_del_tronco := tronco.global_position.y + 0.3
+	for malla: MeshInstance3D in tronco.find_children("*", "MeshInstance3D", true, false):
+		arriba_del_tronco = (malla.global_transform * malla.get_aabb()).end.y
+	var asiento := Vector3(tronco.global_position.x, arriba_del_tronco + 0.09, tronco.global_position.z)
+	var al_fuego := fogon.global_position - asiento
+	al_fuego.y = 0.0
+	al_fuego = al_fuego.normalized()
+	var costado := al_fuego.cross(Vector3.UP).normalized()
+	var suelo := Historia.altura_suelo(asiento.x, asiento.z)
+	# Del lugar donde estaba parado al tronco, dando la vuelta alrededor del fuego (no por encima).
+	var parado := global_transform
+	var desde := Vector2(parado.origin.x - fogon.global_position.x, parado.origin.z - fogon.global_position.z)
+	var hasta := Vector2(asiento.x - fogon.global_position.x, asiento.z - fogon.global_position.z)
+	var rumbo := lerp_angle(desde.angle(), hasta.angle(), s)
+	var radio := lerpf(desde.length(), hasta.length(), s)
+	var origen := Vector3(fogon.global_position.x + cos(rumbo) * radio, lerpf(parado.origin.y, asiento.y - 0.1, s), fogon.global_position.z + sin(rumbo) * radio)
+	var giro := parado.basis.orthonormalized().slerp(Basis.looking_at(al_fuego, Vector3.UP), s)
+	cuerpo.global_transform = Transform3D(giro, origen)
+	if _marcas.is_empty():
+		for nombre: String in ["asiento", "estribo_izq", "estribo_der", "manos"]:
+			var marca := Node3D.new()
+			marca.name = "Marca" + nombre.capitalize().replace(" ", "")
+			marca.top_level = true
+			add_child(marca)
+			_marcas[nombre] = marca
+	var cadera := origen + Vector3.UP * 0.1
+	(_marcas["asiento"] as Node3D).global_position = cadera
+	# Los pies adelante, en el suelo (la marca es el tobillo); las manos, sobre las rodillas.
+	(_marcas["estribo_izq"] as Node3D).global_position = Vector3(cadera.x, suelo + 0.11, cadera.z) + giro * Vector3(-0.17, 0.0, -0.4)
+	(_marcas["estribo_der"] as Node3D).global_position = Vector3(cadera.x, suelo + 0.11, cadera.z) + giro * Vector3(0.17, 0.0, -0.4)
+	(_marcas["manos"] as Node3D).global_position = cadera + giro * Vector3(0.06, 0.12, -0.34)
+	_porte.sentar(_marcas)
+	_porte.montado = s
+	_porte.inclinar = 14.0 * s
+	_porte.levantar = 0.0
+	_porte.cabecear = 0.0
+	# La cámara: la del juego queda donde Zenón estaba parado (y si el humo va para ese lado, no se ve
+	# nada). Mientras está sentado se lo mira de perfil, con el fuego adelante, arrimándose muy despacio.
+	if _camara_fogon == null:
+		_camara_fogon = Camera3D.new()
+		_camara_fogon.name = "CamaraDelFogon"
+		_camara_fogon.top_level = true
+		_camara_fogon.fov = 42.0
+		_camara_fogon.far = camera.far
+		add_child(_camara_fogon)
+	if Historia.en_el_fogon() and not _camara_fogon.current:
+		_camara_fogon.global_position = asiento - costado * 2.6 + al_fuego * 1.25 + Vector3.UP * 0.68
+		_camara_fogon.look_at(asiento + al_fuego * 0.35 - Vector3.UP * 0.08, Vector3.UP)
+		_camara_fogon.make_current()
+	elif _camara_fogon.current:
+		_camara_fogon.global_position += (asiento - _camara_fogon.global_position).normalized() * 0.035 * delta
+	if _sentado <= 0.0:
+		cuerpo.transform = Transform3D.IDENTITY
+		_porte.sentar({})
+		_porte.inclinar = 0.0
+		camera.make_current()
+
+
+## Por qué lado sube Zenón y dónde se para para subir: del lado en que está (si está de frente o
+## de atrás, por el de montar, el izquierdo), junto al estribo, si ahí entra parado. Si no hay lugar
+## de ningún lado (Ceniza arrimada a un cerco por los dos costados), sube desde donde está.
+func _elegir_lado_de_montar() -> void:
+	# Visto desde Ceniza (que mira hacia +Z), su izquierda es +X.
+	var visto := _ceniza.global_transform.affine_inverse() * global_position
+	var lados: Array[float] = [-1.0, 1.0]
+	if visto.x <= -0.2:
+		lados = [1.0, -1.0]
+	_monta_lado = lados[0]
+	_monta_pie = _cuerpo_de.origin
+	for lado: float in lados:
+		var candidato: Vector3 = _ceniza.global_transform * Vector3(-lado * AL_ESTRIBO, 0.0, 0.25)
+		candidato.y = Historia.altura_suelo(candidato.x, candidato.z) + ALTO_DEL_CUERPO
+		if _lugar_libre(candidato):
+			_monta_lado = lado
+			_monta_pie = candidato
+			break
+	var lejos := Vector2(_monta_pie.x - _cuerpo_de.origin.x, _monta_pie.z - _cuerpo_de.origin.z).length()
+	var arrimarse := clampf(lejos / 2.4, 0.12, 0.8)
+	_monta_dura = arrimarse + SUBIR_DURA
+	_monta_camina = arrimarse / _monta_dura
+
+
+## Subir y bajar. No hay clip de montar: el cuerpo sigue un recorrido (arrimarse al estribo,
+## pisarlo, pararse en él, pasar la otra pierna por encima del anca y sentarse) y las piernas y las
+## manos lo acompañan con los mismos dos huesos por miembro con que va sentado (scripts/porte.gd),
+## yendo a unas marcas que se mueven. Bajar es el mismo recorrido al revés. `_subiendo` va de 0 (a
+## pie) a 1 (sentado); la primera parte, al subir, es caminar hasta el estribo.
+func _pase_de_montar(puntos: Dictionary, base: Basis) -> void:
+	var arriba := base.y
+	var costado := base.x * _monta_lado
+	var frente := -base.z
+	var recado := (puntos["asiento"] as Node3D).global_position
+	# Parado junto al estribo: al subir, medio de frente al recado; al bajar, como queda este cuerpo.
+	var de_pie := Transform3D(Basis(arriba, deg_to_rad(55.0) * _monta_lado) * base, _monta_pie) if montado else global_transform
+	var sentado := Transform3D(base, recado - arriba * 0.1)
+	if montado and _subiendo < _monta_camina:
+		# Camina hasta el estribo (si está a más de un paso; si no, se acomoda nomás).
+		_arrimando = _monta_camina * _monta_dura > 0.2
+		cuerpo.global_transform = _cuerpo_de.interpolate_with(de_pie, smoothstep(0.0, 1.0, _subiendo / _monta_camina))
+		if _porte != null:
+			_porte.montado = 0.0
+		return
+	_arrimando = false
+	var u := clampf((_subiendo - _monta_camina) / maxf(1.0 - _monta_camina, 0.01), 0.0, 1.0)
+	# El cuerpo: se arrima al caballo mientras levanta el pie, del suelo pasa a pararse en el estribo,
+	# y de ahí al recado, echado sobre el caballo.
+	var en_el_estribo := recado + costado * 0.34 + arriba * 0.06
+	var al_caballo := Vector3(recado.x - de_pie.origin.x, 0.0, recado.z - de_pie.origin.z)
+	var arrimado := de_pie.origin + al_caballo.normalized() * maxf(al_caballo.length() - ARRIMADO, 0.0)
+	var sube := smoothstep(0.24, 0.6, u)
+	var pasa := smoothstep(0.58, 1.0, u)
+	var se_arrima := smoothstep(0.0, 0.26, u)
+	var de_a_pie := de_pie.origin.lerp(arrimado, se_arrima)
+	var origen := de_a_pie.lerp(en_el_estribo, sube).lerp(sentado.origin, pasa) + arriba * (sin(pasa * PI) * 0.05)
+	var giro := de_pie.basis.orthonormalized().slerp(sentado.basis, smoothstep(0.4, 0.95, u))
+	giro = giro * Basis(Vector3.RIGHT, -deg_to_rad(16.0) * sin(clampf((u - 0.12) / 0.8, 0.0, 1.0) * PI))
+	cuerpo.global_transform = Transform3D(giro, origen)
+	if _porte == null:
+		return
+	if _marcas.is_empty():
+		for nombre: String in ["asiento", "estribo_izq", "estribo_der", "manos"]:
+			var marca := Node3D.new()
+			marca.name = "Marca" + nombre.capitalize().replace(" ", "")
+			marca.top_level = true
+			add_child(marca)
+			_marcas[nombre] = marca
+	var cadera := origen + giro.y * 0.1
+	var cerca := "estribo_izq" if _monta_lado < 0.0 else "estribo_der"
+	var lejos := "estribo_der" if _monta_lado < 0.0 else "estribo_izq"
+	# El pie de ese lado va del suelo al estribo, y ahí queda.
+	var tobillo_cerca := de_a_pie + de_pie.basis.x * (0.11 * _monta_lado) - arriba * 0.9
+	var al_estribo := smoothstep(0.02, 0.24, u)
+	(_marcas[cerca] as Node3D).global_position = tobillo_cerca.lerp((puntos[cerca] as Node3D).global_position, al_estribo) + arriba * (sin(al_estribo * PI) * 0.1)
+	# El otro aguanta en el suelo, después cuelga de la cadera y por último pasa por encima del anca
+	# hasta su estribo.
+	# (Mientras se arrima da un paso corto: el pie se despega apenas del suelo.)
+	var tobillo_lejos := de_a_pie - de_pie.basis.x * (0.11 * _monta_lado) - arriba * (0.9 - sin(se_arrima * PI) * 0.05)
+	var cuelga := tobillo_lejos.lerp(cadera - arriba * 0.8 + costado * 0.1, smoothstep(0.24, 0.5, u))
+	var sobre_el_anca := recado - frente * 0.6 + arriba * 0.3
+	var cruza := smoothstep(0.58, 0.97, u)
+	(_marcas[lejos] as Node3D).global_position = cuelga.lerp(sobre_el_anca, cruza).lerp(sobre_el_anca.lerp((puntos[lejos] as Node3D).global_position, cruza), cruza)
+	# Las manos, de adelante del cinto a las riendas, antes de subir: de ahí se agarra.
+	(_marcas["manos"] as Node3D).global_position = (cadera + giro * Vector3(0.0, 0.02, -0.3)).lerp((puntos["manos"] as Node3D).global_position, smoothstep(0.04, 0.3, u))
+	(_marcas["asiento"] as Node3D).global_position = cadera
+	_porte.sentar(_marcas)
+	_porte.montado = smoothstep(0.0, 0.12, u)
+	_porte.levantar = 0.0
+	_porte.cabecear = 0.0
+
+
+## El jinete no va atornillado al recado: lo sigue con un instante de atraso. Cuando el lomo baja de
+## golpe (el trote, el galope) se despega apenas y vuelve a caer; con los pies en los estribos y las
+## manos en las riendas, eso le dobla las rodillas y los codos solo. Y el tronco cabecea con el envión.
+func _acompasar(delta: float, asiento: Node3D) -> void:
+	var recado := _ceniza.global_transform.affine_inverse() * asiento.global_position
+	if _recado_suave == Vector3.ZERO:
+		_recado_suave = recado
+	_recado_suave = _recado_suave.lerp(recado, 1.0 - exp(-delta / 0.09))
+	_porte.levantar = clampf((_recado_suave.y - recado.y) * 1.3, 0.0, 0.07)
+	_porte.cabecear = clampf((_recado_suave.z - recado.z) * 160.0 + _porte.levantar * 90.0, -7.0, 9.0)
 
 
 ## Las pisadas que Ceniza deja atrás cuando va montada: unas manchas oscuras con forma de vaso,

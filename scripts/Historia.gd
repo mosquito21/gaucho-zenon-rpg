@@ -29,6 +29,9 @@ var confianza: Dictionary = {}
 var deuda := 0
 ## Lo que Zenón hizo hoy, para repasarlo en el fogón.
 var notas: Array = []
+## Lo que Zenón tiene guardado en el morral: cosa → cuántas (ver "cosas" en datos/historia.json).
+## Las cosas fijas y las de los encargos no van acá: salen solas de la historia (lo_que_lleva).
+var cosas: Dictionary = {}
 var final_elegido := ""
 var terminado := false
 
@@ -182,6 +185,7 @@ func nueva() -> void:
 		confianza[bando] = 0
 	deuda = int(config.get("deuda_inicial", 0))
 	notas = []
+	cosas = {}
 	final_elegido = ""
 	terminado = false
 	ocupado = false
@@ -261,6 +265,11 @@ func cumple(cond: Dictionary) -> bool:
 			"deuda_hasta":
 				if deuda > int(valor):
 					return false
+			"tiene":
+				# {"yerba": 2}: tiene por lo menos dos guardadas en el morral.
+				for cosa in valor:
+					if tiene(str(cosa)) < int(valor[cosa]):
+						return false
 			"cerca":
 				if not _cerca(str(valor)):
 					return false
@@ -321,7 +330,7 @@ func _cerca(de_que: String) -> bool:
 
 
 ## Aplica lo que cambia una opción o un nodo.
-## var: {"sena": 1} · flag: ["x"] · confianza: {"ejercito": 1} · deuda: -20 · nota: "..."
+## var: {"sena": 1} · flag: ["x"] · confianza: {"ejercito": 1} · deuda: -20 · nota: "..." · cosa: {"yerba": 1}
 ## momento: 3 · final: "sargento" · jornada: {"horas": 4, "texto": ["..."]} (ver _hacer_jornada)
 func aplicar(efectos: Dictionary) -> void:
 	if efectos.is_empty():
@@ -343,6 +352,10 @@ func aplicar(efectos: Dictionary) -> void:
 				deuda = maxi(0, deuda + int(valor))
 			"saldar":
 				deuda = 0
+			"cosa":
+				# {"yerba": 1} le da una; {"yerba": -1} se la saca.
+				for cosa in valor:
+					dar(str(cosa), int(valor[cosa]))
 			"nota":
 				notas.append(str(valor))
 			"momento":
@@ -356,6 +369,82 @@ func aplicar(efectos: Dictionary) -> void:
 				_jornada = valor
 			_:
 				push_warning("historia.json: efecto desconocido '%s'" % clave)
+
+
+# ------------------------------------------------------------------ el morral y las señas
+
+## Cuántas de esa cosa tiene Zenón guardadas en el morral.
+func tiene(cosa: String) -> int:
+	return int(cosas.get(cosa, 0))
+
+
+## Le da (o le saca, con un número negativo) tantas de esa cosa. Nunca queda en menos de cero.
+func dar(cosa: String, cuantas := 1) -> void:
+	var quedan := maxi(tiene(cosa) + cuantas, 0)
+	if quedan == tiene(cosa):
+		return
+	if quedan > 0:
+		cosas[cosa] = quedan
+	else:
+		cosas.erase(cosa)
+	_sucio = true
+
+
+## Todo lo que Zenón lleva ahora, en el orden de "cosas" de datos/historia.json: lo fijo, lo que le
+## toca llevar por la historia (su "si") y lo que tiene guardado. Cada una: {id, nombre, texto,
+## donde, cuantas}. Lo muestra scripts/Morral.gd.
+func lo_que_lleva() -> Array:
+	var lista: Array = []
+	var fichas: Dictionary = datos.get("cosas", {})
+	for id: String in fichas:
+		var ficha: Dictionary = fichas[id]
+		var cuantas := tiene(id)
+		if cuantas <= 0 and (ficha.get("fija", false) == true or (ficha.has("si") and cumple(ficha["si"]))):
+			cuantas = 1
+		if cuantas > 0:
+			lista.append({"id": id, "nombre": str(ficha.get("nombre", id)), "texto": _texto(str(ficha.get("texto", ""))),
+				"donde": str(ficha.get("donde", "encima")), "cuantas": cuantas})
+	# Una cosa guardada que no tiene ficha se muestra igual, con su nombre crudo, para que se note.
+	for id: String in cosas:
+		if not fichas.has(id):
+			lista.append({"id": id, "nombre": id, "texto": "", "donde": "encima", "cuantas": tiene(id)})
+	return lista
+
+
+## Adónde hay algo que hacer ahora: los puntos del mapa (x, z) de todas las señas que se cumplen
+## ("mapa" > "senias" en datos/historia.json) o, con un final elegido, la llegada de ese final.
+## Los dibujan el mapa y la brújula (scripts/Morral.gd).
+func senias() -> PackedVector2Array:
+	var puntos := PackedVector2Array()
+	if terminado:
+		return puntos
+	var destinos: Array = []
+	if final_elegido != "":
+		var llegada: Array = datos.get("finales", {}).get(final_elegido, {}).get("llegada", [])
+		if llegada.size() == 2:
+			destinos.append(llegada)
+	else:
+		for caso: Dictionary in datos.get("mapa", {}).get("senias", []):
+			if cumple(caso.get("si", {})):
+				destinos.append_array(caso.get("a", []))
+	for destino in destinos:
+		var punto := lugar_del_mapa(destino)
+		if punto.is_finite() and not puntos.has(punto):
+			puntos.append(punto)
+	return puntos
+
+
+## Dónde queda en el mapa (x, z) un destino de los datos: la ruta de un nodo del mundo o un par
+## [x, z]. Si el nodo no está o está oculto (el campamento antes de abril), devuelve un punto sin valor.
+func lugar_del_mapa(destino) -> Vector2:
+	if destino is Array and destino.size() == 2:
+		return Vector2(float(destino[0]), float(destino[1]))
+	if _mundo == null or not is_instance_valid(_mundo):
+		return Vector2(NAN, NAN)
+	var nodo := _mundo.get_node_or_null(str(destino)) as Node3D
+	if nodo == null or not nodo.is_visible_in_tree():
+		return Vector2(NAN, NAN)
+	return Vector2(nodo.global_position.x, nodo.global_position.z)
 
 
 func _texto(crudo: String) -> String:
@@ -547,6 +636,11 @@ func sentarse_al_fogon() -> void:
 	datos["nodos"]["_fogon"] = {"quien": str(fogon.get("quien", "Zenón")), "texto": paginas, "hace": efectos, "ir": ir}
 	_entrar("_fogon")
 	_en_fogon = true
+
+
+## ¿Zenón está sentado al fogón, repasando el día? Lo mira scenes/player/player.gd para sentarlo en el tronco.
+func en_el_fogon() -> bool:
+	return _en_fogon
 
 
 func _amanecer() -> void:
@@ -1201,7 +1295,7 @@ func epoca_guardada() -> String:
 
 func estado() -> Dictionary:
 	return {"version": 1, "momento": momento, "vars": vars, "flags": flags.keys(), "confianza": confianza,
-		"deuda": deuda, "notas": notas, "final": final_elegido, "terminado": terminado}
+		"deuda": deuda, "notas": notas, "cosas": cosas, "final": final_elegido, "terminado": terminado}
 
 
 func poner_estado(e: Dictionary) -> void:
@@ -1215,6 +1309,10 @@ func poner_estado(e: Dictionary) -> void:
 		confianza[bando] = int(e["confianza"][bando])
 	deuda = int(e.get("deuda", deuda))
 	notas = e.get("notas", [])
+	# (Una partida de antes del morral no trae "cosas": queda vacío.)
+	for cosa in e.get("cosas", {}):
+		if int(e["cosas"][cosa]) > 0:
+			cosas[str(cosa)] = int(e["cosas"][cosa])
 	final_elegido = str(e.get("final", ""))
 	terminado = bool(e.get("terminado", false))
 

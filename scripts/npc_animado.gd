@@ -280,8 +280,10 @@ func poner_clips(lista: Array) -> void:
 
 
 ## Cada vez que empieza un clip va un poquito más rápido o más lento, para que no se repita igual.
+## Con el jinete arriba (llevar) espera parada, con la cabeza alta: no pasta ni hace lo de su lista.
 func _tocar() -> void:
-	_anim.play(clips[_turno], -1.0, ritmo * randf_range(0.93, 1.07))
+	var clip: String = "idle" if _modo == Modo.LLEVADO and _anim.has_animation("idle") else clips[_turno]
+	_anim.play(clip, -1.0, ritmo * randf_range(0.93, 1.07))
 
 
 ## El porte se suma por encima de los clips (ver scripts/porte.gd). Si todo está en cero, no se crea.
@@ -352,6 +354,9 @@ func llevar(si: bool) -> void:
 	if not si:
 		_casa = global_position
 		_dejar_de_andar()
+	elif _anim != null and _andando == "" and _anim.current_animation != "idle":
+		# Si estaba pastando cuando la montan, levanta la cabeza.
+		_tocar()
 
 
 ## Pone el clip de andar que corresponde a esa velocidad (o el que se le diga), al ritmo justo

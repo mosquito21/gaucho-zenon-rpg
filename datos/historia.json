@@ -30,7 +30,7 @@
 		"momento_2": "Hay trabajo en la estancia de Don Rufino (al oeste de la posta), en el fortín (pegado a la pulpería) y en la huella que va a la toldería (al oeste). Si no sabés qué falta, sentate a tu fogón.",
 		"cartel_momento_1": [
 			"Enero de 1881.\n\nNorte de la Patagonia, sobre el Limay.",
-			"WASD andar · Shift correr · E usar y hablar\nQ bajarse o silbar · Tab acordarte"
+			"WASD andar · Shift correr · E usar y hablar\nQ bajarse o silbar · Tab acordarte\nM el mapa · I el morral"
 		],
 		"segun": [
 			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "texto": "El arreo: la punta de Don Rufino anda al este de la Posta del Coirón, campo afuera. Montado, llevala hasta el corral grande de la estancia; la tranquera da a la casa." },
@@ -205,6 +205,84 @@
 		{ "si": { "momento": [3, 4] }, "mostrar": [ "Lugares/EstanciaDonRufino/Yerra", "Lugares/EstanciaDonRufino/Gaucho2/Lazo" ],
 			"mover": [ { "nodo": "Lugares/EstanciaDonRufino/Gaucho2", "a": [-140.8, -269.6], "mira": [-139.0, -271.0], "clips": ["idle"] } ] }
 	],
+
+	"_cosas": "Lo que lleva Zenón: el morral (tecla I). Cada cosa tiene 'nombre', 'texto' y 'donde' ('encima', o 'recado' si va cargada en Ceniza). Se ve si es 'fija' (la lleva siempre), si se cumple su 'si' (las condiciones de siempre: así las cosas de los encargos aparecen y se van solas con la historia) o si Zenón tiene alguna guardada. Lo guardado lo cambia el efecto 'cosa' de un diálogo ({'cosa': {'yerba': 1}} le da una; con -1 se la saca) y lo pregunta la condición 'tiene' ({'tiene': {'yerba': 1}}: tiene al menos una); va en la partida. Receta para sumar una cosa: docs/agente/ESTADO.md, 'Para Willy', 'Brújula, mapa y morral'.",
+	"cosas": {
+		"facon": { "nombre": "El facón", "donde": "encima", "fija": true,
+			"texto": "Cruzado atrás, en el cinto. Corta la carne, el tiento y la leña fina." },
+		"boleadoras": { "nombre": "Las boleadoras", "donde": "encima",
+			"si": { "o": [ { "final": "" }, { "final": "sargento" }, { "final": "encargado" }, { "final": "chile" }, { "si": ["boleadoras_quedan"] } ] },
+			"texto": "Tres piedras retobadas en cuero crudo, a la cintura. Lo último que un paisano empeña." },
+		"lazo": { "nombre": "El lazo", "donde": "encima", "fija": true,
+			"texto": "Trenzado de tientos, arrollado al cinto." },
+		"poncho": { "nombre": "El poncho", "donde": "encima", "fija": true,
+			"texto": "Corto, sobre los hombros. De día abriga poco; de noche es la cama." },
+		"yesquero": { "nombre": "El yesquero", "donde": "encima", "fija": true,
+			"texto": "Eslabón, pedernal y yesca en una punta de asta. Sin él no hay fogón." },
+		"recado_posta": { "nombre": "El recado de la posta", "donde": "encima",
+			"si": { "var": { "recado": 1 } },
+			"texto": "Un papel doblado que te dio el puestero. Va al palo del Hito del Humo." },
+		"papel_lacrado": { "nombre": "El papel lacrado", "donde": "encima",
+			"si": { "var": { "sellado": 1 } },
+			"texto": "De Don Rufino, con su lacre. Lo que dice no lo sabés: no sabés leer." },
+		"parte": { "nombre": "El parte", "donde": "encima",
+			"si": { "var": { "chasque": 1 } },
+			"texto": "Del sargento Lucero, para el campamento de la tropa." },
+		"respuesta": { "nombre": "La respuesta", "donde": "encima",
+			"si": { "var": { "chasque": 2 } },
+			"texto": "Del campamento, para el sargento Lucero." },
+		"ponchos": { "nombre": "Los ponchos de la tejedora", "donde": "recado",
+			"si": { "momento": [2, 3], "var": { "ponchos": 1 } },
+			"texto": "Doblados y atados al recado. Son para vender en lo de Don Ceferino." },
+		"tercio": { "nombre": "El tercio de yerba", "donde": "recado",
+			"si": { "momento": [2, 3], "var": { "ponchos": 2 } },
+			"texto": "Al anca de Ceniza. Es la paga de los ponchos: va a la toldería." },
+		"lenia": { "nombre": "El atado de leña", "donde": "recado",
+			"si": { "momento": [2, 3], "var": { "lenia": 2 } },
+			"texto": "Jarilla cortada en el Jarillal del Naciente. Es para el fogón del fortín." }
+	},
+
+	"_mapa": "El mapa (tecla M) y las señas. 'lugares': lo que se dibuja, con su nombre; 'nodo' es su ruta en World.tscn (si el nodo está oculto, como el campamento antes de abril, no sale) o, en su lugar, 'en': [x, z]; 'dibujo' es rancho, fortin, toldos, carpas, palo, piedras, agua, fogon, monte o paso; 'rotulo' dice de qué lado va el nombre (derecha si no se pone; izquierda, arriba o abajo). 'senias': adónde hay algo que hacer ahora; valen TODAS las que cumplan su 'si', y cada una marca en el mapa (un redondel rojo) y en la brújula (una rayita roja) los lugares de 'a' (rutas de nodos, o [x, z]). Con un final elegido la seña es la 'llegada' de ese final. Si se cambia la trama, hay que revisar estas señas.",
+	"mapa": {
+		"lugares": [
+			{ "nodo": "FogonDeZenon", "nombre": "Tu fogón", "dibujo": "fogon" },
+			{ "nodo": "Lugares/PulperiaDonCeferino", "nombre": "Pulpería de Don Ceferino", "dibujo": "rancho", "rotulo": "izquierda" },
+			{ "nodo": "Lugares/FortinDelSalitral", "nombre": "Fortín del Salitral", "dibujo": "fortin" },
+			{ "nodo": "Lugares/PostaDelCoiron", "nombre": "Posta del Coirón", "dibujo": "rancho" },
+			{ "nodo": "Lugares/HitoDelHumo", "nombre": "Hito del Humo", "dibujo": "palo" },
+			{ "nodo": "Lugares/MojonDelCerro", "nombre": "Mojón del Cerro", "dibujo": "piedras" },
+			{ "nodo": "Lugares/EstanciaDonRufino", "nombre": "Estancia de Don Rufino", "dibujo": "rancho" },
+			{ "nodo": "Lugares/TolderiaPainefil", "nombre": "Toldería de Painefil", "dibujo": "toldos" },
+			{ "nodo": "Lugares/AguadaDelCerro", "nombre": "Aguada del Cerro", "dibujo": "agua" },
+			{ "nodo": "Lugares/JarillalDelNaciente", "nombre": "Jarillal del Naciente", "dibujo": "monte", "rotulo": "izquierda" },
+			{ "nodo": "Lugares/CampamentoDeLaTropa", "nombre": "Campamento de la tropa", "dibujo": "carpas" },
+			{ "nodo": "Lugares/FortinNuevo", "nombre": "Fortín nuevo", "dibujo": "fortin" },
+			{ "en": [-1300, 760], "nombre": "Paso a Chile", "dibujo": "paso" }
+		],
+		"senias": [
+			{ "si": { "momento": 1, "no": ["cuenta_vista"] }, "a": ["Lugares/PulperiaDonCeferino"] },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 0 } }, "a": ["Lugares/PostaDelCoiron"] },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 1 } }, "a": ["Lugares/HitoDelHumo"] },
+			{ "si": { "momento": 1, "si": ["cuenta_vista"], "var": { "recado": 2 } }, "a": ["Lugares/PulperiaDonCeferino"] },
+			{ "si": { "momento": 2, "var": { "sellado": 0 } }, "a": ["Lugares/EstanciaDonRufino"] },
+			{ "si": { "momento": 2, "var": { "sellado": 1 } }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": 2, "var": { "sena": 0 }, "no": ["sena_rechazada"] }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": [2, 3], "var": { "sena": 1 } }, "a": ["Lugares/MojonDelCerro"] },
+			{ "si": { "momento": [2, 3], "var": { "sena": 2 } }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": 2, "var": { "favor": 0 } }, "a": ["Lugares/TolderiaPainefil"] },
+			{ "si": { "momento": 2, "var": { "favor": 1 } }, "a": ["Caminos/ParadaDeNicasio", "Lugares/TolderiaPainefil"] },
+			{ "si": { "momento": 2, "var": { "arreo": 1 } }, "a": ["Lugares/EstanciaDonRufino"] },
+			{ "si": { "momento": [2, 3], "var": { "caballada": 1 } }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 1 } }, "a": ["Lugares/JarillalDelNaciente"] },
+			{ "si": { "momento": [2, 3], "var": { "lenia": 2 } }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 1 } }, "a": ["Lugares/PulperiaDonCeferino"] },
+			{ "si": { "momento": [2, 3], "var": { "ponchos": 2 } }, "a": ["Lugares/TolderiaPainefil"] },
+			{ "si": { "momento": 3, "var": { "chasque": 1 } }, "a": ["Lugares/CampamentoDeLaTropa"] },
+			{ "si": { "momento": 3, "var": { "chasque": 2 } }, "a": ["Lugares/FortinDelSalitral"] },
+			{ "si": { "momento": 2, "var": { "sellado": [2, 3], "favor": [2, 3] }, "o": [ { "var": { "sena": 3 } }, { "si": ["sena_rechazada"] } ] }, "a": ["FogonDeZenon"] },
+			{ "si": { "momento": 3 }, "a": ["Lugares/FortinDelSalitral", "Lugares/EstanciaDonRufino", "Lugares/TolderiaPainefil", "Lugares/PulperiaDonCeferino"] }
+		]
+	},
 
 	"_saluda": "Tanda 8: lo que cada uno le dice a Zenón al pasar, sin abrir un diálogo (sale sobre su cabeza unos segundos). 'saluda' es una lista de {'si': condición, 'texto': '...'}: dice el primero que se cumpla; si 'texto' es una lista, uno al azar. {buenas} y {guenas} cambian con la hora. Dos condiciones que solo tienen sentido acá: 'montado' (true: Zenón va a caballo) y 'ligero' (true: viene al galope). No cambian nada de la historia. Para que alguien no diga nada, borrarle 'saluda' (la anciana no lo tiene: no quiere tratos). Los de la toldería están marcados 'revisar' en docs/agente/ESTADO.md.",
 	"personajes": {

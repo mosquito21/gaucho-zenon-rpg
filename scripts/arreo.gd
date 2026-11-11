@@ -120,6 +120,21 @@ func _nueva_vaca(i: int) -> Dictionary:
 	var modelo := (load(str(modelos[i % modelos.size()])) as PackedScene).instantiate() as Node3D
 	modelo.scale = Vector3.ONE * talla
 	nodo.add_child(modelo)
+	# Un cuerpo de choque que viaja con el animal (dos bolas: paleta y anca), para que ni Ceniza al
+	# galope ni Zenón a pie lo atraviesen. Se apartan igual que antes; esto es para cuando no llegan.
+	# Es un cuerpo quieto que se muda de lugar con el animal, no uno "animado": a un cuerpo animado
+	# la física le calcula velocidad por lo que se movió, y al aparecer el rebaño (del origen del mapa
+	# a su lugar, cientos de metros en un cuadro) se llevaba puesto a Zenón si lo tenía cerca.
+	var cuerpo := StaticBody3D.new()
+	cuerpo.name = "Choque"
+	for adelante: float in [0.45, -0.45]:
+		var forma := CollisionShape3D.new()
+		var bola := SphereShape3D.new()
+		bola.radius = 0.48 * talla
+		forma.shape = bola
+		forma.position = Vector3(0.0, 0.85, adelante) * talla
+		cuerpo.add_child(forma)
+	nodo.add_child(cuerpo)
 	add_child(nodo)
 	# Para que scripts/sonidos.gd sepa qué animales hay (les da voz y oye su tropel).
 	nodo.add_to_group("hacienda")
