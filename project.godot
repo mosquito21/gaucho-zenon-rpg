@@ -21,7 +21,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="GauchoZenonRPG"
-config/version="0.1.1"
+config/version="0.2"
 run/main_scene="uid://dm2rhyxcsb061"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"

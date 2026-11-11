@@ -118,7 +118,12 @@ CÓMO SE JUEGA
   Mouse       mirar                  Rueda     acercar o alejar la cámara
   E           usar y hablar          Espacio   saltar
   Tab         acordarte adónde ir    Esc       pausa (ajustes, guardar, salir)
+  M           el mapa                I         el morral (lo que lleva Zenón)
   F11         pantalla completa
+
+  Arriba a la derecha hay una brújula. La N es el norte, el punto claro es el sol, el punto
+  color brasa es tu fogón, la herradura es Ceniza y las rayitas rojas apuntan hacia donde hay
+  algo que hacer. En el mapa, esos lugares llevan un redondel rojo.
 
   A caballo: arrimado a Ceniza, E la monta. W anda al paso, Shift sube de marcha (trote,
   galope), S sofrena, A y D tuercen el rumbo, Q se baja. A pie, Q la silba y viene.

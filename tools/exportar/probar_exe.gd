@@ -162,6 +162,10 @@ func _process(delta: float) -> void:
 			_espero(get_tree().get_nodes_in_group("hacienda").size() > 40, "los animales están (%d)" % get_tree().get_nodes_in_group("hacienda").size())
 			_espero(AudioServer.get_bus_index("Musica") > 0 and AudioServer.get_bus_index("Sonidos") > 0, "están los canales Musica y Sonidos")
 			_espero(escena.get_node_or_null("Luna") != null, "el día y la noche arrancaron (hay luna)")
+			# Lo de la v0.2: la brújula con el mapa y el morral, y las manos de Zenón con su piel.
+			_espero(escena.get_node_or_null("Player/Morral") != null, "están la brújula, el mapa y el morral")
+			_espero((h.call("lo_que_lleva") as Array).size() >= 5, "el morral tiene lo que Zenón lleva encima (%d cosas)" % (h.call("lo_que_lleva") as Array).size())
+			_espero(ResourceLoader.exists("res://assets/personajes/gaucho_zenon_animado_ZenonT_manos.png"), "la piel de las manos de Zenón está en el paquete")
 			_cuadros = 0
 			_siguiente()
 		3:  # Cuadros por segundo, parado en el arranque (con el tope de siempre).
